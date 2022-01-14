@@ -49,9 +49,7 @@ SignalView.prototype._generateMarkup = function () {
               <div class="row">
                 <div class="cols-2"><p id="${this.id}-device">${
     this._signal.found ? this._signal.device : ""
-  }: <span id="${this.id}-map">${
-    this._signal.found ? this._signal.map : ""
-  }</span></p></div>
+  }: ${this._signal.found ? this._signal.map : ""}</p></div>
 
                 <div class="cols-2 left"><div id="${
                   this.id
@@ -67,41 +65,6 @@ SignalView.prototype._generateMarkup = function () {
     </div>
   `;
 
-  // const markup = `
-  //   <div id="${this.id}" class="digital-signal">
-  //       <div class="row">
-  //           <div class="cols-2">
-  //             <div class="row">
-  //               <div class="cols-2"><p id="${this.id}-ind"></p></div>
-  //               <div class="cols-2"><p class="message hidden">(modified)</p></div>
-  //             </div>
-  //           </div>
-  //           <div class="cols-2">
-  //               <div class="row">
-  //                   <div class="cols-2"><p id="${this.id}-device">${
-  //     this._signal.found ? this._signal.device : ""
-  //   }</p></div>
-  //                   <div class="cols-4"><p id="${this.id}-map">${
-  //     this._signal.found ? this._signal.map : ""
-  //   }</p></div>
-  //                   <div class="cols-4"><div id="${
-  //                     this.id
-  //                   }-edit" class="btn-edit-signal"
-  //                       data-name="${this._signal.name}"
-  //                       data-type="${this._signal.type}"
-  //                       data-device="${
-  //                         this._signal.found ? this._signal.device : ""
-  //                       }"
-  //                       data-map="${this._signal.found ? this._signal.map : ""}">
-  //                   </div></div>
-  //               </div>
-  //           </div>
-  //       </div>
-  //   </div>
-  // `;
-
-  // this._indicator.desc = this._signal.name;
-
   return markup;
 };
 
@@ -111,7 +74,7 @@ SignalView.prototype._handleFPComponents = function () {
   this._indicator.attachToId(`${this.id}-ind`);
   this._edit.attachToId(`${this.id}-edit`);
   this._device = this._parentElement.querySelector(`#${this.id}-device`);
-  this._map = this._parentElement.querySelector(`#${this.id}-map`);
+  // this._map = this._parentElement.querySelector(`#${this.id}-map`);
   this._btnEdit = this._parentElement.querySelector(`#${this.id}-edit`);
   this._FPCompAttached = true;
 };
@@ -121,9 +84,9 @@ SignalView.prototype.updateIndicator = function (value) {
 };
 
 SignalView.prototype.updateAttributes = function (attr) {
-  this._device && (this._device.textContent = attr.device);
-  this._map && (this._map.textContent = attr.map);
-  console.log("😀");
+  this._device &&
+    (this._device.textContent = `${attr.device}: ${attr.map ? attr.map : ""}`);
+  // this._map && (this._map.textContent = attr.map);
 
   const msg = this._parentElement
     .querySelector(`#${this.id}`)
