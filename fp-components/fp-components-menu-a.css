@@ -1,0 +1,109 @@
+
+/*
+
+(c) Copyright 2020-2021 ABB
+
+Any unauthorized use, reproduction, distribution,
+or disclosure to third parties is strictly forbidden.
+ABB reserves all rights regarding Intellectual Property Rights
+
+// OmniCore App SDK 1.1
+
+*/
+
+:root {
+    --fp-components-menu-flash-color: var(--fp-color-YELLOW-WARNING);
+}
+
+.fp-components-menu-a-container {
+    background-color: #f5f5f5;
+    overflow-y: auto;
+    height: 100%;
+    width: 100%;
+}
+
+.fp-components-menu-a-button {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    background-color: white;
+    padding-left: 8px;
+    padding-right: 8px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    margin-top: 2px;
+    margin-bottom: 2px;
+    margin-left: 0;
+    margin-right: 0;
+    font-size: 20px;   
+    min-height: 40px;         
+}
+
+.fp-components-menu-a-button-flash {
+    animation: fp-components-menu-a-button-flash-kf ease-in-out 1.5s infinite;
+}
+
+@keyframes fp-components-menu-a-button-flash-kf {
+    0%   { background-color: var(--fp-color-STD-BACKGROUND); }
+    50%  { background-color: var(--fp-components-menu-flash-color); }
+    100% { background-color: var(--fp-color-STD-BACKGROUND); }
+}
+
+
+.fp-components-menu-a-button-enabled:active {
+    background-color: #a9a9a9;
+}
+
+.fp-components-menu-a-button-icon {
+    margin-right: 10px;
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+    flex: 1 1 auto;
+    max-width: 40px;
+    height: 40px;
+}
+
+.fp-components-menu-a-button > p {
+    margin-right: 10px;
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+.fp-components-menu-a-button-righticon {
+    margin-left: auto;
+    margin-right: 0;
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-position: center;
+    flex: 1 1 auto;
+    max-width: 32px;
+    height: 32px;
+}
+
+.fp-components-menu-a-label {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    background-color: #efefef;
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-top: 3px;
+    padding-bottom: 3px;
+    margin-top: 5px;
+    margin-bottom: 2px;
+    margin-left: 0;
+    margin-right: 0;
+    border-top-style: solid;
+    border-bottom-style: solid;
+    border-width: 2px;
+    border-color: #d5d5d5;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.fp-components-menu-a-label > p {
+    margin-right: 10px;
+    margin-top: 0;
+    margin-bottom: 0;
+}

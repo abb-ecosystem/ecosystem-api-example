@@ -1,0 +1,79 @@
+
+/*
+
+(c) Copyright 2020-2021 ABB
+
+Any unauthorized use, reproduction, distribution,
+or disclosure to third parties is strictly forbidden.
+ABB reserves all rights regarding Intellectual Property Rights
+
+// OmniCore App SDK 1.1
+
+*/
+
+.fp-components-switch-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.fp-components-switch-button {
+    display: inline-block;
+    background-color: white;
+    border-style: solid;
+    border-color: black;
+    border-width: 2px;
+    border-radius: 10px;
+    height: 16px;
+    width: 40px;
+    transition: all 0.15s linear; 
+}
+
+.fp-components-switch-button > div {
+    background-color: black;
+    border-radius: 10px;
+    height: 10px;
+    width: 10px;
+    padding: 0;
+    margin-top: 3px;
+    margin-left: 3px;
+    margin-bottom: 0;
+    margin-right: 0;
+    transition: all 0.15s linear;
+ }
+
+ .fp-components-switch-button-disabled {
+    background-color: white;
+    border-color: rgb(153,153,153);
+ }
+
+ .fp-components-switch-button-disabled > div {
+    background-color: rgb(153,153,153);
+ }
+
+ .fp-components-switch-button-active {
+    background-color: var(--fp-color-BLUE-PRIMARY-HIGHLIGHT);
+    border-color: var(--fp-color-BLUE-PRIMARY-HIGHLIGHT);
+}
+
+.fp-components-switch-button-active > div {
+    background-color: white;
+    margin-left: 27px;
+ }
+
+ .fp-components-switch-button-active.fp-components-switch-button-disabled {
+     background-color: rgb(204,204,204);
+     border-color: rgb(204,204,204);
+ }
+
+
+ .fp-components-switch-button-active.fp-components-switch-button-disabled > div {
+    background-color: rgb(162,162,162);
+}
+
+.fp-components-switch-button-desc {
+    font-size: inherit;
+    color: inherit;
+    white-space: nowrap;
+    margin-left: 10px;
+}

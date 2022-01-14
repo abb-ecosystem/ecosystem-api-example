@@ -1,0 +1,77 @@
+
+/*
+
+(c) Copyright 2020-2021 ABB
+
+Any unauthorized use, reproduction, distribution,
+or disclosure to third parties is strictly forbidden.
+ABB reserves all rights regarding Intellectual Property Rights
+
+// OmniCore App SDK 1.1
+
+*/
+
+.fp-components-checkbox, .fp-components-checkbox-checked {
+    display: flex;
+    border-style: solid;
+    border-width: 2px;
+    width: 16px;
+    height: 16px;
+    margin: 0px;
+    padding: 0px;
+    align-items: center;
+    transition: all 0.15s linear;
+}
+
+.fp-components-checkbox canvas, .fp-components-checkbox-checked canvas {
+    display: none;
+}
+
+.fp-components-checkbox-checked:not(.fp-components-checkbox-disabled) canvas:nth-child(1) {
+    display: inline-block;
+}
+
+.fp-components-checkbox-checked.fp-components-checkbox-disabled canvas:nth-child(2) {
+    display: inline-block;
+}
+
+.fp-components-checkbox {
+    background-color: white;
+    border-color: black;
+}
+
+.fp-components-checkbox-checked {
+    background-color: var(--fp-color-BLUE-PRIMARY-HIGHLIGHT);
+    border-color: var(--fp-color-BLUE-PRIMARY-HIGHLIGHT);
+}
+
+.fp-components-checkbox-checked:hover:not(.fp-components-checkbox-disabled) {
+    border-color: black;
+}
+
+.fp-components-checkbox.fp-components-checkbox-disabled {
+    border-color:  rgb(153,153,153);
+}
+
+.fp-components-checkbox-checked.fp-components-checkbox-disabled {
+    background-color: white;
+    border-color: rgb(153,153,153);
+}
+
+.fp-components-checkbox:active:not(.fp-components-checkbox-disabled), .fp-components-checkbox-checked:active:not(.fp-components-checkbox-disabled) {
+    background-color: rgb(102,102,102);
+    border-color: rgb(102,102,102);
+}
+
+.fp-components-checkbox-desc {
+    font-size: inherit;
+    color: inherit;
+    white-space: nowrap;
+    margin-left: 26px;
+}
+
+.fp-components-checkbox-checked .fp-components-checkbox-desc {
+    margin-left: 10px;
+}
+
+

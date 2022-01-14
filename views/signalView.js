@@ -1,0 +1,100 @@
+// SignalView
+
+const SignalView = function (signal, container) {
+  View.call(this);
+  this._signal = signal;
+  this.id = `signal-${this._signal.name}`;
+  this._parentElement = document.querySelector(`#${container}`);
+
+  this._indicator = new FPComponents.Digital_A();
+  this._edit = new FPComponents.Button_A();
+  this._edit.text = "edit";
+
+  this._signal.addCallbackOnChanged(this.updateIndicator.bind(this));
+};
+
+SignalView.prototype = Object.create(View.prototype);
+
+SignalView.prototype.addHandlerIndicator = function (handler) {
+  const cbOnClick = async function () {
+    let value = this._indicator.active ? 0 : 1;
+    // this._indicator.active = setValue;
+
+    handler(this._signal.name, value);
+  };
+
+  this._indicator.onclick = cbOnClick.bind(this);
+  // document.getElementById(`${this.id}-ind`).addEventListener('click', cbOnClick.bind(this));
+};
+
+SignalView.prototype.callbackOnChanged = function (value) {
+  this._indicator.active = value;
+};
+
+SignalView.prototype._generateMarkup = function () {
+  const markup = `
+  <div id="${this.id}" class="digital-signal">
+      <div class="row">
+          <div class="cols-2"><p id="${this.id}-ind"></p></div>
+          <div class="cols-2">
+              <div class="row">
+                  <div class="cols-2"><p>${this._signal.device}</p></div>
+                  <div class="cols-4"><p>${this._signal.map}</p></div>
+                  <div class="cols-4"><div id="${this.id}-edit" class="btn-edit-signal"
+                      data-signal-name="${this._signal.name}"
+                      data-signal-type="${this._signal.type}"
+                      data-signal-device="${this._signal.device}"
+                      data-signal-map="${this._signal.map}">
+                  </div></div>
+              </div>
+          </div>
+      </div>
+  </div>
+  `;
+
+  this._indicator.desc = this._signal.name;
+
+  return markup;
+};
+
+SignalView.prototype._handleFPComponents = function () {
+  this._indicator.attachToId(`${this.id}-ind`);
+  this._edit.attachToId(`${this.id}-edit`);
+};
+
+SignalView.prototype.updateIndicator = function (value) {
+  this._indicator.active = value;
+};
+
+///////////////////////////////////////////////////
+// Signal container
+
+const SignalContainer = function (id) {
+  View.call(this);
+  this.id = id;
+  this._parentElement = document.querySelector(`#${id}`);
+  this._errorMessage = "Error at signal view 😆!";
+  this._message = "";
+  this._signals = [];
+};
+
+SignalContainer.prototype = Object.create(View.prototype);
+
+SignalContainer.prototype.addHandlerChangeSignalValue = function (handler) {
+  this._signals.forEach((signal) => signal.addHandlerIndicator(handler));
+};
+
+SignalContainer.prototype._generateMarkup = function () {
+  const markup = this._data
+    .map((signal) => {
+      const newSignal = new SignalView(signal, this.id);
+      this._signals.push(newSignal);
+      return newSignal.render(signal, false);
+    })
+    .join("");
+  return markup;
+};
+
+SignalContainer.prototype._handleFPComponents = function () {
+  this._signals.forEach((signal) => signal._handleFPComponents());
+};

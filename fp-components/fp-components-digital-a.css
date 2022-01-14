@@ -1,0 +1,49 @@
+
+/*
+
+(c) Copyright 2020-2021 ABB
+
+Any unauthorized use, reproduction, distribution,
+or disclosure to third parties is strictly forbidden.
+ABB reserves all rights regarding Intellectual Property Rights
+
+// OmniCore App SDK 1.1
+
+*/
+
+.fp-components-digital-a-container {
+    display:flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.fp-components-digital-a {
+
+    margin: 3px;
+    width: 24px;
+    height: 24px;
+
+    font-weight: bold;
+    font-size: 17.5px;   
+    text-align: center;
+    
+    color: white;
+    background-color: #b2b2b2;
+
+    border-radius: 13px;
+    border-style: solid;
+    border-color: #f0f0f0;
+    border-width: 2px;
+
+    transition: all 0.15s linear;
+}
+
+.fp-components-digital-a.fp-components-digital-a-active {
+    background-color: #f5bf5c;
+}
+
+.fp-components-digital-a-desc {
+    margin-left: 10px;
+    white-space: nowrap;
+    font-size: inherit;
+}

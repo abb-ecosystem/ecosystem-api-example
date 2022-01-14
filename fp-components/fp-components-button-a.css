@@ -1,0 +1,82 @@
+
+/*
+
+(c) Copyright 2020-2021 ABB
+
+Any unauthorized use, reproduction, distribution,
+or disclosure to third parties is strictly forbidden.
+ABB reserves all rights regarding Intellectual Property Rights
+
+// OmniCore App SDK 1.1
+
+*/
+
+.fp-components-button, .fp-components-button-disabled {
+    background-color: var(--fp-color-GRAY-20);
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 0px 18px;
+    transition: transform 0.03s linear;
+    font-size: 1.0em;
+    border-radius: 4px;
+    min-width: 90px;
+    height: 40px;
+    box-sizing: border-box;
+    border-style: solid;
+    border-color: var(--fp-color-GRAY-20);
+    border-width: 2px;
+}
+
+.fp-components-button {
+    color: var(--fp-color-PRIMARY-TEXT);
+}
+
+.fp-components-button-disabled {
+    color: var(--fp-color-GRAY-40);
+    border-color: var(--fp-color-GRAY-30);
+    background-color: var(--fp-color-GRAY-10);
+    border-width: 2px;
+}
+
+.fp-components-button:active {
+    background-color: var(--fp-color-GRAY-40);
+    border-color: var(--fp-color-GRAY-40);
+    transform: scale(0.96, 0.96);
+}
+
+.fp-components-button:hover:not(:active) {
+    background-color: var(--fp-color-GRAY-30);
+    border-color: var(--fp-color-GRAY-30);
+}
+
+.fp-components-button.fp-components-button-highlight {
+    background-color: var(--fp-color-BLUE-PRIMARY-HIGHLIGHT);
+    border-color: var(--fp-color-BLUE-PRIMARY-HIGHLIGHT);
+    color: white;
+}
+
+.fp-components-button.fp-components-button-highlight:active {
+    background-color: var(--fp-color-BLUE-80);
+    border-color: var(--fp-color-BLUE-80);
+}
+
+.fp-components-button.fp-components-button-highlight:hover:not(:active) {
+    background-color: var(--fp-color-BLUE-70);
+    border-color: var(--fp-color-BLUE-70);
+}
+
+.fp-components-button-text {
+    flex: 1 0 auto;
+    text-align: center;
+}
+
+.fp-components-button-icon {
+    width: 24px;
+    height: 24px;
+    margin-right: 10px;
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+}

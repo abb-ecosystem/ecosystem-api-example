@@ -1,0 +1,133 @@
+
+/*
+
+(c) Copyright 2020-2021 ABB
+
+Any unauthorized use, reproduction, distribution,
+or disclosure to third parties is strictly forbidden.
+ABB reserves all rights regarding Intellectual Property Rights
+
+// OmniCore App SDK 1.1
+
+*/
+
+:root {
+    --fp-components-popup-bg-color: var(--fp-color-STD-BACKGROUND);
+    --fp-components-popup-border-color:var(--fp-color-GRAY-20);
+}
+
+/* Background */
+.fp-components-popup-bg {
+    display: none; /* Will be "block" when visible */
+    position: fixed;
+    z-index: 2147480100;
+    top: 0px;
+    left: 0px;
+    box-sizing: border-box;
+    height: 100vh;
+    width: 100vw;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(255,255,255,0.7);
+}
+
+/* Main popup window */
+.fp-components-popup {
+    display: flex; /* Will be "flex" when visible */
+    max-width: 600px;
+    min-width: 480px;
+    box-sizing: border-box;
+    border-style: solid;
+    border-color: var(--fp-components-popup-border-color);
+    border-width: 1px;
+    flex-direction: column;
+    box-shadow: 0px 6px 15px 0px var(--fp-color-GRAY-40);   
+}
+
+/* Top black border */
+.fp-components-popup-top-border{
+    display: block;
+    background-color: var(--fp-color-GRAY-100);
+    min-height: 3px;
+}
+
+/* Popup content */
+.fp-components-popup-content{
+    display: flex;
+    flex-direction: column;
+    background-color: var(--fp-components-popup-bg-color);
+    width: 100%;
+    flex-grow: 1;
+    box-sizing: border-box;
+    overflow-y: auto;
+}
+
+/* Header */
+.fp-components-popup-header {
+    font-weight: 600;
+    margin: 30px 24px;
+    font-size: 18px;
+    display: flex;
+    flex-direction: row;
+}
+
+.fp-components-popup-header > div {
+    margin-right: 16px;
+}
+
+/* Body */
+.fp-components-popup-body {
+    margin-left: 24px;
+    margin-right: 24px;
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    flex-shrink: 1;
+    flex-grow: 1;
+    font-size: 14px;
+    min-height: 90px;
+}
+
+.fp-components-popup-message {
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    max-height: 310px;
+    max-width: 495px;
+    flex: 1 0 auto;
+}
+
+/* Bottom container (buttons etc) */
+.fp-components-popup-footer {
+    display: flex;
+    justify-content: flex-end;
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin: 0px 24px 16px 16px;
+}
+
+.fp-components-popup-footer > div {
+    margin-left: 16px;
+    margin-top: 16px;
+}
+
+/* Icon used with warning and danger styles */
+.fp-components-popup-icon {
+    width: 30px;
+    height: 30px;
+    flex: 0 0 auto;
+    display: block;
+    background-image: url("img/svg/abb_information-circle-1_updated.svg");
+    background-size: 100%;
+    background-repeat: no-repeat;
+    margin-right: 24px;
+}
+
+.fp-components-popup-icon--warning {
+    background-image: url("img/svg/abb_warning-triangle_updated.svg")
+}
+
+.fp-components-popup-icon--danger {
+    background-image: url("img/svg/abb_error-circle_updated.svg");
+}

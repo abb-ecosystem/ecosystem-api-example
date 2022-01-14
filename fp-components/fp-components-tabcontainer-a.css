@@ -1,0 +1,181 @@
+
+/*
+
+(c) Copyright 2020-2021 ABB
+
+Any unauthorized use, reproduction, distribution,
+or disclosure to third parties is strictly forbidden.
+ABB reserves all rights regarding Intellectual Property Rights
+
+// OmniCore App SDK 1.1
+
+*/
+
+.fp-components-tabcontainer {
+    background-color: var(--fp-color-STD-BACKGROUND);
+    display: flex;
+    flex-direction: column;
+    max-height: 100%;
+    min-height: 100%;
+}
+
+/* Content-switch */
+.fp-components-tabcontainer > :nth-child(2) {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    margin-top: 5px;
+    overflow-y: auto;
+}
+
+/* User content in content switch */
+.fp-components-tabcontainer > :nth-child(2) > * {
+    flex: 1;
+}
+
+/* Tab-bar outer */
+.fp-components-tabcontainer > :nth-child(1) {
+
+    background-color: var(--fp-color-GRAY-30);
+
+    display: flex;
+    flex-direction: row;
+
+    padding-left: 8px;
+    
+    min-height: 48px;
+    font-size: 16px;
+}
+
+.fp-components-tabcontainer-sidebutton {
+
+    background-color: var(--fp-color-GRAY-20);
+
+    margin-right: 8px;
+    max-height: 48px;
+    min-height: 48px;
+    min-width: 48px;
+    
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 24px;
+
+    transition: all 0.15s ease;
+}
+.fp-components-tabcontainer-sidebutton-active:hover {
+    background-color: var(--fp-color-GRAY-40);
+}
+.fp-components-tabcontainer-sidebutton-active:active {
+    background-color: var(--fp-color-GRAY-50);
+}
+
+.fp-components-tabcontainer-dynspace {
+    flex-grow: 1;
+}
+
+
+/* Tab bar */
+.fp-components-tabcontainer-tabbar {
+
+    display: flex;
+    flex-direction: row;
+
+    min-height: 48px;
+    flex-shrink: 1;
+
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    scroll-behavior: smooth; /* Not working on Edge or Chrome.. */
+}
+.fp-components-tabcontainer-tabbar::-webkit-scrollbar {
+    display: none;
+}
+
+/* Tab buttons */
+.fp-components-tabcontainer-tabbar > * {
+    
+    background-color: var(--fp-color-GRAY-20);
+    
+    margin: 0px 8px 0px 0px;
+    max-height: 48px;
+    min-height: 48px;
+    min-width: 140px;
+    width: 333px;
+    max-width: 333px;
+    flex: 1;
+
+    display: flex;
+    flex-direction: column;  
+    
+    transition: all 0.2s ease;
+}
+
+.fp-components-tabcontainer-tabbar > *:hover {
+    background-color: var(--fp-color-GRAY-40);
+}
+
+.fp-components-tabcontainer-tabbar > *:active {
+    background-color: var(--fp-color-GRAY-50);
+}
+
+/* Tab button top and bottom "borders", bottom is for spacing only */
+.fp-components-tabcontainer-tabbar > * > :nth-child(1),
+.fp-components-tabcontainer-tabbar > * > :nth-child(3) {
+    height: 5px;
+}
+
+/* Tab button main content */
+.fp-components-tabcontainer-tabbar > * > :nth-child(2){
+    
+    display: flex;
+    flex-direction: row;
+
+    flex: 1;
+    padding: 0px 4px 0px 12px;
+    
+}
+
+/* Tab button text, outer */
+.fp-components-tabcontainer-tabbar > * > :nth-child(2) > :nth-child(1) {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    flex: 1;
+    overflow: hidden;
+
+}
+/* Tab button text, inner */
+.fp-components-tabcontainer-tabbar > * > :nth-child(2) > :nth-child(1) > * {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Tab button, X button click area */
+.fp-components-tabcontainer-tabbar > * > :nth-child(2) > :nth-child(2) {
+
+    display: none;
+
+    min-width: 32px;
+    margin: 6px 0px 6px 0px;
+
+    background-image: url('img/svg/abb_close_24.svg');
+    background-size: 24px;
+    background-repeat: no-repeat;
+    background-position: center;
+
+}
+/* Tab button, X button click area, closable active tab */
+.fp-components-tabcontainer .fp-components-tabcontainer-activetab:not(.fp-components-tabcontainer-activetab-noclose) > :nth-child(2) > :nth-child(2) {
+    display: block;
+}
+
+/* Active tab button */
+.fp-components-tabcontainer .fp-components-tabcontainer-activetab {
+    background-color: var(--fp-color-STD-BACKGROUND);
+}
+
+.fp-components-tabcontainer .fp-components-tabcontainer-activetab > :nth-child(1) {
+    background-color: var(--fp-color-BLUE-PRIMARY-HIGHLIGHT);
+}

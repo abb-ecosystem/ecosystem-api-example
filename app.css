@@ -1,0 +1,197 @@
+/* === General settings === */
+
+body {
+  margin: 0;
+}
+
+/* * {
+  box-sizing: border-box;
+} */
+
+/*  === GRID-SYSTEM (Sichbarkeit) === */
+/* .border, .border * {
+    border: 1px solid #91c4ff;
+}
+
+[class*='cols-'] {
+background-color: #bfddff;
+} */
+
+/* p {
+    background-color: #91c4ff;
+    padding: 0;
+    margin: 0;
+    color: #FFF;
+    text-align: center;
+} */
+
+/*  === GRID-SYSTEM === */
+
+.container {
+  width: 95%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.row::after {
+  content: "";
+  clear: both;
+  display: block;
+}
+
+[class*="cols-"] {
+  float: left;
+  min-height: 1px;
+  padding: 0.8rem;
+  box-sizing: border-box;
+}
+
+.cols-6 {
+  width: 16.666%;
+}
+.cols-4 {
+  width: 25%;
+}
+.cols-3 {
+  width: 33.333%;
+}
+.cols-2 {
+  width: 50%;
+}
+.cols-1 {
+  width: 100%;
+}
+
+/*
+=== BREAKPOINTS ===
+
+480 Pixel   (iPhone Querformat) 
+768 Pixel   (iPad Hochformat)
+1024 Pixel  (iPad Querformat
+
+*/
+@media (max-width: 1024px) {
+  .cols-6 {
+    width: 33.333%;
+  }
+  .cols-4 {
+    width: 50%;
+  }
+}
+
+/* @media (max-width: 768px) { */
+@media (max-width: 500px) {
+  .cols-6 {
+    width: 50%;
+  }
+  .cols-4 {
+    width: 50%;
+  }
+  .cols-3 {
+    width: 100%;
+  }
+  .cols-2 {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .cols-6 {
+    width: 100%;
+  }
+  .cols-4 {
+    width: 100%;
+  }
+  .cols-3 {
+    width: 100%;
+  }
+  .cols-2 {
+    width: 100%;
+  }
+}
+
+/* === Styling === */
+p {
+  font-size: 14px;
+}
+
+.infobox > :nth-child(1) {
+  background-color: #dddddd;
+  height: 30px;
+  border-bottom-style: solid;
+  border-bottom-color: #d5d5d5;
+  border-bottom-width: 2px;
+  display: flex;
+  align-items: center;
+  padding-left: 8px;
+}
+
+.infobox > :nth-child(1) > p {
+  font-weight: bold;
+  font-size: 18px;
+  text-align: center;
+  width: 100%;
+}
+
+.infobox > :nth-child(2) {
+  background-color: white;
+  flex-grow: 1;
+  padding: 8px;
+}
+
+.digital-signal {
+  padding: 8px;
+}
+
+/* === Modal window === */
+.show-modal {
+  font-size: 2rem;
+  font-weight: 600;
+  padding: 1.75rem 3.5rem;
+  margin: 5rem 2rem;
+  border: none;
+  background-color: #fff;
+  color: #444;
+  border-radius: 10rem;
+  cursor: pointer;
+}
+
+.close-modal {
+  position: absolute;
+  top: 1.2rem;
+  right: 2rem;
+  font-size: 5rem;
+  color: #333;
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+.hidden {
+  display: none;
+}
+
+.modal {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 70%;
+
+  background-color: white;
+  padding: 6rem;
+  border-radius: 5px;
+  box-shadow: 0 3rem 5rem rgba(0, 0, 0, 0.3);
+  z-index: 10;
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(3px);
+  z-index: 5;
+}

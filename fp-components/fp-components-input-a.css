@@ -1,0 +1,51 @@
+
+/*
+
+(c) Copyright 2020-2021 ABB
+
+Any unauthorized use, reproduction, distribution,
+or disclosure to third parties is strictly forbidden.
+ABB reserves all rights regarding Intellectual Property Rights
+
+// OmniCore App SDK 1.1
+
+*/
+
+.fp-components-input {
+    box-sizing: border-box;
+    max-width: 100%;
+    min-width: 100%;
+    min-height: 40px;
+    display: flex;
+    color: black;
+    background-color: white;
+    border-style: solid;
+    border-width: 2px;
+    border-color: rgb(153,153,153);
+    padding-top: 6px;
+    padding-bottom: 6px;
+    padding-left: 6px;
+    padding-right: 6px;
+    transition: all 0.15s linear;
+}
+
+.fp-components-input.fp-components-input-disabled {
+    color: rgb(122,122,122);
+    background-color: rgb(204,204,204);
+}
+
+.fp-components-input > p {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    margin-left: 0;
+    margin-right: 0;
+    margin-top: 0;
+    margin-bottom: 0;    
+}
+
+.fp-components-input-desc {
+    display: block;
+    margin-bottom: 6px;
+    font-size: inherit;
+}

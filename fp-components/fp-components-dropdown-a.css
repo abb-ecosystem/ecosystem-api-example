@@ -1,0 +1,109 @@
+
+/*
+
+(c) Copyright 2020-2021 ABB
+
+Any unauthorized use, reproduction, distribution,
+or disclosure to third parties is strictly forbidden.
+ABB reserves all rights regarding Intellectual Property Rights
+
+// OmniCore App SDK 1.1
+
+*/
+
+.fp-components-dropdown {
+    position: relative;
+    box-sizing: border-box;
+    max-width: 100%;
+    display: flex;
+    align-items: center;
+    color: black;
+    background-color: white;
+    border-style: solid;
+    border-width: 2px;
+    border-color: rgb(153,153,153);
+    padding-top: 6px;
+    padding-bottom: 6px;
+    padding-left: 8px;
+    padding-right: 8px;
+}
+
+.fp-components-dropdown.fp-components-dropdown-disabled {
+    color: rgb(122,122,122);
+}
+
+.fp-components-dropdown:not(.fp-components-dropdown-disabled):hover {
+    border-color: black;
+}
+
+.fp-components-dropdown > p {
+    padding-right: 8px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    margin-left: 0;
+    margin-right: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+.fp-components-dropdown > canvas {
+    margin-right: 0;
+    margin-left: auto;
+}
+
+.fp-components-dropdown-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    background-color: rgba(255, 255, 255, 0.6);
+    width: 100vw;
+    height: 100vh;
+}
+
+.fp-components-dropdown-menu {
+    display: none;
+    position: absolute;
+    z-index: 2;
+    background-color: rgb(242,242,242);
+    border-style: solid;
+    border-width: 1px;
+    border-color: rgb(204,204,204);
+    min-width: calc(100% + 2px);
+    min-height: 42px;
+    max-height: 400px;
+    overflow-y: auto;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    left: -2px;
+    box-shadow:  5px 20px -10px black;
+}
+
+.fp-components-dropdown-menu > p {
+    padding-top: 12px;
+    padding-bottom: 12px;
+    padding-left: 4px;
+    padding-right: 4px;
+}
+
+.fp-components-dropdown-menu > p:hover {
+    background-color: rgb(218,218,218);
+}
+
+.fp-components-dropdown-menu > p:active {
+    background-color: rgb(194,194,194);
+    transform: scale(0.97, 0.97);
+}
+
+.fp-components-dropdown-disabled {
+    background-color: rgb(204,204,204);
+    border-color: rgb(204,204,204);
+}
+
+.fp-components-dropdown-desc {
+    margin-bottom: 6px;
+    display: block;
+    font-size: inherit;
+}

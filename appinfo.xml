@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<WebApp>
+    <name>EcoSystem-Guide</name>
+    <icon>abb_logo.png</icon>
+    <path>index.html</path>
+</WebApp>
+
+

@@ -1,0 +1,175 @@
+
+/*
+
+(c) Copyright 2020-2021 ABB
+
+Any unauthorized use, reproduction, distribution,
+or disclosure to third parties is strictly forbidden.
+ABB reserves all rights regarding Intellectual Property Rights
+
+// OmniCore App SDK 1.1
+
+*/
+
+/* The wrapping div */
+.fp-components-context {
+    position: relative;
+    border-radius: 4px;
+    background-color: inherit;
+}
+
+/* The base button */
+.fp-components-context-basebutton {
+    background-color: var(--fp-color-GRAY-20);
+    background-image: url("img/context-dots_31.png");
+    background-repeat: no-repeat;
+    background-position: center;
+    border-width: 2px;
+    box-sizing: border-box;
+    width: 51px;
+    height: 45px;
+    border-radius: 4px;
+}
+
+.fp-components-context-basebutton:hover {
+    background-color: var(--fp-color-GRAY-30);
+    border-color: var(--fp-color-GRAY-60);
+    border-style: solid;
+}
+
+.fp-components-context-basebutton:active {
+    background-color: var(--fp-color-GRAY-40);
+    border-color: var(--fp-color-GRAY-40);
+}
+
+.fp-components-context-basebutton-disabled {
+    opacity: 0.35;
+}
+
+.fp-components-context-basebutton-disabled:hover {
+    background-color: var(--fp-color-GRAY-20);
+    border-style: none;
+}
+
+.fp-components-context-basebutton-disabled:active {
+    background-color: var(--fp-color-GRAY-20);
+}
+
+/* Background hit area */
+.fp-components-context-menu-background {
+    background-color: rgba(228, 228, 228, 0.3);
+    position: fixed;
+    z-index: 2147480050;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 100%;
+    display: none; /* Set to "block" when visible */
+}
+
+/* The context menu */
+.fp-components-context-menu {
+    background-color: white;
+    border-style: solid;
+    border-width: 1px;
+    border-color: var(--fp-color-GRAY-30);
+    color: var(--fp-color-PRIMARY-TEXT);
+    padding: 12px 17px 12px 17px;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    z-index: 2147480051;
+    box-sizing: border-box;
+    max-height: calc(100vh - 70px);
+    max-width: calc(100vw - 70px);
+    overflow-y: auto;
+    display: none;  /* Set to "block" when visible */
+}
+
+/* Context menu buttons */
+.fp-components-context-button {
+    display: flex;
+    flex-direction: row;
+    height: 45px;
+    align-items: center;
+    padding-left: 11px;
+    padding-right: 14px;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+.fp-components-context-button:hover {
+    background-color: var(--fp-color-GRAY-10);
+}
+
+.fp-components-context-button:active {
+    transform: scale(0.98, 0.98);
+}
+
+/* Context menu button icon */
+.fp-components-context-button > :nth-child(1) {
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: contain;
+    width: 32px;
+    min-width: 32px;
+    height: 32px;
+    margin-right: 16px;
+}
+
+/* Context menu button text */
+.fp-components-context-button > :nth-child(2){
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 14px;
+    height: 32px;
+    line-height: 32px;
+}
+
+/* Context button disabled */
+.fp-components-context-button-disabled {
+    opacity: 0.15;
+    filter:grayscale(100%);
+}
+
+/* Context menu labels */
+.fp-components-context-label {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+/* Context menu label text */
+.fp-components-context-label > :nth-child(1) {
+    font-size: 16px;
+    white-space: nowrap;
+    height: 42px;
+    line-height: 42px;
+}
+
+/* Context menu label decorative line */
+.fp-components-context-label > :nth-child(2) {
+    background-color: var(--fp-color-GRAY-40);
+    height: 1px;
+    flex-shrink: 1;
+    flex-grow: 1;
+    margin-left: 5px;
+    min-width: 30px; 
+}
+
+/* Context menu gap */
+.fp-components-context-gap {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    height: 10px;
+    margin-left: 8px;
+}
+
+/* Context menu gap line */
+.fp-components-context-gap > * {
+    background-color: var(--fp-color-GRAY-10);
+    height: 1px;
+    flex-grow: 1;
+} 
