@@ -42,7 +42,7 @@ background-color: #bfddff;
 [class*="cols-"] {
   float: left;
   min-height: 1px;
-  padding: 0.8rem;
+  padding: 0.2rem;
   box-sizing: border-box;
 }
 
@@ -70,7 +70,7 @@ background-color: #bfddff;
 1024 Pixel  (iPad Querformat
 
 */
-@media (max-width: 1024px) {
+@media (max-width: 1020px) {
   .cols-6 {
     width: 33.333%;
   }
@@ -79,8 +79,7 @@ background-color: #bfddff;
   }
 }
 
-/* @media (max-width: 768px) { */
-@media (max-width: 500px) {
+@media (max-width: 680px) {
   .cols-6 {
     width: 50%;
   }
@@ -112,19 +111,28 @@ background-color: #bfddff;
 
 /* === Styling === */
 p {
-  font-size: 14px;
+  font-size: 12px;
 }
 
 .btn {
   height: 60;
   width: 80px;
 }
-.center {
+.ok {
   margin: 0;
   position: absolute;
-  left: 50%;
-  -ms-transform: translate(-50%, -50%);
-  transform: translate(-50%, -50%);
+  right: 5%;
+  transform: translate(-0%, 100%);
+}
+
+.left {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.warning {
+  color: red;
 }
 
 .infobox > :nth-child(1) {
@@ -148,11 +156,11 @@ p {
 .infobox > :nth-child(2) {
   background-color: white;
   flex-grow: 1;
-  padding: 8px;
+  /* padding: 8px; */
 }
 
 .digital-signal {
-  padding: 8px;
+  padding: 0 8px;
 }
 
 /* === Modal window === */
@@ -172,7 +180,7 @@ p {
   position: absolute;
   top: 1.2rem;
   right: 2rem;
-  font-size: 5rem;
+  font-size: 3rem;
   color: #333;
   cursor: pointer;
   border: none;

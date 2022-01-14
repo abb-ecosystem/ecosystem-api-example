@@ -17,9 +17,7 @@ window.addEventListener("load", () => {
 
 async function constructUI(done) {
   initTabs();
-
-  //   const btnUpdate = document.querySelector("#update-signal");
-  //   btnUpdate.addEventListener("click", updateSignalIndicator);
+  configRebootButton();
 
   setTimeout(() => {
     done();

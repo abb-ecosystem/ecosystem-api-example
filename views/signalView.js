@@ -35,39 +35,72 @@ SignalView.prototype.callbackOnChanged = function (value) {
 
 SignalView.prototype._generateMarkup = function () {
   const markup = `
-  <div id="${this.id}" class="digital-signal">
-      <div class="row">
-          <div class="cols-2">
-            <div class="row">
-              <div class="cols-2"><p id="${this.id}-ind"></p></div>
-              <div class="cols-2"><p class="message hidden">(modified)</p></div>
-            </div>
-          </div>
-          <div class="cols-2">
+    <div id="${this.id}" class="digital-signal">
+        <div class="row">
+            <div class="cols-2">
               <div class="row">
-                  <div class="cols-2"><p id="${this.id}-device">${
-    this._signal.found ? this._signal.device : ""
-  }</p></div>
-                  <div class="cols-4"><p id="${this.id}-map">${
-    this._signal.found ? this._signal.map : ""
-  }</p></div>
-                  <div class="cols-4"><div id="${
-                    this.id
-                  }-edit" class="btn-edit-signal"
-                      data-name="${this._signal.name}"
-                      data-type="${this._signal.type}"
-                      data-device="${
-                        this._signal.found ? this._signal.device : ""
-                      }"
-                      data-map="${this._signal.found ? this._signal.map : ""}">
-                  </div></div>
+                <div class="cols-3"><p id="${this.id}-ind"></p></div>
+                <div class="cols-2"><p class="message">${
+                  this._signal.name
+                }</p></div>
               </div>
-          </div>
-      </div>
-  </div>
+            </div>
+            <div class="cols-2">
+              <div class="row">
+                <div class="cols-2"><p id="${this.id}-device">${
+    this._signal.found ? this._signal.device : ""
+  }: <span id="${this.id}-map">${
+    this._signal.found ? this._signal.map : ""
+  }</span></p></div>
+
+                <div class="cols-2 left"><div id="${
+                  this.id
+                }-edit" class="btn btn-edit-signal"
+                  data-name="${this._signal.name}"
+                  data-type="${this._signal.type}"
+                  data-device="${this._signal.found ? this._signal.device : ""}"
+                  data-map="${this._signal.found ? this._signal.map : ""}">
+                </div></div>
+              </div>
+            </div>
+        </div>
+    </div>
   `;
 
-  this._indicator.desc = this._signal.name;
+  // const markup = `
+  //   <div id="${this.id}" class="digital-signal">
+  //       <div class="row">
+  //           <div class="cols-2">
+  //             <div class="row">
+  //               <div class="cols-2"><p id="${this.id}-ind"></p></div>
+  //               <div class="cols-2"><p class="message hidden">(modified)</p></div>
+  //             </div>
+  //           </div>
+  //           <div class="cols-2">
+  //               <div class="row">
+  //                   <div class="cols-2"><p id="${this.id}-device">${
+  //     this._signal.found ? this._signal.device : ""
+  //   }</p></div>
+  //                   <div class="cols-4"><p id="${this.id}-map">${
+  //     this._signal.found ? this._signal.map : ""
+  //   }</p></div>
+  //                   <div class="cols-4"><div id="${
+  //                     this.id
+  //                   }-edit" class="btn-edit-signal"
+  //                       data-name="${this._signal.name}"
+  //                       data-type="${this._signal.type}"
+  //                       data-device="${
+  //                         this._signal.found ? this._signal.device : ""
+  //                       }"
+  //                       data-map="${this._signal.found ? this._signal.map : ""}">
+  //                   </div></div>
+  //               </div>
+  //           </div>
+  //       </div>
+  //   </div>
+  // `;
+
+  // this._indicator.desc = this._signal.name;
 
   return markup;
 };
@@ -101,10 +134,10 @@ SignalView.prototype.updateAttributes = function (attr) {
     this._btnEdit.dataset.map !== attr.map
   ) {
     this.modified = true;
-    msg.classList.remove("hidden");
+    msg.classList.add("warning");
   } else {
     this.modified = false;
-    msg.classList.add("hidden");
+    msg.classList.remove("warning");
   }
 };
 

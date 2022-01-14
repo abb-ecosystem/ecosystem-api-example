@@ -77,9 +77,6 @@ const handlerUpdateSignalAttr = async function (attr) {
     (signal) => signal.modified === true
   );
 
-  console.log("😎");
-  console.log(rebootRequired);
-
   rebootRequired
     ? btnRebootContainer.classList.remove("hidden")
     : btnRebootContainer.classList.add("hidden");
@@ -87,8 +84,6 @@ const handlerUpdateSignalAttr = async function (attr) {
 
 async function setupConfiguration() {
   await model.init();
-
-  configRebootButton();
 
   // Digital inputs
   model.addInputSignal(await Signal.create("di_is_gripper_opened"));

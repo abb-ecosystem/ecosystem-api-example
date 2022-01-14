@@ -12,7 +12,10 @@ const EditSignalView = function () {
 
   this._modalDeviceDropDown = new FPComponents.Dropdown_A();
   this._modalMapInput = new FPComponents.Input_A();
+  this._btnUpdate = new FPComponents.Button_A();
 
+  this._btnUpdate.text = "update";
+  this._btnUpdate.highlight = true;
   this._modalMapInput.regex = /^-?[0-9]+(\.[0-9]+)?$/;
 
   this._addHandlerHideWindow();
@@ -118,9 +121,7 @@ EditSignalView.prototype._generateMarkup = function () {
     </div>
     <div class="row">
       <div class="cols-1">
-        <button class="btn center">
-          <span>Upload</span>
-        </button>
+        <div id="modal-signal-update" class="btn ok"></div>
       </div>
     </div>
     <div class="row">
@@ -140,22 +141,26 @@ EditSignalView.prototype._generateMarkup = function () {
 EditSignalView.prototype._handleFPComponents = function () {
   this._modalDeviceDropDown.attachToId("modal-signal-device");
   this._modalMapInput.attachToId("modal-signal-map");
+  this._btnUpdate.attachToId("modal-signal-update");
   this._warning = this._parentElement.querySelector(".modal-warning");
 };
 
 EditSignalView.prototype.addHandlerUpdate = function (handler) {
-  const cbUpdate = function (e) {
-    e.preventDefault();
+  const cbUpdate = function () {
     const attr = [];
-    attr.name = e.target.querySelector(".modal-signal-name").textContent;
-    attr.type = e.target.querySelector(".modal-signal-type").textContent;
+
+    attr.name =
+      this._parentElement.querySelector(".modal-signal-name").textContent;
+    attr.type =
+      this._parentElement.querySelector(".modal-signal-type").textContent;
     attr.device =
       this._modalDeviceDropDown.model.items[this._modalDeviceDropDown.selected];
     attr.map = this._modalMapInput.text;
     handler(attr);
     this.toggleWindow();
   };
-  this._parentElement.addEventListener("submit", cbUpdate.bind(this));
+
+  this._btnUpdate.onclick = cbUpdate.bind(this);
 };
 
 window.editSignalView = new EditSignalView();
