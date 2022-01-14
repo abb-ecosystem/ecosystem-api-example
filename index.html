@@ -52,11 +52,14 @@
           <div id="signal-container-output"></div>
         </div>
       </div>
+      <div class="row">
+        <div id="btn-reboot" class="hidden"></div>
+      </div>
     </div>
 
     <div class="modal hidden">
       <button class="close-modal">&times;</button>
-      <div id="edit" class="modal-content"></div>
+      <form id="edit" class="modal-content"></form>
     </div>
     <div class="overlay hidden"></div>
 
@@ -72,7 +75,7 @@
   <script defer src="views/editSignalView.js"></script>
   <script defer src="views/signalView.js"></script>
 
-  <script src="model.js"></script>
-  <script src="app-ios.js"></script>
-  <script src="app.js"></script>
+  <script defer src="model.js"></script>
+  <script defer src="controller.js"></script>
+  <script defer src="app.js"></script>
 </html>

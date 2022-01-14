@@ -1,42 +1,52 @@
 // export default class ...
 
+// export default function
+const View = function () {};
 
-// export default function 
-const View = function(){}
+View.prototype.render = function (data, render = true) {
+  if (!data || (Array.isArray(data) && data.length === 0))
+    return this.renderError();
+  this._data = data;
+  const markup = this._generateMarkup();
 
-View.prototype.render = function(data, render = true) {
-    if(!data || (Array.isArray(data) && data.length === 0)) return this.renderError();
-    this._data = data;
-    const markup = this._generateMarkup();
+  if (!render) return markup;
 
-    if(!render) return markup;
-    
-    this._clear();
-    this._parentElement.insertAdjacentHTML('afterbegin', markup);
-    this._handleFPComponents();
+  this._clear();
+  this._parentElement.insertAdjacentHTML("afterbegin", markup);
+  this._handleFPComponents();
 };
 
-View.prototype._clear = function() {
-    this._parentElement.innerHTML = '';
+View.prototype._clear = function () {
+  this._parentElement.innerHTML = "";
 };
 
-View.prototype.renderError = function(message = this._errorMessage) {
-    const markup=`
+View.prototype.renderError = function (message = this._errorMessage) {
+  const markup = `
         <div class="error">
             <div>
                 <svg>
-                    <use href="${icons}#icon-alert-triangle"></use>
                 </svg>
             </div>
             <p>${message}</p>
         </div>
     `;
-    this._clear();
-    this._parentElement.insertAdjacentHTML('afterbegin', markup);
+
+  // const markup=`
+  //     <div class="error">
+  //         <div>
+  //             <svg>
+  //                 <use href="${icons}#icon-alert-triangle"></use>
+  //             </svg>
+  //         </div>
+  //         <p>${message}</p>
+  //     </div>
+  // `;
+  this._clear();
+  this._parentElement.insertAdjacentHTML("afterbegin", markup);
 };
 
-View.prototype.renderMessage = function(message = this._message) {
-    const markup=`
+View.prototype.renderMessage = function (message = this._message) {
+  const markup = `
         <div class="message">
             <div>
                 <svg>
@@ -46,12 +56,10 @@ View.prototype.renderMessage = function(message = this._message) {
             <p>${message}</p>
         </div>
     `;
-    this._clear();
-    this._parentElement.insertAdjacentHTML('afterbegin', markup);
+  this._clear();
+  this._parentElement.insertAdjacentHTML("afterbegin", markup);
 };
 
-View.prototype._handleFPComponents = function() {
-    // console.log('View._handleFPComponents: no FPComponents to attach...');
+View.prototype._handleFPComponents = function () {
+  // console.log('View._handleFPComponents: no FPComponents to attach...');
 };
-
-

@@ -115,6 +115,18 @@ p {
   font-size: 14px;
 }
 
+.btn {
+  height: 60;
+  width: 80px;
+}
+.center {
+  margin: 0;
+  position: absolute;
+  left: 50%;
+  -ms-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+}
+
 .infobox > :nth-child(1) {
   background-color: #dddddd;
   height: 30px;

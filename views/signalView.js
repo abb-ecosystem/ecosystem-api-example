@@ -9,8 +9,10 @@ const SignalView = function (signal, container) {
   this._indicator = new FPComponents.Digital_A();
   this._edit = new FPComponents.Button_A();
   this._edit.text = "edit";
+  this.modified = false;
 
-  this._signal.addCallbackOnChanged(this.updateIndicator.bind(this));
+  if (this._signal.found)
+    this._signal.addCallbackOnChanged(this.updateIndicator.bind(this));
 };
 
 SignalView.prototype = Object.create(View.prototype);
@@ -35,16 +37,29 @@ SignalView.prototype._generateMarkup = function () {
   const markup = `
   <div id="${this.id}" class="digital-signal">
       <div class="row">
-          <div class="cols-2"><p id="${this.id}-ind"></p></div>
+          <div class="cols-2">
+            <div class="row">
+              <div class="cols-2"><p id="${this.id}-ind"></p></div>
+              <div class="cols-2"><p class="message hidden">(modified)</p></div>
+            </div>
+          </div>
           <div class="cols-2">
               <div class="row">
-                  <div class="cols-2"><p>${this._signal.device}</p></div>
-                  <div class="cols-4"><p>${this._signal.map}</p></div>
-                  <div class="cols-4"><div id="${this.id}-edit" class="btn-edit-signal"
-                      data-signal-name="${this._signal.name}"
-                      data-signal-type="${this._signal.type}"
-                      data-signal-device="${this._signal.device}"
-                      data-signal-map="${this._signal.map}">
+                  <div class="cols-2"><p id="${this.id}-device">${
+    this._signal.found ? this._signal.device : ""
+  }</p></div>
+                  <div class="cols-4"><p id="${this.id}-map">${
+    this._signal.found ? this._signal.map : ""
+  }</p></div>
+                  <div class="cols-4"><div id="${
+                    this.id
+                  }-edit" class="btn-edit-signal"
+                      data-name="${this._signal.name}"
+                      data-type="${this._signal.type}"
+                      data-device="${
+                        this._signal.found ? this._signal.device : ""
+                      }"
+                      data-map="${this._signal.found ? this._signal.map : ""}">
                   </div></div>
               </div>
           </div>
@@ -58,12 +73,39 @@ SignalView.prototype._generateMarkup = function () {
 };
 
 SignalView.prototype._handleFPComponents = function () {
+  if (this._FPCompAttached) return;
+
   this._indicator.attachToId(`${this.id}-ind`);
   this._edit.attachToId(`${this.id}-edit`);
+  this._device = this._parentElement.querySelector(`#${this.id}-device`);
+  this._map = this._parentElement.querySelector(`#${this.id}-map`);
+  this._btnEdit = this._parentElement.querySelector(`#${this.id}-edit`);
+  this._FPCompAttached = true;
 };
 
 SignalView.prototype.updateIndicator = function (value) {
   this._indicator.active = value;
+};
+
+SignalView.prototype.updateAttributes = function (attr) {
+  this._device && (this._device.textContent = attr.device);
+  this._map && (this._map.textContent = attr.map);
+  console.log("😀");
+
+  const msg = this._parentElement
+    .querySelector(`#${this.id}`)
+    .querySelector(".message");
+
+  if (
+    this._btnEdit.dataset.device !== attr.device ||
+    this._btnEdit.dataset.map !== attr.map
+  ) {
+    this.modified = true;
+    msg.classList.remove("hidden");
+  } else {
+    this.modified = false;
+    msg.classList.add("hidden");
+  }
 };
 
 ///////////////////////////////////////////////////
@@ -73,7 +115,7 @@ const SignalContainer = function (id) {
   View.call(this);
   this.id = id;
   this._parentElement = document.querySelector(`#${id}`);
-  this._errorMessage = "Error at signal view 😆!";
+  this._errorMessage = "No signals found 😆!";
   this._message = "";
   this._signals = [];
 };
@@ -97,4 +139,12 @@ SignalContainer.prototype._generateMarkup = function () {
 
 SignalContainer.prototype._handleFPComponents = function () {
   this._signals.forEach((signal) => signal._handleFPComponents());
+};
+
+SignalContainer.prototype.updateSignalAttributes = function (attr) {
+  const signal = this._signals.find((signal) => {
+    let signalName = signal.id.slice(7);
+    return signalName === attr.name;
+  });
+  signal && signal.updateAttributes(attr);
 };
