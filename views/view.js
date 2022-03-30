@@ -1,6 +1,3 @@
-// export default class ...
-
-// export default function
 const View = function () {};
 
 View.prototype.render = function (data, render = true) {
@@ -60,6 +57,4 @@ View.prototype.renderMessage = function (message = this._message) {
   this._parentElement.insertAdjacentHTML("afterbegin", markup);
 };
 
-View.prototype._handleFPComponents = function () {
-  // console.log('View._handleFPComponents: no FPComponents to attach...');
-};
+View.prototype._handleFPComponents = function () {};

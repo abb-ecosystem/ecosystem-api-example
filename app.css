@@ -4,29 +4,7 @@ body {
   margin: 0;
 }
 
-/* * {
-  box-sizing: border-box;
-} */
-
-/*  === GRID-SYSTEM (Sichbarkeit) === */
-/* .border, .border * {
-    border: 1px solid #91c4ff;
-}
-
-[class*='cols-'] {
-background-color: #bfddff;
-} */
-
-/* p {
-    background-color: #91c4ff;
-    padding: 0;
-    margin: 0;
-    color: #FFF;
-    text-align: center;
-} */
-
 /*  === GRID-SYSTEM === */
-
 .container {
   width: 95%;
   margin-left: auto;

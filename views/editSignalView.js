@@ -1,62 +1,62 @@
 const EditSignalView = function () {
-  View.call(this);
+  View.call(this)
 
-  this._parentElement = document.querySelector(".modal-content"); // this has to be a <form></form>
-  this._errorMessage = "Error while editing signal 😆!";
-  this._message = "";
+  this._parentElement = document.querySelector('.modal-content')
+  this._errorMessage = 'Error while editing signal 😆!'
+  this._message = ''
 
-  this._window = document.querySelector(".modal");
-  this._overlay = document.querySelector(".overlay");
-  this._btnsOpen = document.querySelectorAll(".btn-edit-signal");
-  this._btnClose = document.querySelector(".close-modal");
+  this._window = document.querySelector('.modal')
+  this._overlay = document.querySelector('.overlay')
+  this._btnsOpen = document.querySelectorAll('.btn-edit-signal')
+  this._btnClose = document.querySelector('.close-modal')
 
-  this._modalDeviceDropDown = new FPComponents.Dropdown_A();
-  this._modalMapInput = new FPComponents.Input_A();
-  this._btnUpdate = new FPComponents.Button_A();
+  this._modalDeviceDropDown = new FPComponents.Dropdown_A()
+  this._modalMapInput = new FPComponents.Input_A()
+  this._btnUpdate = new FPComponents.Button_A()
 
-  this._btnUpdate.text = "update";
-  this._btnUpdate.highlight = true;
-  this._modalMapInput.regex = /^-?[0-9]+(\.[0-9]+)?$/;
+  this._btnUpdate.text = 'update'
+  this._btnUpdate.highlight = true
+  this._modalMapInput.regex = /^-?[0-9]+(\.[0-9]+)?$/
 
-  this._addHandlerHideWindow();
-};
+  this._addHandlerHideWindow()
+}
 
-EditSignalView.prototype = Object.create(View.prototype);
+EditSignalView.prototype = Object.create(View.prototype)
 
 EditSignalView.prototype.openWindow = function (e) {
-  const btn = e.target.closest(".btn-edit-signal");
+  const btn = e.target.closest('.btn-edit-signal')
   if (btn) {
-    this.render(btn.dataset);
+    this.render(btn.dataset)
   }
 
-  this.toggleWindow();
-};
+  this.toggleWindow()
+}
 
 EditSignalView.prototype.toggleWindow = function () {
-  this._overlay.classList.toggle("hidden");
-  this._window.classList.toggle("hidden");
-};
+  this._overlay.classList.toggle('hidden')
+  this._window.classList.toggle('hidden')
+}
 
 EditSignalView.prototype.addHandlersShowWindow = function () {
-  this._btnsOpen = document.querySelectorAll(".btn-edit-signal");
+  this._btnsOpen = document.querySelectorAll('.btn-edit-signal')
 
   Array.from(this._btnsOpen).forEach((node) =>
-    node.addEventListener("click", this.openWindow.bind(this))
-  );
-};
+    node.addEventListener('click', this.openWindow.bind(this))
+  )
+}
 
 EditSignalView.prototype._addHandlerHideWindow = function () {
-  this._btnClose.addEventListener("click", this.toggleWindow.bind(this));
-  this._overlay.addEventListener("click", this.toggleWindow.bind(this));
-};
+  this._btnClose.addEventListener('click', this.toggleWindow.bind(this))
+  this._overlay.addEventListener('click', this.toggleWindow.bind(this))
+}
 
 EditSignalView.prototype.initDeviceDropdown = function (devices) {
-  this._modalDeviceDropDown.model = { items: devices };
-};
+  this._modalDeviceDropDown.model = { items: devices }
+}
 
 EditSignalView.prototype.addHandlerRender = function (update) {
   const cbOnSelection = function (index, obj) {
-    this._warning.textContent = "";
+    this._warning.textContent = ''
     const attr = {
       name: this._data.name,
       type: this._data.type,
@@ -65,23 +65,23 @@ EditSignalView.prototype.addHandlerRender = function (update) {
           this._modalDeviceDropDown.selected
         ],
       map: this._modalMapInput.text,
-    };
+    }
 
-    const response = update(this._data, attr);
+    const response = update(this._data, attr)
 
-    if (!response) return;
+    if (!response) return
 
     // if the update was unsuccessful, then restore old value
-    this._warning.textContent = response;
+    this._warning.textContent = response
 
     this._modalDeviceDropDown.selected =
-      this._modalDeviceDropDown.model.items.indexOf(this._data.device);
-  };
+      this._modalDeviceDropDown.model.items.indexOf(this._data.device)
+  }
 
-  this._modalDeviceDropDown.onselection = cbOnSelection.bind(this);
+  this._modalDeviceDropDown.onselection = cbOnSelection.bind(this)
 
   const cbOnChange = function (text) {
-    this._warning.textContent = "";
+    this._warning.textContent = ''
 
     const attr = {
       name: this._data.name,
@@ -91,19 +91,19 @@ EditSignalView.prototype.addHandlerRender = function (update) {
           this._modalDeviceDropDown.selected
         ],
       map: text,
-    };
+    }
 
-    const response = update(this._data, attr);
+    const response = update(this._data, attr)
 
-    if (!response) return;
+    if (!response) return
 
     // if the update was unsuccessful, then restore old value
-    this._warning.textContent = response;
+    this._warning.textContent = response
 
-    this._modalMapInput.text = this._data.map;
-  };
-  this._modalMapInput.onchange = cbOnChange.bind(this);
-};
+    this._modalMapInput.text = this._data.map
+  }
+  this._modalMapInput.onchange = cbOnChange.bind(this)
+}
 
 EditSignalView.prototype._generateMarkup = function () {
   const markup = `
@@ -129,38 +129,41 @@ EditSignalView.prototype._generateMarkup = function () {
         <h3 class="modal-warning"></h3>
       </div>
     </div>
-    `;
+    `
+
+  console.log('😝')
+  console.log(this._modalDeviceDropDown)
 
   this._modalDeviceDropDown.selected =
-    this._modalDeviceDropDown.model.items.indexOf(this._data.device);
-  this._modalMapInput.text = this._data.map;
+    this._modalDeviceDropDown.model.items.indexOf(this._data.device)
+  this._modalMapInput.text = this._data.map
 
-  return markup;
-};
+  return markup
+}
 
 EditSignalView.prototype._handleFPComponents = function () {
-  this._modalDeviceDropDown.attachToId("modal-signal-device");
-  this._modalMapInput.attachToId("modal-signal-map");
-  this._btnUpdate.attachToId("modal-signal-update");
-  this._warning = this._parentElement.querySelector(".modal-warning");
-};
+  this._modalDeviceDropDown.attachToId('modal-signal-device')
+  this._modalMapInput.attachToId('modal-signal-map')
+  this._btnUpdate.attachToId('modal-signal-update')
+  this._warning = this._parentElement.querySelector('.modal-warning')
+}
 
 EditSignalView.prototype.addHandlerUpdate = function (handler) {
   const cbUpdate = function () {
-    const attr = [];
+    const attr = []
 
-    attr.name =
-      this._parentElement.querySelector(".modal-signal-name").textContent;
-    attr.type =
-      this._parentElement.querySelector(".modal-signal-type").textContent;
-    attr.device =
-      this._modalDeviceDropDown.model.items[this._modalDeviceDropDown.selected];
-    attr.map = this._modalMapInput.text;
-    handler(attr);
-    this.toggleWindow();
-  };
+    attr.Name =
+      this._parentElement.querySelector('.modal-signal-name').textContent
+    attr.SignalType =
+      this._parentElement.querySelector('.modal-signal-type').textContent
+    attr.Device =
+      this._modalDeviceDropDown.model.items[this._modalDeviceDropDown.selected]
+    attr.DeviceMap = this._modalMapInput.text
+    handler(attr)
+    this.toggleWindow()
+  }
 
-  this._btnUpdate.onclick = cbUpdate.bind(this);
-};
+  this._btnUpdate.onclick = cbUpdate.bind(this)
+}
 
-window.editSignalView = new EditSignalView();
+window.editSignalView = new EditSignalView()

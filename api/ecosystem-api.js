@@ -36,11 +36,67 @@ if (typeof API.constructedApi === 'undefined') {
       return true
     }
 
+    es.DEVICE = new (function () {
+      this.ethernetIP = []
+
+      this.getEthernetIPDeviceByName = (name) => {
+        return this.devices.find((device) => device.name === name)
+      }
+
+      this.fetchEthernetIPDevices = async function () {
+        try {
+          const devices = await RWS.CFG.getInstances('EIO', 'ETHERNETIP_DEVICE')
+          console.log('=== EthernetIP Devices ===')
+          for (let device of devices) {
+            console.log(device.getAttributes())
+            console.log(
+              `${device.getInstanceName()}: ${
+                device.getAttributes().StateWhenStartup
+              }`
+            )
+            this.ethernetIP.push(device.getInstanceName())
+          }
+          return this.ethernetIP
+        } catch (err) {
+          console.error(err)
+          throw err
+        }
+      }
+    })()
+
     /**
      * The domain used for Signal handling
      */
     es.SIGNAL = new (function () {
       this.signals = []
+
+      this.getSignalByName = (name) => {
+        return this.signals.find((signal) => signal.name === name)
+      }
+
+      this.getSignalsOfType = (type) => {
+        return this.signals.filter((signal) => signal.type === type)
+      }
+
+      this.isAnySignalModified = () => {
+        return this.signals.some((signal) => signal.modified === true)
+      }
+
+      this.isAnyInputMappedTo = (attr) => {
+        console.log(API.DEVICE.ethernetIP)
+        const device = API.DEVICE.ethernetIP.find(
+          (dev) => dev.device === attr.Device
+        )
+        const found =
+          device &&
+          device.signals.some(
+            (signal) =>
+              signal.map === attr.Map &&
+              signal.type === attr.SignalType &&
+              signal.name !== attr.Name
+          )
+        return found
+      }
 
       /**
        * Signal class containing all relevant elements to access the signal
@@ -56,7 +112,46 @@ if (typeof API.constructedApi === 'undefined') {
           this.name = name
           this.signal = signal
           this.config = config
-          this.attr = attr
+          this._attr = attr
+
+          this.signal ? (this.modified = false) : (this.modified = true)
+        }
+
+        get value() {
+          return this.signal || this.signal.getValue()
+        }
+
+        set value(v) {
+          this.signal || this.signal.setValue(v)
+        }
+
+        get type() {
+          return this._attr.SignalType
+        }
+
+        get device() {
+          return this._attr.Device
+        }
+
+        get map() {
+          return this._attr.DeviceMap
+        }
+
+        get active() {
+          return this.signal === null ? false : true
+        }
+
+        /**
+         * @param {{ SignalType: any; }} a  object with attributes to be updated
+         */
+        set attr(a) {
+          const f = function (key) {
+            this._attr[key] = a[key]
+          }
+          Object.keys(a).forEach(f.bind(this))
+
+          API.SIGNAL.updateAttributes(a)
+          this.modified = true
         }
 
         /**
@@ -66,7 +161,25 @@ if (typeof API.constructedApi === 'undefined') {
          */
         async subscribe(callback) {
           try {
-            console.log(this.signal)
+            if (!this.signal) {
+              console.log(`Signal ${this.name} not available for subscription`)
+              return
+            }
+
+            const failed = await this.signal.subscribe(true)
+
+            if (failed) console.log(failed)
+          } catch (e) {
+            console.error(e)
+          }
+        }
+
+        async unsubscribe() {
+          return this.signal.unsubscribe()
+        }
+
+        addCallbackOnChanged(callback) {
+          try {
             if (!this.signal) {
               console.log(`Signal ${this.name} not available for subscription`)
               return
@@ -85,16 +198,12 @@ if (typeof API.constructedApi === 'undefined') {
             }
 
             this.signal.addCallbackOnChanged(cb.bind(this))
-            const failed = await this.signal.subscribe(true)
 
-            if (failed) console.log(failed)
+            // force the callback to update to current value
+            cb()
           } catch (e) {
             console.error(e)
           }
-        }
-
-        async unsubscribe() {
-          return this.signal.unsubscribe()
         }
 
         async handler(value) {
@@ -103,13 +212,11 @@ if (typeof API.constructedApi === 'undefined') {
         }
       }
 
-      this.getSignalByName = function (name) {
-        return this.signals.find((signal) => signal.name === name)
-      }
-
-      this.createSignal = async (attr) => {
+      this.createSignal = async (name, attr = {}) => {
         let signal = null
         let config = null
+
+        attr.Name = name
 
         // Check if signal is already available
         signal = await this.getSignal(attr.Name)
@@ -121,15 +228,17 @@ if (typeof API.constructedApi === 'undefined') {
         config = await this.getConfigInstance(attr.Name)
         if (config) {
           console.log(
-            `Signal ${attr.Name} found in configuration, use API.SIGNAL.setSignalAttributes to change attributes`
+            `Signal ${attr.Name} found in configuration, use API.SIGNAL.updateAttributes to change attributes`
           )
+          attr = await config.getAttributes()
         } else {
           // Signal instance NOT found, create a config instance
           this.createConfigInstance(attr.Name)
-          this.setSignalAttributes(attr)
+          this.updateAttributes(attr)
+          config = await this.getConfigInstance(attr.Name)
         }
-
         const s = new Signal(attr.Name, signal, config, attr)
+        s.subscribe()
         this.signals.push(s)
         return s
       }
@@ -143,11 +252,9 @@ if (typeof API.constructedApi === 'undefined') {
 
         // Check if signal is configured
         let config = await this.getConfigInstance(name)
-        // console.log(config)
         if (config) {
           // Signal instance found, get attributes of signal
           attr = await config.getAttributes()
-          // console.log(attr)
         }
 
         const s = new Signal(name, signal, config, attr)
@@ -200,7 +307,6 @@ if (typeof API.constructedApi === 'undefined') {
           let config = await this.getConfigInstance()
           let attr = null
           if (config !== null) attr = config.getAttributes()
-          console.log(attr)
           return attr
         } catch (e) {
           // if singal not available, then an exception will occur
@@ -227,10 +333,8 @@ if (typeof API.constructedApi === 'undefined') {
        * @param {*} attr
        */
 
-      this.setSignalAttributes = async function (attr) {
+      this.updateAttributes = async function (attr) {
         try {
-          console.log(attr.Name)
-          console.log(attr.Access)
           await RWS.CFG.updateAttributesByName(
             'EIO',
             'EIO_SIGNAL',
