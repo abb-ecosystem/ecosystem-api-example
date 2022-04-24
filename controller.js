@@ -19,16 +19,17 @@ function configRebootButton() {
 }
 
 // Model functions
-const updateSignalIndicator = async function () {
-  model.state.ios.inputs.forEach((io) => io.forceCallback())
-  model.state.ios.outputs.forEach((io) => io.forceCallback())
-}
+// const updateSignalIndicator = async function () {
+//   model.state.ios.inputs.forEach((io) => io.forceCallback())
+//   model.state.ios.outputs.forEach((io) => io.forceCallback())
+// }
 
 // Handler functions
-const handlerConfigureSignal = function (data, attr) {
+const handlerConfigureSignal = function (attr) {
   let found = false
   try {
-    found = model.isAnyInputMappedTo(attr)
+    // found = model.isAnyInputMappedTo(attr)
+    found = API.DEVICE.isAnySignalMappedTo(attr)
     if (found)
       return `Device "${attr.Device}", Map "${attr.DeviceMap}" already used by another signal!`
   } catch (err) {
@@ -54,6 +55,9 @@ const handlerChangeSignalValue = async function (name, value) {
 
 const handlerUpdateSignalAttr = async function (attr) {
   // Search signal api
+  console.log(`handlerUpdateSignalAttr called`)
+  console.log(attr)
+
   const signal = API.SIGNAL.getSignalByName(attr.Name)
   signal.attr = attr
   signal.type === 'DI'
@@ -84,33 +88,16 @@ async function setupConfiguration() {
   await API.SIGNAL.createSignal('do_part_in_clamping_pos')
   await API.SIGNAL.createSignal('do_profile_free_robot')
 
-  // if (!(await model.isEverySignalConfigured())) {
-  // if (true) {
-  //   console.log('NOT every signal configured, loading from config file...')
-  //   if (model.state.devices.some((dev) => dev === 'ABB_Scalable_IO')) {
-  //     await loadIOConfigFromFile('EIO_ABB_Scalable_IO.cfg')
-  //   } else {
-  //     await loadIOConfigFromFile('EIO.cfg')
-  //   }
-  // } else {
-  //   console.log('EVERY signal configured...')
-  // }
-
-  // model.updateSignalAttributes().then(() => {
   window.editSignalView.addHandlerRender(handlerConfigureSignal)
   const devices = await API.DEVICE.fetchEthernetIPDevices()
-  window.editSignalView.initDeviceDropdown(devices)
+
+  const deviceNames = devices.map((item) => item.device)
+  window.editSignalView.initDeviceDropdown(deviceNames)
 
   inputSignalContainer.render(API.SIGNAL.getSignalsOfType('DI'))
-  // inputSignalContainer.addHandlerChangeSignalValue(handlerChangeSignalValue)
-
   outputSignalContainer.render(API.SIGNAL.getSignalsOfType('DO'))
-  // outputSignalContainer.addHandlerChangeSignalValue(handlerChangeSignalValue)
 
   // Only after the signals are added to input and output container
   window.editSignalView.addHandlersShowWindow()
   window.editSignalView.addHandlerUpdate(handlerUpdateSignalAttr)
-
-  // updateSignalIndicator()
-  // })
 }

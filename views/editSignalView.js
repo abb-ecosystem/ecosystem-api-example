@@ -51,6 +51,8 @@ EditSignalView.prototype._addHandlerHideWindow = function () {
 }
 
 EditSignalView.prototype.initDeviceDropdown = function (devices) {
+  console.log('😎')
+  console.log(devices)
   this._modalDeviceDropDown.model = { items: devices }
 }
 
@@ -58,16 +60,17 @@ EditSignalView.prototype.addHandlerRender = function (update) {
   const cbOnSelection = function (index, obj) {
     this._warning.textContent = ''
     const attr = {
-      name: this._data.name,
-      type: this._data.type,
-      device:
+      Name: this._data.name,
+      SignalType: this._data.type,
+      Device:
         this._modalDeviceDropDown.model.items[
           this._modalDeviceDropDown.selected
         ],
-      map: this._modalMapInput.text,
+      DeviceMap: this._modalMapInput.text,
     }
 
-    const response = update(this._data, attr)
+    console.log('👍', JSON.stringify(attr))
+    const response = update(attr)
 
     if (!response) return
 
@@ -84,16 +87,16 @@ EditSignalView.prototype.addHandlerRender = function (update) {
     this._warning.textContent = ''
 
     const attr = {
-      name: this._data.name,
-      type: this._data.type,
-      device:
+      Name: this._data.name,
+      SignalType: this._data.type,
+      Device:
         this._modalDeviceDropDown.model.items[
           this._modalDeviceDropDown.selected
         ],
-      map: text,
+      DeviceMap: text,
     }
 
-    const response = update(this._data, attr)
+    const response = update(attr)
 
     if (!response) return
 
@@ -159,6 +162,9 @@ EditSignalView.prototype.addHandlerUpdate = function (handler) {
     attr.Device =
       this._modalDeviceDropDown.model.items[this._modalDeviceDropDown.selected]
     attr.DeviceMap = this._modalMapInput.text
+
+    console.log('💢')
+    console.log(attr)
     handler(attr)
     this.toggleWindow()
   }

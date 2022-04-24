@@ -37,31 +37,69 @@ if (typeof API.constructedApi === 'undefined') {
     }
 
     es.DEVICE = new (function () {
-      this.ethernetIP = []
+      this.ethernetIPDevices = []
 
       this.getEthernetIPDeviceByName = (name) => {
         return this.devices.find((device) => device.name === name)
       }
 
       this.fetchEthernetIPDevices = async function () {
+        const deviceData = []
         try {
-          const devices = await RWS.CFG.getInstances('EIO', 'ETHERNETIP_DEVICE')
+          const ethIPDevices = await RWS.CFG.getInstances(
+            'EIO',
+            'ETHERNETIP_DEVICE'
+          )
           console.log('=== EthernetIP Devices ===')
-          for (let device of devices) {
+          for (let device of ethIPDevices) {
+            this.ethernetIPDevices.push({
+              device: device.getInstanceName(),
+              signals: [],
+            })
             console.log(device.getAttributes())
-            console.log(
-              `${device.getInstanceName()}: ${
-                device.getAttributes().StateWhenStartup
-              }`
-            )
-            this.ethernetIP.push(device.getInstanceName())
           }
-          return this.ethernetIP
-        } catch (err) {
-          console.error(err)
-          throw err
+
+          const eioSignals = await RWS.CFG.getInstances('EIO', 'EIO_SIGNAL')
+          for (const signal of eioSignals) {
+            let attr = signal.getAttributes()
+            for (let item of this.ethernetIPDevices) {
+              attr.Device === item.device &&
+                item.signals.push({ attributes: attr })
+            }
+          }
+
+          return this.ethernetIPDevices
+        } catch (e) {
+          console.error(e)
+          FPComponents.Popup_A.message(`ethDevices --Exception occurs:`, [
+            e.message,
+            `Code: ${e.controllerStatus.code}`,
+            e.controllerStatus.description,
+          ])
+          return undefined
         }
       }
+
+      this.isAnySignalMappedTo = function (attr) {
+        const device = this.ethernetIPDevices.find(
+          (dev) => dev.device === attr.Device
+        )
+        const found =
+          device &&
+          device.signals.some(
+            (signal) =>
+              signal.attributes.DeviceMap === attr.DeviceMap &&
+              signal.attributes.SignalType === attr.SignalType &&
+              signal.attributes.Name !== attr.Name
+          )
+        return found
+      }
+
+      // class Device {
+      //   constructor(name) {
+      //     this.name = name
+      //   }
+      // }
     })()
 
     /**
@@ -145,6 +183,8 @@ if (typeof API.constructedApi === 'undefined') {
          * @param {{ SignalType: any; }} a  object with attributes to be updated
          */
         set attr(a) {
+          console.log(`Signal.attr`)
+          console.log(a)
           const f = function (key) {
             this._attr[key] = a[key]
           }
@@ -335,6 +375,8 @@ if (typeof API.constructedApi === 'undefined') {
 
       this.updateAttributes = async function (attr) {
         try {
+          console.log('😮')
+          console.log(attr)
           await RWS.CFG.updateAttributesByName(
             'EIO',
             'EIO_SIGNAL',
