@@ -18,17 +18,10 @@ function configRebootButton() {
   btnReboot.attachToId('btn-reboot')
 }
 
-// Model functions
-// const updateSignalIndicator = async function () {
-//   model.state.ios.inputs.forEach((io) => io.forceCallback())
-//   model.state.ios.outputs.forEach((io) => io.forceCallback())
-// }
-
 // Handler functions
 const handlerConfigureSignal = function (attr) {
   let found = false
   try {
-    // found = model.isAnyInputMappedTo(attr)
     found = API.DEVICE.isAnySignalMappedTo(attr)
     if (found)
       return `Device "${attr.Device}", Map "${attr.DeviceMap}" already used by another signal!`

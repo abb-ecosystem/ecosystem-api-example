@@ -37,69 +37,31 @@ if (typeof API.constructedApi === 'undefined') {
     }
 
     es.DEVICE = new (function () {
-      this.ethernetIPDevices = []
+      this.ethernetIP = []
 
       this.getEthernetIPDeviceByName = (name) => {
         return this.devices.find((device) => device.name === name)
       }
 
       this.fetchEthernetIPDevices = async function () {
-        const deviceData = []
         try {
-          const ethIPDevices = await RWS.CFG.getInstances(
-            'EIO',
-            'ETHERNETIP_DEVICE'
-          )
+          const devices = await RWS.CFG.getInstances('EIO', 'ETHERNETIP_DEVICE')
           console.log('=== EthernetIP Devices ===')
-          for (let device of ethIPDevices) {
-            this.ethernetIPDevices.push({
-              device: device.getInstanceName(),
-              signals: [],
-            })
+          for (let device of devices) {
             console.log(device.getAttributes())
+            console.log(
+              `${device.getInstanceName()}: ${
+                device.getAttributes().StateWhenStartup
+              }`
+            )
+            this.ethernetIP.push(device.getInstanceName())
           }
-
-          const eioSignals = await RWS.CFG.getInstances('EIO', 'EIO_SIGNAL')
-          for (const signal of eioSignals) {
-            let attr = signal.getAttributes()
-            for (let item of this.ethernetIPDevices) {
-              attr.Device === item.device &&
-                item.signals.push({ attributes: attr })
-            }
-          }
-
-          return this.ethernetIPDevices
-        } catch (e) {
-          console.error(e)
-          FPComponents.Popup_A.message(`ethDevices --Exception occurs:`, [
-            e.message,
-            `Code: ${e.controllerStatus.code}`,
-            e.controllerStatus.description,
-          ])
-          return undefined
+          return this.ethernetIP
+        } catch (err) {
+          console.error(err)
+          throw err
         }
       }
-
-      this.isAnySignalMappedTo = function (attr) {
-        const device = this.ethernetIPDevices.find(
-          (dev) => dev.device === attr.Device
-        )
-        const found =
-          device &&
-          device.signals.some(
-            (signal) =>
-              signal.attributes.DeviceMap === attr.DeviceMap &&
-              signal.attributes.SignalType === attr.SignalType &&
-              signal.attributes.Name !== attr.Name
-          )
-        return found
-      }
-
-      // class Device {
-      //   constructor(name) {
-      //     this.name = name
-      //   }
-      // }
     })()
 
     /**
@@ -183,8 +145,6 @@ if (typeof API.constructedApi === 'undefined') {
          * @param {{ SignalType: any; }} a  object with attributes to be updated
          */
         set attr(a) {
-          console.log(`Signal.attr`)
-          console.log(a)
           const f = function (key) {
             this._attr[key] = a[key]
           }
@@ -231,9 +191,9 @@ if (typeof API.constructedApi === 'undefined') {
                 value = await this.signal.getValue()
               }
 
-              console.log(
-                `${this.name} callback function called: value(${value})`
-              )
+              // console.log(
+              //   `${this.name} callback function called: value(${value})`
+              // );
               callback(value)
             }
 
@@ -375,8 +335,6 @@ if (typeof API.constructedApi === 'undefined') {
 
       this.updateAttributes = async function (attr) {
         try {
-          console.log('😮')
-          console.log(attr)
           await RWS.CFG.updateAttributesByName(
             'EIO',
             'EIO_SIGNAL',
@@ -385,6 +343,127 @@ if (typeof API.constructedApi === 'undefined') {
           )
         } catch (err) {
           console.error(err)
+        }
+      }
+    })()
+
+    es.RAPID = new (function () {
+      this.variables = []
+      this.procedures = []
+      this.modules = []
+
+      class Variable {
+        constructor(variable, props) {
+          this.props = props
+          this.var = variable
+        }
+
+        get value() {
+          return (async () => {
+            try {
+              return this.var.getValue()
+            } catch (e) {
+              return undefined // fallback value
+            }
+          })()
+        }
+
+        set value(v) {
+          this.var && this.var.setValue(v)
+        }
+
+        get type() {
+          return this.props.dataType
+        }
+
+        /**
+         * Returns the declaration type of the data, valid values:
+         * 'constant'
+         * 'variable'
+         * 'persistent'
+         */
+        get declaration() {
+          return this.props.symbolType
+        }
+
+        /**
+         * Subscribe to the variable and set the callback function
+         * @param {*} callback function to be called on change
+         * @returns
+         */
+        async subscribe(callback) {
+          try {
+            if (!this.var) {
+              console.log(
+                `Variable ${this.name} not available for subscription`
+              )
+              return
+            }
+
+            const failed = await this.var.subscribe(true)
+
+            if (failed) console.log(failed)
+          } catch (e) {
+            console.error(e)
+          }
+        }
+
+        async unsubscribe() {
+          return this.var.unsubscribe()
+        }
+
+        addCallbackOnChanged(callback) {
+          try {
+            if (!this.var) {
+              console.log(
+                `Variable ${this.name} not available for subscription`
+              )
+              return
+            }
+
+            const cb = async (value) => {
+              // first time this is called, newValue is undefined.
+              if (value === undefined) {
+                value = await this.var.getValue()
+              }
+
+              // console.log(
+              //   `${this.name} callback function called: value(${value})`
+              // );
+              callback(value)
+            }
+
+            this.var.addCallbackOnChanged(cb.bind(this))
+
+            // force the callback to update to current value
+            cb()
+          } catch (e) {
+            console.error(e)
+          }
+        }
+
+        async handler(value) {
+          if (!this.var) return
+          this.var.setValue(value)
+        }
+      }
+
+      this.registerToVariable = async (task, module, name, id) => {
+        try {
+          const variable = await RWS.Rapid.getData(task, module, name)
+
+          const p = await variable.getProperties()
+          const v = new Variable(variable, p)
+
+          v.addCallbackOnChanged(async function (value) {
+            document.getElementById(id).textContent = value
+          })
+          await v.subscribe(true)
+          this.variables.push(v)
+          return v
+        } catch (e) {
+          console.error(e)
+          return undefined
         }
       }
     })()
