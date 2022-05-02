@@ -46,7 +46,6 @@ if (typeof API.constructedApi === 'undefined') {
       this.fetchEthernetIPDevices = async function () {
         try {
           const devices = await RWS.CFG.getInstances('EIO', 'ETHERNETIP_DEVICE')
-          console.log('=== EthernetIP Devices ===')
           for (let device of devices) {
             console.log(device.getAttributes())
             console.log(
@@ -79,7 +78,6 @@ if (typeof API.constructedApi === 'undefined') {
             'ETHERNETIP_DEVICE'
           )
 
-          console.log('=== EthernetIP Devices ===')
           for (let device of ethIPDevices) {
             this.ethernetIPDevices.push({
               device: device.getInstanceName(),
@@ -253,15 +251,9 @@ if (typeof API.constructedApi === 'undefined') {
               if (value === undefined) {
                 value = await this.signal.getValue()
               }
-
-              // console.log(
-              //   `${this.name} callback function called: value(${value})`
-              // );
               callback(value)
             }
-
             this.signal.addCallbackOnChanged(cb.bind(this))
-
             // force the callback to update to current value
             cb()
           } catch (e) {
@@ -284,15 +276,15 @@ if (typeof API.constructedApi === 'undefined') {
         // Check if signal is already available
         signal = await this.getSignal(attr.Name)
         if (signal) {
-          console.log(`Signal ${attr.Name} exist already... `)
+          // console.log(`Signal ${attr.Name} exist already... `);
         }
 
         // Check if signal is configured
         config = await this.getSignalInstance(attr.Name)
         if (config) {
-          console.log(
-            `Signal ${attr.Name} found in configuration, use API.SIGNAL.updateAttributes to change attributes`
-          )
+          // console.log(
+          //   `Signal ${attr.Name} found in configuration, use API.SIGNAL.updateAttributes to change attributes`
+          // );
           attr = await config.getAttributes()
         } else {
           // Signal instance NOT found, create a config instance
@@ -306,7 +298,7 @@ if (typeof API.constructedApi === 'undefined') {
         return s
       }
 
-      this.getSignalFromController = async (name) => {
+      this.fetchSignalFromController = async (name) => {
         let signal = null
         let attr = []
 
@@ -320,6 +312,7 @@ if (typeof API.constructedApi === 'undefined') {
           attr = await config.getAttributes()
         }
 
+        // ToDo: check if the signal is aldready available and replace it if so.
         const s = new Signal(name, signal, config, attr)
         this.signals.push(s)
         return s
@@ -451,7 +444,7 @@ if (typeof API.constructedApi === 'undefined') {
             'EIO_CROSS'
           )
           for (let cc of crossConnections) {
-            console.log(cc.getAttributes())
+            // console.log(cc.getAttributes());
             this.crossConnections.push(cc)
           }
           return this.crossConnections
@@ -473,10 +466,14 @@ if (typeof API.constructedApi === 'undefined') {
           this.var = variable
         }
 
+        get name() {
+          return this.props.symbolName
+        }
+
         get value() {
           return (async () => {
             try {
-              return this.var.getValue()
+              return await this.var.getValue()
             } catch (e) {
               return undefined // fallback value
             }
@@ -537,14 +534,9 @@ if (typeof API.constructedApi === 'undefined') {
             }
 
             const cb = async (value) => {
-              // first time this is called, newValue is undefined.
               if (value === undefined) {
                 value = await this.var.getValue()
               }
-
-              // console.log(
-              //   `${this.name} callback function called: value(${value})`
-              // );
               callback(value)
             }
 
@@ -563,16 +555,28 @@ if (typeof API.constructedApi === 'undefined') {
         }
       }
 
-      this.registerToVariable = async (task, module, name, id) => {
+      /**
+       * Subscribe to a existing RAPID variable.
+       * @param {string} task  - RAPID Task in which the variable is contained
+       * @param {string} module -RAPID module where the variable is contained
+       * @param {string} name - name of RAPID variable
+       * @param {string} id  (optional) - DOM element id in which "textContent" will get the value of  the variable
+       * @returns API.RAPID.variable or undifined if variable does not exist in the controller
+       */
+      this.subscribeToVariable = async (task, module, name, id) => {
         try {
           const variable = await RWS.Rapid.getData(task, module, name)
 
           const p = await variable.getProperties()
+          // console.log(p);
           const v = new Variable(variable, p)
 
-          v.addCallbackOnChanged(async function (value) {
-            document.getElementById(id).textContent = value
-          })
+          if (id) {
+            v.addCallbackOnChanged(async function (value) {
+              document.getElementById(id).textContent = value
+            })
+          }
+
           await v.subscribe(true)
           this.variables.push(v)
           return v
@@ -580,6 +584,57 @@ if (typeof API.constructedApi === 'undefined') {
           console.error(e)
           return undefined
         }
+      }
+
+      this.requestMastership = function () {
+        return RWS.Mastership.request()
+          .then(() => Promise.resolve())
+          .catch((err) =>
+            Promise.reject(console.log('Could not get Mastership.', err))
+          )
+      }
+
+      // Releases the Mastership, if it fails it should log the error and hide the rejection.
+      this.releaseMastership = function () {
+        return RWS.Mastership.release()
+          .then(() => Promise.resolve())
+          .catch((err) => {
+            RWS.writeDebug(`Could not release Mastership. >>> ${err.message}`)
+            return Promise.resolve()
+          })
+      }
+
+      this.loadModule = function (
+        path,
+        isReplace = false,
+        taskName = 'T_ROB1'
+      ) {
+        let hasMastership = false
+        let error = null
+
+        return this.requestMastership()
+          .then(() => {
+            hasMastership = true
+
+            return RWS.Network.post(
+              `/rw/rapid/tasks/${taskName}/loadmod`,
+              'modulepath=' + path + '&replace=' + isReplace
+            )
+          })
+          .catch((err) => {
+            if (hasMastership === true) {
+              error = err
+              return Promise.resolve()
+            }
+
+            return console.error('Failed to get Mastership.', err)
+          })
+          .then(() => this.releaseMastership())
+          .then(() => {
+            if (error !== null)
+              return console.error('Failed to set value.', error)
+            return Promise.resolve()
+          })
       }
     })()
 
