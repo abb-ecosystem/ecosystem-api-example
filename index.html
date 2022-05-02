@@ -32,6 +32,14 @@
   <body>
     <div id="tab-container"></div>
 
+    <div id="cfg-view">
+      <div class="row">
+        <div class="col-1 infobox">
+          <div><p>Cross-Connections</p></div>
+          <div id="cross-connection-1"></div>
+        </div>
+      </div>
+    </div>
     <!-- Grid-System -->
     <div id="io-view" class="container border">
       <div class="row">
@@ -45,8 +53,6 @@
       <div class="row">
         <div class="cols-2 infobox">
           <div><p>Inputs</p></div>
-          <div id="signal-indicator"></div>
-          <div id="signal-indicator-2"></div>
           <div id="signal-container-input"></div>
         </div>
         <div class="cols-2 infobox">
@@ -71,8 +77,6 @@
   </body>
 
   <script defer src="api/ecosystem-api.js"></script>
-  <script defer src="api/ethernetDevices.js"></script>
-  <script defer src="api/signal.js"></script>
 
   <script defer src="views/view.js"></script>
   <script defer src="views/editSignalView.js"></script>

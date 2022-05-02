@@ -84,7 +84,8 @@ async function setupConfiguration() {
   window.editSignalView.addHandlerRender(handlerConfigureSignal)
   const devices = await API.DEVICE.fetchEthernetIPDevices()
 
-  const deviceNames = devices.map((item) => item.device)
+  const deviceNames = devices.map((item) => item)
+  console.log(deviceNames)
   window.editSignalView.initDeviceDropdown(deviceNames)
 
   inputSignalContainer.render(API.SIGNAL.getSignalsOfType('DI'))

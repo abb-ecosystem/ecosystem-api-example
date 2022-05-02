@@ -14,9 +14,7 @@ const SignalView = function (signal, container) {
   if (this._signal.active)
     this._signal.addCallbackOnChanged(this.updateIndicator.bind(this))
 
-  console.log('🙈')
   const cbOnClick = async function () {
-    console.log(`Indicator callback of ${this.id} SignalView called...`)
     this._indicator.active = !this._indicator.active
     this._indicator.active ? this._signal.handler(1) : this._signal.handler(0)
   }

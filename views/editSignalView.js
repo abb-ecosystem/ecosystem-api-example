@@ -51,8 +51,6 @@ EditSignalView.prototype._addHandlerHideWindow = function () {
 }
 
 EditSignalView.prototype.initDeviceDropdown = function (devices) {
-  console.log('😎')
-  console.log(devices)
   this._modalDeviceDropDown.model = { items: devices }
 }
 

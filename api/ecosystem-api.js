@@ -56,6 +56,7 @@ if (typeof API.constructedApi === 'undefined') {
             )
             this.ethernetIP.push(device.getInstanceName())
           }
+          console.log(this.ethernetIP)
           return this.ethernetIP
         } catch (err) {
           console.error(err)
@@ -64,11 +65,73 @@ if (typeof API.constructedApi === 'undefined') {
       }
     })()
 
+    es.DEVICE = new (function () {
+      this.ethernetIPDevices = []
+
+      this.getEthernetIPDeviceByName = (name) => {
+        return this.devices.find((device) => device.name === name)
+      }
+
+      this.fetchEthernetIPDevices = async function () {
+        try {
+          const ethIPDevices = await RWS.CFG.getInstances(
+            'EIO',
+            'ETHERNETIP_DEVICE'
+          )
+
+          console.log('=== EthernetIP Devices ===')
+          for (let device of ethIPDevices) {
+            this.ethernetIPDevices.push({
+              device: device.getInstanceName(),
+              signals: [],
+            })
+
+            console.log(device.getAttributes())
+          }
+
+          const eioSignals = await RWS.CFG.getInstances('EIO', 'EIO_SIGNAL')
+          for (const signal of eioSignals) {
+            let attr = signal.getAttributes()
+            for (let item of this.ethernetIPDevices) {
+              attr.Device === item.device &&
+                item.signals.push({ attributes: attr })
+            }
+          }
+
+          return this.ethernetIPDevices
+        } catch (e) {
+          console.error(e)
+          FPComponents.Popup_A.message(`ethDevices - Exception occurs:`, [
+            e.message,
+            `Code: ${e.controllerStatus.code}`,
+            e.controllerStatus.description,
+          ])
+          return undefined
+        }
+      }
+
+      this.isAnySignalMappedTo = function (attr) {
+        const device = this.ethernetIPDevices.find(
+          (dev) => dev.device === attr.Device
+        )
+        const found =
+          device &&
+          device.signals.some(
+            (signal) =>
+              signal.attributes.DeviceMap === attr.DeviceMap &&
+              signal.attributes.SignalType === attr.SignalType &&
+              signal.attributes.Name !== attr.Name
+          )
+        return found
+      }
+    })()
+
     /**
      * The domain used for Signal handling
      */
     es.SIGNAL = new (function () {
       this.signals = []
+      this.crossConnections = []
 
       this.getSignalByName = (name) => {
         return this.signals.find((signal) => signal.name === name)
@@ -225,7 +288,7 @@ if (typeof API.constructedApi === 'undefined') {
         }
 
         // Check if signal is configured
-        config = await this.getConfigInstance(attr.Name)
+        config = await this.getSignalInstance(attr.Name)
         if (config) {
           console.log(
             `Signal ${attr.Name} found in configuration, use API.SIGNAL.updateAttributes to change attributes`
@@ -235,7 +298,7 @@ if (typeof API.constructedApi === 'undefined') {
           // Signal instance NOT found, create a config instance
           this.createConfigInstance(attr.Name)
           this.updateAttributes(attr)
-          config = await this.getConfigInstance(attr.Name)
+          config = await this.getSignalInstance(attr.Name)
         }
         const s = new Signal(attr.Name, signal, config, attr)
         s.subscribe()
@@ -251,7 +314,7 @@ if (typeof API.constructedApi === 'undefined') {
         signal = await this.getSignal(name)
 
         // Check if signal is configured
-        let config = await this.getConfigInstance(name)
+        let config = await this.getSignalInstance(name)
         if (config) {
           // Signal instance found, get attributes of signal
           attr = await config.getAttributes()
@@ -277,21 +340,54 @@ if (typeof API.constructedApi === 'undefined') {
       }
 
       /**
-       * Get the configuration instace of a signal from RWS.CFG Namespace
-       * @return {object} The cofiguration instace of a signal
+       * Get a configuration instace from RWS.CFG Namespace
+       * @param {string} name -- name of the insance
+       * @param {string} domain -- supported domains: EIO_SIGNAL, EIO_CROSS
+       * @returns {object}The cofiguration instace
        */
-      this.getConfigInstance = async function (name) {
+      this.getConfigInstance = async function (name, domain) {
         try {
-          const instance = await RWS.CFG.getInstanceByName(
-            'EIO',
-            'EIO_SIGNAL',
-            name
-          )
+          const instance = await RWS.CFG.getInstanceByName('EIO', domain, name)
           return instance
         } catch (e) {
-          console.error(
-            `Error while getting configuration instance of a signal ${name}`
-          )
+          console.error(`Error while getting configuration instance ${name}`)
+          return null
+        }
+      }
+
+      /**
+       * Get a configuration instace of a signal from RWS.CFG Namespace
+       * @param {string} name -- name of the signal
+       * @returns {object}The cofiguration instace of a signal
+       */
+      this.getSignalInstance = async function (name) {
+        return this.getConfigInstance(name, 'EIO_SIGNAL')
+      }
+
+      /**
+       * Get a configuration instace of a cross-connection from RWS.CFG Namespace
+       * @param {string} name -- name of the cross-connection
+       * @returns {object}The cofiguration instace of a cross-connection
+       */
+      this.getCrossConnectionInstance = async function (name) {
+        return this.getConfigInstance(name, 'EIO_CROSS')
+      }
+
+      /**
+       * Get the attributes of a signal
+       * @return {object} The attributes of a signal
+       */
+      this.getSignalAttributes = async function (name) {
+        try {
+          // Check if instance is configured (which does not necesarily means that the signal is already availabe),
+          // after creating an instance, a Reboot is reqiured
+          let config = await this.getSignalInstance(name)
+          let attr = null
+          if (config !== null) attr = config.getAttributes()
+          return attr
+        } catch (e) {
+          // if singal not available, then an exception will occur
+          console.error(`Error while getting attributes of a signal ${name} `)
           return null
         }
       }
@@ -300,17 +396,19 @@ if (typeof API.constructedApi === 'undefined') {
        * Get the attributes of a signal
        * @return {object} The attributes of a signal
        */
-      this.getAttributes = async function (name) {
+      this.getCrossConnectionAttributes = async function (name) {
         try {
           // Check if instance is configured (which does not necesarily means that the signal is already availabe),
           // after creating an instance, a Reboot is reqiured
-          let config = await this.getConfigInstance()
+          let config = await this.getCrossConnectionInstance(name)
           let attr = null
           if (config !== null) attr = config.getAttributes()
           return attr
         } catch (e) {
           // if singal not available, then an exception will occur
-          console.error(`Error while getting attributes of a signal ${name} `)
+          console.error(
+            `Error while getting attributes of the cross-conneciton ${name} `
+          )
           return null
         }
       }
@@ -343,6 +441,23 @@ if (typeof API.constructedApi === 'undefined') {
           )
         } catch (err) {
           console.error(err)
+        }
+      }
+
+      this.fetchAllCrossConnections = async function () {
+        try {
+          const crossConnections = await RWS.CFG.getInstances(
+            'EIO',
+            'EIO_CROSS'
+          )
+          for (let cc of crossConnections) {
+            console.log(cc.getAttributes())
+            this.crossConnections.push(cc)
+          }
+          return this.crossConnections
+        } catch (err) {
+          console.error(err)
+          throw err
         }
       }
     })()
