@@ -14,6 +14,19 @@ if (typeof API.constructedApi === 'undefined') {
 
     es.__unload = false
 
+    es.CONFIG = {
+      DOMAIN: {
+        EIO: 'EIO',
+        SYS: 'SYS',
+        MOC: 'MOC',
+      },
+      TYPE: {
+        SIGNAL: 'EIO_SIGNAL',
+        CROSS: 'EIO_CROSS',
+        ETHERNETIP: 'ETHERNETIP_DEVICE',
+      },
+    }
+
     /**
      * Clean up when the web page is closed
      */
@@ -42,26 +55,6 @@ if (typeof API.constructedApi === 'undefined') {
       this.getEthernetIPDeviceByName = (name) => {
         return this.devices.find((device) => device.name === name)
       }
-
-      this.fetchEthernetIPDevices = async function () {
-        try {
-          const devices = await RWS.CFG.getInstances('EIO', 'ETHERNETIP_DEVICE')
-          for (let device of devices) {
-            console.log(device.getAttributes())
-            console.log(
-              `${device.getInstanceName()}: ${
-                device.getAttributes().StateWhenStartup
-              }`
-            )
-            this.ethernetIP.push(device.getInstanceName())
-          }
-          console.log(this.ethernetIP)
-          return this.ethernetIP
-        } catch (err) {
-          console.error(err)
-          throw err
-        }
-      }
     })()
 
     es.DEVICE = new (function () {
@@ -74,8 +67,8 @@ if (typeof API.constructedApi === 'undefined') {
       this.fetchEthernetIPDevices = async function () {
         try {
           const ethIPDevices = await RWS.CFG.getInstances(
-            'EIO',
-            'ETHERNETIP_DEVICE'
+            API.CONFIG.DOMAIN.EIO,
+            API.CONFIG.TYPE.ETHERNETIP
           )
 
           for (let device of ethIPDevices) {
@@ -83,11 +76,12 @@ if (typeof API.constructedApi === 'undefined') {
               device: device.getInstanceName(),
               signals: [],
             })
-
-            console.log(device.getAttributes())
           }
 
-          const eioSignals = await RWS.CFG.getInstances('EIO', 'EIO_SIGNAL')
+          const eioSignals = await RWS.CFG.getInstances(
+            API.CONFIG.DOMAIN.EIO,
+            API.CONFIG.TYPE.SIGNAL
+          )
           for (const signal of eioSignals) {
             let attr = signal.getAttributes()
             for (let item of this.ethernetIPDevices) {
@@ -144,7 +138,6 @@ if (typeof API.constructedApi === 'undefined') {
       }
 
       this.isAnyInputMappedTo = (attr) => {
-        console.log(API.DEVICE.ethernetIP)
         const device = API.DEVICE.ethernetIP.find(
           (dev) => dev.device === attr.Device
         )
@@ -157,6 +150,42 @@ if (typeof API.constructedApi === 'undefined') {
               signal.name !== attr.Name
           )
         return found
+      }
+
+      class Instance {
+        constructor(attr) {
+          this._attr = attr
+          this.modified = false
+          this.InstanceType = undefined
+        }
+
+        /**
+         *
+         */
+        updateAttributes(attr) {
+          const f = function (key) {
+            this._attr[key] = attr[key]
+          }
+          Object.keys(attr).forEach(f.bind(this))
+
+          if (!this.InstanceType) {
+            console.error('Instance type is not defined')
+            return
+          }
+
+          API.SIGNAL.updateInstanceAttributes(attr, this.InstanceType)
+          this.modified = true
+        }
+      }
+
+      class crossConnection extends Instance {
+        constructor() {
+          super(attr)
+          this.InstanceType = API.CONFIG.TYPE.CROSS
+        }
+        set attr(a) {
+          this.updateAttributes(a)
+        }
       }
 
       /**
@@ -174,6 +203,7 @@ if (typeof API.constructedApi === 'undefined') {
           this.signal = signal
           this.config = config
           this._attr = attr
+          this.InstanceType = API.CONFIG.TYPE.SIGNAL
 
           this.signal ? (this.modified = false) : (this.modified = true)
         }
@@ -202,16 +232,13 @@ if (typeof API.constructedApi === 'undefined') {
           return this.signal === null ? false : true
         }
 
-        /**
-         * @param {{ SignalType: any; }} a  object with attributes to be updated
-         */
         set attr(a) {
           const f = function (key) {
             this._attr[key] = a[key]
           }
           Object.keys(a).forEach(f.bind(this))
 
-          API.SIGNAL.updateAttributes(a)
+          API.SIGNAL.updateSignalAttributes(a)
           this.modified = true
         }
 
@@ -282,14 +309,13 @@ if (typeof API.constructedApi === 'undefined') {
         // Check if signal is configured
         config = await this.getSignalInstance(attr.Name)
         if (config) {
-          // console.log(
-          //   `Signal ${attr.Name} found in configuration, use API.SIGNAL.updateAttributes to change attributes`
-          // );
+          console.log(
+            `Signal ${attr.Name} found in configuration, use API.SIGNAL.updateSignalAttributes to change attributes`
+          )
           attr = await config.getAttributes()
         } else {
           // Signal instance NOT found, create a config instance
-          this.createConfigInstance(attr.Name)
-          this.updateAttributes(attr)
+          this.createSignalInstance(attr)
           config = await this.getSignalInstance(attr.Name)
         }
         const s = new Signal(attr.Name, signal, config, attr)
@@ -335,12 +361,16 @@ if (typeof API.constructedApi === 'undefined') {
       /**
        * Get a configuration instace from RWS.CFG Namespace
        * @param {string} name -- name of the insance
-       * @param {string} domain -- supported domains: EIO_SIGNAL, EIO_CROSS
+       * @param {string} type -- supported types: EIO_SIGNAL, EIO_CROSS
        * @returns {object}The cofiguration instace
        */
-      this.getConfigInstance = async function (name, domain) {
+      this.getConfigInstance = async function (name, type) {
         try {
-          const instance = await RWS.CFG.getInstanceByName('EIO', domain, name)
+          const instance = await RWS.CFG.getInstanceByName(
+            API.CONFIG.DOMAIN.EIO,
+            type,
+            name
+          )
           return instance
         } catch (e) {
           console.error(`Error while getting configuration instance ${name}`)
@@ -354,7 +384,7 @@ if (typeof API.constructedApi === 'undefined') {
        * @returns {object}The cofiguration instace of a signal
        */
       this.getSignalInstance = async function (name) {
-        return this.getConfigInstance(name, 'EIO_SIGNAL')
+        return this.getConfigInstance(name, API.CONFIG.TYPE.SIGNAL)
       }
 
       /**
@@ -363,7 +393,7 @@ if (typeof API.constructedApi === 'undefined') {
        * @returns {object}The cofiguration instace of a cross-connection
        */
       this.getCrossConnectionInstance = async function (name) {
-        return this.getConfigInstance(name, 'EIO_CROSS')
+        return this.getConfigInstance(name, API.CONFIG.TYPE.CROSS)
       }
 
       /**
@@ -409,13 +439,25 @@ if (typeof API.constructedApi === 'undefined') {
       /**
        * Create signal configuraiton instance with attributes
        */
-      this.createConfigInstance = async function (name) {
-        console.log(`Creating configuration instanceof signal ${name}...`)
+      this.createConfigInstance = async function (name, type) {
+        console.log(
+          `Creating configuration instance of ${name} in type ${type}...`
+        )
         try {
-          await RWS.CFG.createInstance('EIO', 'EIO_SIGNAL', name)
+          await RWS.CFG.createInstance(API.CONFIG.DOMAIN.EIO, type, name)
         } catch (e) {
           console.error(e)
         }
+      }
+
+      this.createSignalInstance = async function (attr) {
+        this.createConfigInstance(attr.Name, API.CONFIG.TYPE.SIGNAL)
+        this.updateSignalAttributes(attr)
+      }
+
+      this.createCrossConnectionInstance = async function (attr) {
+        this.createConfigInstance(attr.Name, API.CONFIG.TYPE.CROSS)
+        this.updateCrossConnectionAttributes(attr)
       }
 
       /**
@@ -424,11 +466,11 @@ if (typeof API.constructedApi === 'undefined') {
        * @param {*} attr
        */
 
-      this.updateAttributes = async function (attr) {
+      this.updateInstanceAttributes = async function (attr, type) {
         try {
           await RWS.CFG.updateAttributesByName(
-            'EIO',
-            'EIO_SIGNAL',
+            API.CONFIG.DOMAIN.EIO,
+            type,
             attr.Name,
             attr
           )
@@ -437,20 +479,54 @@ if (typeof API.constructedApi === 'undefined') {
         }
       }
 
+      this.updateSignalAttributes = async function (attr) {
+        this.updateInstanceAttributes(attr, API.CONFIG.TYPE.SIGNAL)
+      }
+
+      this.updateCrossConnectionAttributes = async function (attr) {
+        this.updateInstanceAttributes(attr, API.CONFIG.TYPE.CROSS)
+      }
+
       this.fetchAllCrossConnections = async function () {
         try {
-          const crossConnections = await RWS.CFG.getInstances(
-            'EIO',
-            'EIO_CROSS'
+          const crossConnections = this.fetchAllInstancesFromType(
+            API.CONFIG.TYPE.CROSS
           )
+          this.crossConnections.length = 0
           for (let cc of crossConnections) {
-            // console.log(cc.getAttributes());
             this.crossConnections.push(cc)
           }
           return this.crossConnections
         } catch (err) {
           console.error(err)
           throw err
+        }
+      }
+
+      this.fetchAllSignals = async function () {
+        try {
+          const signals = this.fetchAllInstancesFromType(API.CONFIG.TYPE.SIGNAL)
+          this.signals.length = 0
+          for (let signal of signals) {
+            this.signals.push(signal)
+          }
+          return this.crossConnections
+        } catch (err) {
+          console.error(err)
+          throw err
+        }
+      }
+
+      this.fetchAllInstancesFromType = async function (typle) {
+        try {
+          const instances = await RWS.CFG.getInstances(
+            API.CONFIG.DOMAIN.EIO,
+            type
+          )
+          return instances
+        } catch (err) {
+          console.error(err)
+          return undefined
         }
       }
     })()
@@ -568,7 +644,6 @@ if (typeof API.constructedApi === 'undefined') {
           const variable = await RWS.Rapid.getData(task, module, name)
 
           const p = await variable.getProperties()
-          // console.log(p);
           const v = new Variable(variable, p)
 
           if (id) {
@@ -619,6 +694,35 @@ if (typeof API.constructedApi === 'undefined') {
             return RWS.Network.post(
               `/rw/rapid/tasks/${taskName}/loadmod`,
               'modulepath=' + path + '&replace=' + isReplace
+            )
+          })
+          .catch((err) => {
+            if (hasMastership === true) {
+              error = err
+              return Promise.resolve()
+            }
+
+            return console.error('Failed to get Mastership.', err)
+          })
+          .then(() => this.releaseMastership())
+          .then(() => {
+            if (error !== null)
+              return console.error('Failed to set value.', error)
+            return Promise.resolve()
+          })
+      }
+
+      this.unloadModule = function (moduleName, taskName = 'T_ROB1') {
+        let hasMastership = false
+        let error = null
+
+        return this.requestMastership()
+          .then(() => {
+            hasMastership = true
+
+            return RWS.Network.post(
+              `/rw/rapid/tasks/${taskName}/unloadmod`,
+              'module=' + moduleName
             )
           })
           .catch((err) => {

@@ -1,3 +1,6 @@
+const moduleName = 'myModule'
+const modulePath = `HOME/WebApps/EcosystemGuide/rapid/${moduleName}.sysx`
+
 /////////////////
 const inputSignalContainer = new SignalContainer('signal-container-input')
 const outputSignalContainer = new SignalContainer('signal-container-output')
@@ -16,6 +19,84 @@ function configRebootButton() {
   btnReboot.onclick = handlerReboot
   btnReboot.highlight = true
   btnReboot.attachToId('btn-reboot')
+}
+
+function createConfigView() {
+  const loadBtn = new FPComponents.Button_A()
+  const unloadBtn = new FPComponents.Button_A()
+  const getCrossConn = new FPComponents.Button_A()
+  const setCrossConn = new FPComponents.Button_A()
+
+  getCrossConn.attachToId('cross-connection-get')
+  getCrossConn.text = 'Get cross-connections'
+  setCrossConn.attachToId('cross-connection-set')
+  setCrossConn.text = 'Set cross-connections'
+
+  cbOnClickGetCC = async () => {
+    const textArea = document.getElementById('cross-connection-output')
+    textArea.textContent = ''
+    const crossConns = await API.SIGNAL.fetchAllCrossConnections()
+
+    textArea.textContent = crossConns
+      .map((conn) => JSON.stringify(conn.getAttributes()))
+      .join(' \n ')
+  }
+  getCrossConn.onclick = cbOnClickGetCC
+
+  cbOnClickSetCC = async () => {
+    const attrs = {
+      Name: 'newConnection',
+      Res: 'ZG_DI0',
+      Act1: 'ZG_DI1',
+      Act1_invert: 'false',
+      Oper1: 'AND',
+      Act2: 'ZG_DI2',
+      Act2_invert: 'false',
+      // Oper2: '',
+      // Act3: '',
+      // Act3_invert: '',
+      // Oper3: '',
+      // Act4: '',
+      // Act4_invert: 'false',
+      // Oper4: '',
+      // Act5: '',
+      // Act5_invert: 'false',
+    }
+
+    try {
+      await API.SIGNAL.createCrossConnectionInstance(attrs)
+    } catch (e) {
+      console.error(e)
+    }
+  }
+  setCrossConn.onclick = cbOnClickSetCC
+
+  loadBtn.attachToId('load-module')
+  loadBtn.text = 'Load Module'
+  unloadBtn.attachToId('unload-module')
+  unloadBtn.text = 'Unload Module'
+
+  cbOnClickLoad = async () => {
+    try {
+      await API.RAPID.loadModule(modulePath, true)
+    } catch (e) {
+      console.error('Uncaught exception in cbOnClickLoad: ' + JSON.stringify(e))
+      console.error(e)
+    }
+  }
+  loadBtn.onclick = cbOnClickLoad
+
+  cbOnClickUnload = async () => {
+    try {
+      await API.RAPID.unloadModule(moduleName)
+    } catch (e) {
+      console.error(
+        'Uncaught exception in cbOnClickUnload: ' + JSON.stringify(e)
+      )
+      console.error(e)
+    }
+  }
+  unloadBtn.onclick = cbOnClickUnload
 }
 
 // Handler functions
@@ -47,10 +128,6 @@ const handlerChangeSignalValue = async function (name, value) {
 }
 
 const handlerUpdateSignalAttr = async function (attr) {
-  // Search signal api
-  console.log(`handlerUpdateSignalAttr called`)
-  console.log(attr)
-
   const signal = API.SIGNAL.getSignalByName(attr.Name)
   signal.attr = attr
   signal.type === 'DI'
@@ -84,8 +161,7 @@ async function setupConfiguration() {
   window.editSignalView.addHandlerRender(handlerConfigureSignal)
   const devices = await API.DEVICE.fetchEthernetIPDevices()
 
-  const deviceNames = devices.map((item) => item)
-  console.log(deviceNames)
+  const deviceNames = devices.map((item) => item.device)
   window.editSignalView.initDeviceDropdown(deviceNames)
 
   inputSignalContainer.render(API.SIGNAL.getSignalsOfType('DI'))

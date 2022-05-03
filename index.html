@@ -34,12 +34,37 @@
 
     <div id="cfg-view">
       <div class="row">
-        <div class="col-1 infobox">
-          <div><p>Cross-Connections</p></div>
-          <div id="cross-connection-1"></div>
+        <div class="cols-2">
+          <div class="row">
+            <div class="col-1 infobox">
+              <div><p>Cross-Connections</p></div>
+              <div id="cross-connection-get" class="right"></div>
+              <textarea
+                name="cross-connection-output"
+                id="cross-connection-output"
+                cols="60"
+                rows="20"
+              ></textarea>
+              <div id="cross-connection-set" class="right"></div>
+            </div>
+          </div>
+        </div>
+        <div class="cols-2">
+          <div class="row">
+            <div class="col-1 infobox">
+              <div><p>Load Module</p></div>
+              <div class="row">
+                <div class="col-2">
+                  <div id="load-module" class="right"></div>
+                  <div id="unload-module" class="right"></div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
+
     <!-- Grid-System -->
     <div id="io-view" class="container border">
       <div class="row">
@@ -72,7 +97,7 @@
     <div class="overlay hidden"></div>
 
     <div id="about-view">
-      <p>ABB Ecosystem Guidelines V1.0.15</p>
+      <p>ABB Ecosystem Guidelines V1.0.16</p>
     </div>
   </body>
 
@@ -82,9 +107,6 @@
   <script defer src="views/editSignalView.js"></script>
   <script defer src="views/signalView.js"></script>
 
-  <script defer src="sampleCode.js"></script>
-  <script defer src="configIOs.js"></script>
-  <!-- <script defer src="model.js"></script> -->
   <script defer src="controller.js"></script>
   <script defer src="app.js"></script>
 </html>

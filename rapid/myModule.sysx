@@ -1,0 +1,7 @@
+MODULE myModule(SYSMODULE)
+    TASK PERS num my_Number := 10;
+    
+    PROC my_Proc()
+        TPWrite "My module procedure called...";
+    ENDPROC
+ENDMODULE

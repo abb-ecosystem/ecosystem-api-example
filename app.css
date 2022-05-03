@@ -12,12 +12,12 @@ body {
 }
 
 .row::after {
-  content: "";
+  content: '';
   clear: both;
   display: block;
 }
 
-[class*="cols-"] {
+[class*='cols-'] {
   float: left;
   min-height: 1px;
   padding: 0.2rem;
@@ -107,6 +107,13 @@ p {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
+}
+
+.right {
+  padding: 5px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
 
 .warning {
