@@ -26,11 +26,18 @@ function createConfigView() {
   const unloadBtn = new FPComponents.Button_A()
   const getCrossConn = new FPComponents.Button_A()
   const setCrossConn = new FPComponents.Button_A()
+  const deleteCrossConn = new FPComponents.Button_A()
+  const deleteSignal = new FPComponents.Button_A()
+  const virtualIOName = new FPComponents.Input_A()
+  const virtualIOType = new FPComponents.Dropdown_A()
+  const virtualIOBtn = new FPComponents.Button_A()
 
   getCrossConn.attachToId('cross-connection-get')
   getCrossConn.text = 'Get cross-connections'
   setCrossConn.attachToId('cross-connection-set')
-  setCrossConn.text = 'Set cross-connections'
+  setCrossConn.text = 'Set cross-connection'
+  deleteCrossConn.attachToId('cross-connection-delete')
+  deleteCrossConn.text = 'Remove cross-connection'
 
   cbOnClickGetCC = async () => {
     const textArea = document.getElementById('cross-connection-output')
@@ -71,6 +78,15 @@ function createConfigView() {
   }
   setCrossConn.onclick = cbOnClickSetCC
 
+  cbOnClickDeleteCC = async () => {
+    try {
+      await API.SIGNAL.deleteCrossConnection('newConnection')
+    } catch (e) {
+      console.error(e)
+    }
+  }
+  deleteCrossConn.onclick = cbOnClickDeleteCC
+
   loadBtn.attachToId('load-module')
   loadBtn.text = 'Load Module'
   unloadBtn.attachToId('unload-module')
@@ -97,6 +113,55 @@ function createConfigView() {
     }
   }
   unloadBtn.onclick = cbOnClickUnload
+
+  virtualIOName.text = 'signal_name'
+  virtualIOName.label = 'Virtual signal to be created.'
+  virtualIOName.desc = 'Virtual signal to be created.'
+  virtualIOName.attachToId('virtual-io-name')
+  virtualIOName.regex = /^\S*$/
+
+  virtualIOType.model = {
+    items: ['DI', 'DO', 'GO', 'GI'],
+  }
+  virtualIOType.selected = 0
+  virtualIOType.onselection = (index, obj) => {
+    console.log(index)
+    console.log(obj)
+  }
+  virtualIOType.desc = 'Select signal type'
+  virtualIOType.attachToId('virtual-io-type')
+
+  virtualIOBtn.attachToId('virtual-io-btn')
+  virtualIOBtn.text = 'Create'
+
+  deleteSignal.attachToId('virtual-io-delete')
+  deleteSignal.text = 'Remove'
+
+  cbOnClickDeleteSignal = async () => {
+    try {
+      console.log('cbOnClickDeleteSignal called...')
+      await API.SIGNAL.deleteSignal(virtualIOName.text)
+    } catch (e) {
+      console.error(e)
+    }
+  }
+  deleteSignal.onclick = cbOnClickDeleteSignal
+
+  cbOnClickVirtualIO = async () => {
+    try {
+      console.log('cbOnClickVirtualIO called...')
+      console.log(virtualIOName.text)
+      let attr = {}
+      attr.SignalType = virtualIOType.model.items[virtualIOType.selected]
+      await API.SIGNAL.createSignal(virtualIOName.text, attr)
+    } catch (e) {
+      console.error(
+        'Uncaught exception in cbOnClickVirtualIO: ' + JSON.stringify(e)
+      )
+      console.error(e)
+    }
+  }
+  virtualIOBtn.onclick = cbOnClickVirtualIO
 }
 
 // Handler functions
@@ -142,26 +207,45 @@ const handlerUpdateSignalAttr = async function (attr) {
 }
 
 async function setupConfiguration() {
-  // await model.init()
+  const devices = await API.DEVICE.fetchEthernetIPDevices()
+  const deviceNames = devices.map((item) => item.device)
 
-  // Digital inputs
-  await API.SIGNAL.createSignal('di_is_gripper_opened')
-  await API.SIGNAL.createSignal('di_is_gripper_closed')
-  await API.SIGNAL.createSignal('di_machine_job_end')
-  await API.SIGNAL.createSignal('di_part_clamped')
-  await API.SIGNAL.createSignal('di_profile_free_machine')
+  for (var i = 0; i < deviceNames.length; i++) {
+    const filter = {
+      device: deviceNames[i],
+    }
+    let signals = await API.SIGNAL.searchSignals(filter)
+    for (var j = 0; j < signals.length; j++) {
+      console.log(signals[j].getName())
+      await API.SIGNAL.createSignal(signals[j].getName())
+    }
+  }
 
-  // Digital outputs
-  await API.SIGNAL.createSignal('do_gripper_close')
-  await API.SIGNAL.createSignal('do_gripper_open')
-  await API.SIGNAL.createSignal('do_part_gripped')
-  await API.SIGNAL.createSignal('do_part_in_clamping_pos')
-  await API.SIGNAL.createSignal('do_profile_free_robot')
+  // Add also virtual signals
+  const filter = {
+    device: '',
+  }
+  let signals = await API.SIGNAL.searchSignals(filter)
+  for (var j = 0; j < signals.length; j++) {
+    console.log(signals[j].getName())
+    await API.SIGNAL.createSignal(signals[j].getName())
+  }
+
+  // // Digital inputs
+  // await API.SIGNAL.createSignal('di_is_gripper_opened')
+  // await API.SIGNAL.createSignal('di_is_gripper_closed')
+  // await API.SIGNAL.createSignal('di_machine_job_end')
+  // await API.SIGNAL.createSignal('di_part_clamped')
+  // await API.SIGNAL.createSignal('di_profile_free_machine')
+
+  // // Digital outputs
+  // await API.SIGNAL.createSignal('do_gripper_close')
+  // await API.SIGNAL.createSignal('do_gripper_open')
+  // await API.SIGNAL.createSignal('do_part_gripped')
+  // await API.SIGNAL.createSignal('do_part_in_clamping_pos')
+  // await API.SIGNAL.createSignal('do_profile_free_robot')
 
   window.editSignalView.addHandlerRender(handlerConfigureSignal)
-  const devices = await API.DEVICE.fetchEthernetIPDevices()
-
-  const deviceNames = devices.map((item) => item.device)
   window.editSignalView.initDeviceDropdown(deviceNames)
 
   inputSignalContainer.render(API.SIGNAL.getSignalsOfType('DI'))

@@ -11,6 +11,17 @@ body {
   margin-right: auto;
 }
 
+.container-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+}
+
+.item {
+  align-self: auto;
+  padding: 5px;
+}
+
 .row::after {
   content: '';
   clear: both;

@@ -99,14 +99,9 @@ SignalView.prototype.updateIndicator = function (value) {
 
 SignalView.prototype.updateAttributes = function (attr) {
   this._device &&
-    (this._device.textContent = `${attr.Device}: ${
+    (this._device.textContent = `${attr.Device ? attr.Device : ''}: ${
       attr.DeviceMap ? attr.DeviceMap : ''
     }`)
-  // this._map && (this._map.textContent = attr.DeviceMap);
-
-  // this._msg = this._parentElement
-  //   .querySelector(`#${this.id}`)
-  //   .querySelector(".message");
 
   if (
     this._btnEdit.dataset.device !== attr.Device ||

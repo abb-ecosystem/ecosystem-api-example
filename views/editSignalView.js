@@ -1,3 +1,5 @@
+const VIRTUAL_SIGNAL = 'Virtual Signal'
+
 const EditSignalView = function () {
   View.call(this)
 
@@ -51,7 +53,7 @@ EditSignalView.prototype._addHandlerHideWindow = function () {
 }
 
 EditSignalView.prototype.initDeviceDropdown = function (devices) {
-  this._modalDeviceDropDown.model = { items: devices }
+  this._modalDeviceDropDown.model = { items: [...devices, VIRTUAL_SIGNAL] }
 }
 
 EditSignalView.prototype.addHandlerRender = function (update) {
@@ -60,14 +62,25 @@ EditSignalView.prototype.addHandlerRender = function (update) {
     const attr = {
       Name: this._data.name,
       SignalType: this._data.type,
-      Device:
-        this._modalDeviceDropDown.model.items[
-          this._modalDeviceDropDown.selected
-        ],
+      // Device:
+      //   this._modalDeviceDropDown.model.items[
+      //     this._modalDeviceDropDown.selected
+      //   ],
       DeviceMap: this._modalMapInput.text,
     }
 
+    const selection =
+      this._modalDeviceDropDown.model.items[this._modalDeviceDropDown.selected]
+    if (selection !== VIRTUAL_SIGNAL) {
+      console.log('selection !== virtual signal')
+      attr.Device = selection
+    } else {
+      console.log('selection === virtual signal')
+      attr.Device = ''
+    }
+
     console.log('👍', JSON.stringify(attr))
+    console.log(attr)
     const response = update(attr)
 
     if (!response) return
@@ -87,11 +100,21 @@ EditSignalView.prototype.addHandlerRender = function (update) {
     const attr = {
       Name: this._data.name,
       SignalType: this._data.type,
-      Device:
-        this._modalDeviceDropDown.model.items[
-          this._modalDeviceDropDown.selected
-        ],
+      // Device:
+      //   this._modalDeviceDropDown.model.items[
+      //     this._modalDeviceDropDown.selected
+      //   ],
       DeviceMap: text,
+    }
+
+    const selection =
+      this._modalDeviceDropDown.model.items[this._modalDeviceDropDown.selected]
+    if (selection !== VIRTUAL_SIGNAL) {
+      console.log('selection !== virtual signal')
+      attr.Device = selection
+    } else {
+      console.log('selection === virtual signal')
+      attr.Device = ''
     }
 
     const response = update(attr)
@@ -157,12 +180,15 @@ EditSignalView.prototype.addHandlerUpdate = function (handler) {
       this._parentElement.querySelector('.modal-signal-name').textContent
     attr.SignalType =
       this._parentElement.querySelector('.modal-signal-type').textContent
-    attr.Device =
+    const selection =
       this._modalDeviceDropDown.model.items[this._modalDeviceDropDown.selected]
-    attr.DeviceMap = this._modalMapInput.text
-
-    console.log('💢')
-    console.log(attr)
+    // attr.Device = selection === VIRTUAL_SIGNAL ? '' : selection
+    if (selection !== VIRTUAL_SIGNAL) {
+      attr.Device = selection
+      attr.DeviceMap = this._modalMapInput.text
+    } else {
+      attr.Device = ''
+    }
     handler(attr)
     this.toggleWindow()
   }

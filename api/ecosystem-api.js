@@ -4,7 +4,7 @@ var API = API || {}
 if (typeof API.constructedApi === 'undefined') {
   ;(function (es) {
     // VERSION INFO
-    es.ECOSYSTEM_LIB_VERSION = '0.1'
+    es.ECOSYSTEM_LIB_VERSION = '0.02'
 
     /**
      * Initializes the ES object
@@ -123,7 +123,7 @@ if (typeof API.constructedApi === 'undefined') {
      */
     es.SIGNAL = new (function () {
       this.signals = []
-      this.crossConnections = []
+      this.crossConns = []
 
       this.getSignalByName = (name) => {
         return this.signals.find((signal) => signal.name === name)
@@ -233,14 +233,30 @@ if (typeof API.constructedApi === 'undefined') {
         }
 
         set attr(a) {
+          console.log('calling Signal setter attr...')
           const f = function (key) {
             this._attr[key] = a[key]
           }
           Object.keys(a).forEach(f.bind(this))
 
           API.SIGNAL.updateSignalAttributes(a)
+          // this.config = API.SIGNAL.getSignalInstance(a.Name)
           this.modified = true
         }
+
+        // set attr(a) {
+        //   const f = function (key) {
+        //     this._attr[key] = a[key]
+        //   }
+        //   Object.keys(a).forEach(f.bind(this))
+
+        //   this.modified = true
+
+        //   return async () => {
+        //     await API.SIGNAL.updateSignalAttributes(a)
+        //     this.config = await API.SIGNAL.getSignalInstance(a.Name)
+        //   }
+        // }
 
         /**
          * Subscribe to the signal and set the callback function
@@ -303,15 +319,13 @@ if (typeof API.constructedApi === 'undefined') {
         // Check if signal is already available
         signal = await this.getSignal(attr.Name)
         if (signal) {
-          // console.log(`Signal ${attr.Name} exist already... `);
+          console.log(`Signal ${attr.Name} exist already... `)
         }
 
         // Check if signal is configured
         config = await this.getSignalInstance(attr.Name)
         if (config) {
-          console.log(
-            `Signal ${attr.Name} found in configuration, use API.SIGNAL.updateSignalAttributes to change attributes`
-          )
+          console.log(`Signal ${attr.Name} found in configuration... `)
           attr = await config.getAttributes()
         } else {
           // Signal instance NOT found, create a config instance
@@ -319,8 +333,11 @@ if (typeof API.constructedApi === 'undefined') {
           config = await this.getSignalInstance(attr.Name)
         }
         const s = new Signal(attr.Name, signal, config, attr)
-        s.subscribe()
-        this.signals.push(s)
+
+        if (signal) {
+          s.subscribe()
+          this.signals.push(s)
+        }
         return s
       }
 
@@ -342,6 +359,22 @@ if (typeof API.constructedApi === 'undefined') {
         const s = new Signal(name, signal, config, attr)
         this.signals.push(s)
         return s
+      }
+
+      this.searchSignals = async function (filter = {}) {
+        try {
+          var signals = await RWS.IO.searchSignals(filter)
+          if (signals.length > 0) {
+            for (let i = 0; i < signals.length; i++) {
+              var testValue = await signals[i].getValue()
+              // console.log(`${signals[i].getName()} = ${testValue}`)
+            }
+          }
+          return signals
+        } catch (e) {
+          console.error(e)
+          return null
+        }
       }
 
       /**
@@ -373,7 +406,9 @@ if (typeof API.constructedApi === 'undefined') {
           )
           return instance
         } catch (e) {
-          console.error(`Error while getting configuration instance ${name}`)
+          console.log(
+            `Configuration instance ${name} not found in current configuration...`
+          )
           return null
         }
       }
@@ -441,7 +476,7 @@ if (typeof API.constructedApi === 'undefined') {
        */
       this.createConfigInstance = async function (name, type) {
         console.log(
-          `Creating configuration instance of ${name} in type ${type}...`
+          `Creating configuration instance ${name} of type ${type}...`
         )
         try {
           await RWS.CFG.createInstance(API.CONFIG.DOMAIN.EIO, type, name)
@@ -480,23 +515,41 @@ if (typeof API.constructedApi === 'undefined') {
       }
 
       this.updateSignalAttributes = async function (attr) {
-        this.updateInstanceAttributes(attr, API.CONFIG.TYPE.SIGNAL)
+        console.log('calling SIGNAL.updateSignalAttributes')
+        console.log(attr)
+        if (!attr.SignalType) {
+          console.log('Signal type was not defined, DI will be used')
+          attr.SignalType = 'DI'
+        }
+        if (attr.Device === '') {
+          console.log('Device is a empty string...')
+          delete attr.Device
+          await API.SIGNAL.deleteSignal(attr.Name)
+          await API.SIGNAL.createConfigInstance(
+            attr.Name,
+            API.CONFIG.TYPE.SIGNAL
+          )
+        }
+
+        await this.updateInstanceAttributes(attr, API.CONFIG.TYPE.SIGNAL)
       }
 
       this.updateCrossConnectionAttributes = async function (attr) {
-        this.updateInstanceAttributes(attr, API.CONFIG.TYPE.CROSS)
+        await this.updateInstanceAttributes(attr, API.CONFIG.TYPE.CROSS)
       }
 
       this.fetchAllCrossConnections = async function () {
         try {
-          const crossConnections = this.fetchAllInstancesFromType(
+          const crossConnections = await this.fetchAllInstancesFromType(
             API.CONFIG.TYPE.CROSS
           )
-          this.crossConnections.length = 0
-          for (let cc of crossConnections) {
-            this.crossConnections.push(cc)
-          }
-          return this.crossConnections
+          if (!crossConnection) return
+          this.crossConns.length = 0
+          // for (let cc of crossConnections) {
+          //   this.crossConns.push(cc)
+          // }
+          this.crossConns.push(...crossConnections)
+          return this.crossConns
         } catch (err) {
           console.error(err)
           throw err
@@ -505,19 +558,21 @@ if (typeof API.constructedApi === 'undefined') {
 
       this.fetchAllSignals = async function () {
         try {
-          const signals = this.fetchAllInstancesFromType(API.CONFIG.TYPE.SIGNAL)
+          const signals = await this.fetchAllInstancesFromType(
+            API.CONFIG.TYPE.SIGNAL
+          )
           this.signals.length = 0
           for (let signal of signals) {
             this.signals.push(signal)
           }
-          return this.crossConnections
+          return this.signals
         } catch (err) {
           console.error(err)
           throw err
         }
       }
 
-      this.fetchAllInstancesFromType = async function (typle) {
+      this.fetchAllInstancesFromType = async function (type) {
         try {
           const instances = await RWS.CFG.getInstances(
             API.CONFIG.DOMAIN.EIO,
@@ -528,6 +583,31 @@ if (typeof API.constructedApi === 'undefined') {
           console.error(err)
           return undefined
         }
+      }
+
+      this.deleteConfigInstance = async function (name, type) {
+        try {
+          await API.RWS_EXTRA.deleteConfigInstance(
+            name,
+            type,
+            API.CONFIG.DOMAIN.EIO
+          )
+        } catch (e) {
+          console.error(`Error while deleting configuration instance ${name}`)
+          return null
+        }
+      }
+
+      // ToDo: remove from this.crossConns
+      // ToDo: handle reject
+      this.deleteCrossConnection = async function (name) {
+        return await this.deleteConfigInstance(name, API.CONFIG.TYPE.CROSS)
+      }
+
+      // ToDo: remove from this.signals
+      // ToDo: handle reject
+      this.deleteSignal = async function (name) {
+        return await this.deleteConfigInstance(name, API.CONFIG.TYPE.SIGNAL)
       }
     })()
 
@@ -661,6 +741,103 @@ if (typeof API.constructedApi === 'undefined') {
         }
       }
 
+      // this.requestMastership = function () {
+      //   return RWS.Mastership.request()
+      //     .then(() => Promise.resolve())
+      //     .catch((err) =>
+      //       Promise.reject(console.log('Could not get Mastership.', err))
+      //     )
+      // }
+
+      // // Releases the Mastership, if it fails it should log the error and hide the rejection.
+      // this.releaseMastership = function () {
+      //   return RWS.Mastership.release()
+      //     .then(() => Promise.resolve())
+      //     .catch((err) => {
+      //       RWS.writeDebug(`Could not release Mastership. >>> ${err.message}`)
+      //       return Promise.resolve()
+      //     })
+      // }
+
+      // this.loadModule = function (
+      //   path,
+      //   isReplace = false,
+      //   taskName = 'T_ROB1'
+      // ) {
+      //   let hasMastership = false
+      //   let error = null
+
+      //   return this.requestMastership()
+      //     .then(() => {
+      //       hasMastership = true
+
+      //       return RWS.Network.post(
+      //         `/rw/rapid/tasks/${taskName}/loadmod`,
+      //         'modulepath=' + path + '&replace=' + isReplace
+      //       )
+      //     })
+      //     .catch((err) => {
+      //       if (hasMastership === true) {
+      //         error = err
+      //         return Promise.resolve()
+      //       }
+
+      //       return console.error('Failed to get Mastership.', err)
+      //     })
+      //     .then(() => this.releaseMastership())
+      //     .then(() => {
+      //       if (error !== null)
+      //         return console.error('Failed to set value.', error)
+      //       return Promise.resolve()
+      //     })
+      // }
+
+      // this.unloadModule = function (moduleName, taskName = 'T_ROB1') {
+      //   let hasMastership = false
+      //   let error = null
+
+      //   return this.requestMastership()
+      //     .then(() => {
+      //       hasMastership = true
+
+      //       return RWS.Network.post(
+      //         `/rw/rapid/tasks/${taskName}/unloadmod`,
+      //         'module=' + moduleName
+      //       )
+      //     })
+      //     .catch((err) => {
+      //       if (hasMastership === true) {
+      //         error = err
+      //         return Promise.resolve()
+      //       }
+
+      //       return console.error('Failed to get Mastership.', err)
+      //     })
+      //     .then(() => this.releaseMastership())
+      //     .then(() => {
+      //       if (error !== null)
+      //         return console.error('Failed to set value.', error)
+      //       return Promise.resolve()
+      //     })
+      // }
+
+      this.loadModule = function (
+        path,
+        isReplace = false,
+        taskName = 'T_ROB1'
+      ) {
+        API.RWS_EXTRA.loadModule.apply(null, arguments)
+      }
+
+      this.unloadModule = function (moduleName, taskName = 'T_ROB1') {
+        API.RWS_EXTRA.unloadModule.apply(null, arguments)
+      }
+    })()
+
+    /**
+     * Extension of RWS not yet available at the omnicore.rws SDK
+     */
+    es.RWS_EXTRA = new (function () {
       this.requestMastership = function () {
         return RWS.Mastership.request()
           .then(() => Promise.resolve())
@@ -679,11 +856,7 @@ if (typeof API.constructedApi === 'undefined') {
           })
       }
 
-      this.loadModule = function (
-        path,
-        isReplace = false,
-        taskName = 'T_ROB1'
-      ) {
+      this.requestMastershipAround = function (func, args) {
         let hasMastership = false
         let error = null
 
@@ -691,10 +864,8 @@ if (typeof API.constructedApi === 'undefined') {
           .then(() => {
             hasMastership = true
 
-            return RWS.Network.post(
-              `/rw/rapid/tasks/${taskName}/loadmod`,
-              'modulepath=' + path + '&replace=' + isReplace
-            )
+            func.apply(this, args)
+            // func()
           })
           .catch((err) => {
             if (hasMastership === true) {
@@ -712,33 +883,37 @@ if (typeof API.constructedApi === 'undefined') {
           })
       }
 
+      this.loadModule = function (
+        path,
+        isReplace = false,
+        taskName = 'T_ROB1'
+      ) {
+        const cb = function () {
+          return RWS.Network.post(
+            `/rw/rapid/tasks/${taskName}/loadmod`,
+            'modulepath=' + path + '&replace=' + isReplace
+          )
+        }
+        return API.RWS_EXTRA.requestMastershipAround(cb)
+      }
+
       this.unloadModule = function (moduleName, taskName = 'T_ROB1') {
-        let hasMastership = false
-        let error = null
+        const cb = function () {
+          return RWS.Network.post(
+            `/rw/rapid/tasks/${taskName}/unloadmod`,
+            'module=' + moduleName
+          )
+        }
+        return API.RWS_EXTRA.requestMastershipAround(cb)
+      }
 
-        return this.requestMastership()
-          .then(() => {
-            hasMastership = true
-
-            return RWS.Network.post(
-              `/rw/rapid/tasks/${taskName}/unloadmod`,
-              'module=' + moduleName
-            )
-          })
-          .catch((err) => {
-            if (hasMastership === true) {
-              error = err
-              return Promise.resolve()
-            }
-
-            return console.error('Failed to get Mastership.', err)
-          })
-          .then(() => this.releaseMastership())
-          .then(() => {
-            if (error !== null)
-              return console.error('Failed to set value.', error)
-            return Promise.resolve()
-          })
+      this.deleteConfigInstance = function (name, type, domain) {
+        const cb = function () {
+          return RWS.Network.delete(
+            `/rw/cfg/${domain}/${type}/instances/${name}`
+          )
+        }
+        return API.RWS_EXTRA.requestMastershipAround(cb)
       }
     })()
 
