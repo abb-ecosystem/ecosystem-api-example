@@ -10,7 +10,7 @@ git clone https://github.com/rcastilloc/ecosystem-api-example.git
 Alternativelly download the repository ZIP file and unpack it inside the folder. </br>
 Direct access to the HOME directory can be achive by right clicking at the HOME folder under Controller View and selecting "Open folder".
 
-Open the FlexPendant under Controller View and you will find the new installed "Ecosystem-Guide" webapp..
+Open the FlexPendant under Controller View and you will find the new installed "Ecosystem-Guide" webapp.
 
 <h3>Disclaimer</h3>
 The code from this repo is not an official ABB Product and not inteded for production enviroment. It is just for educational purposes.
