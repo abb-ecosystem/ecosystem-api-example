@@ -1,5 +1,5 @@
 <h1>Ecosystem-API-Example</h1>
-WebApp example for usage of an Ecosystem-API for accessing the Omnicore App SDK and additional RWS for the ABB Omnicore controllers
+WebApp example for usage of an Ecosystem-API for accessing the Omnicore App SDK and additional RWS for the ABB Omnicore controllers.
 
 For its installation in a virtual controller in Robot Studio create the following directory "HOME/WebApps/" at the virtual controller and add the content of this repository by usign the follwing git command:
 
