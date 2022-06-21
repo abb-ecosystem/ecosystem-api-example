@@ -1,3 +1,4 @@
+[![Board Status](https://dev.azure.com/ABB-RA-CobotTeam/1e2d7109-52d1-4f05-a610-22f331f9319d/8dce21c4-82b3-40a8-83be-ac519c037fbd/_apis/work/boardbadge/ca4cd861-3070-4db3-96c0-34f0d27fec27)](https://dev.azure.com/ABB-RA-CobotTeam/1e2d7109-52d1-4f05-a610-22f331f9319d/_boards/board/t/8dce21c4-82b3-40a8-83be-ac519c037fbd/Microsoft.RequirementCategory)
 <h1>Ecosystem-API-Example</h1>
 WebApp example for usage of an Ecosystem-API for accessing the Omnicore App SDK and additional RWS for the ABB Omnicore controllers
 
