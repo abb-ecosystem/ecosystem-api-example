@@ -1,0 +1,10 @@
+MODULE Ecosystem_BASE(SYSMODULE)
+
+    PERS num ec_Number := 10;
+    PERS robtarget esTarget01:=[[0,0,0],[1,0,0,0],[0,0,0,0],[9E9,9E9,9E9,9E9,9E9,9E9]];
+    PERS robtarget esTarget02:=[[0,0,0],[1,0,0,0],[0,0,0,0],[9E9,9E9,9E9,9E9,9E9,9E9]];
+
+    PROC es_Procedure()
+        TPWrite "Ecosystem module procedure called...";
+    ENDPROC
+ENDMODULE

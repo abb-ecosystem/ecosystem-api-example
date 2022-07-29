@@ -100,7 +100,7 @@ body {
 
 /* === Styling === */
 p {
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .btn {
@@ -210,4 +210,32 @@ p {
   background-color: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(3px);
   z-index: 5;
+}
+
+.location {
+  display: flex;
+  flex-direction: column;
+  height: 100px;
+  width: 400px;
+  justify-content: space-around;
+  align-items: flex-start;
+  padding-left: 20px;
+}
+
+.location-row {
+  flex-direction: row;
+  height: auto;
+  align-items: center;
+  justify-content: flex-start;
+  margin-right: 10px;
+}
+
+.output {
+  font-family: Consolas, monospace;
+  font-size: 16px;
+  font-weight: bold;
+  text-align: center;
+  margin-left: 5px;
+  margin-right: 5px;
+  padding: 10px;
 }
