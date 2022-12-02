@@ -1,68 +1,36 @@
-requirejs.config({
-  baseUrl: '',
-  paths: {
-    views: 'views',
-  },
-})
+/**
+ * Start loading the app file. Put all of
+ * your application logic in there.
+ */
 
-// Start loading the app file. Put all of
-// your application logic in there.
-requirejs(['app'], function (App) {
-  ;(async function () {
-    // RWS.setDebug(1, 0)
-    fpComponentsEnableLog()
+/**
+ * When using RequireJS, the script is loaded asynchronously.
+ * In many cases, this means that the load event will happen before
+ * the script runs, therefore when using  window.addEventListener('load',...
+ * the code may be listening for an event that has already happened.
+ */
+window.addEventListener('load', async function () {
+  // RWS.setDebug(1, 0)
+  fpComponentsEnableLog();
 
-    const locale = await API.CONTROLLER.getLanguage()
-    console.log(`Current language: ${locale}`)
+  API.setVerbose(true);
+  const locale = await API.CONTROLLER.getLanguage();
+  console.log(`Current language: ${locale}`);
 
-    // let state = await API.RWS.getMastershipState('edit')
-    // console.log(state)
+  let monitor = API.RAPID.monitorExecutionState((value) => {
+    console.log(`monitorExecutionState : ${value}`);
+  });
+  API.CONTROLLER.monitorOperationMode((value) => {
+    console.log(`monitorOperationMode : ${value}`);
+  });
+  API.CONTROLLER.monitorControllerState((value) => {
+    console.log(`monitorControllerState : ${value}`);
+  });
 
-    // const task = await API.RAPID.getTask()
+  document.querySelector('#about-api').textContent = API.ECOSYSTEM_LIB_VERSION;
+  document.querySelector('#about-tcomponents').textContent = T_COMPONENTS_BASE_VERSION;
+  document.querySelector('#about-tcomponents-example').textContent = T_COMPONENTS_EXAMPLE_VERSION;
 
-    // task.executeProcedure('myProc', true)
-
-    // let myTarget = await task.getVariable('Example', 'myTarget')
-    // console.log(JSON.stringify(myTarget))
-    // let myTarget02 = await task.getVariable('Example', 'myTarget02')
-    // console.log(JSON.stringify(myTarget02))
-
-    // let robTarget = await API.RWS.MOTIONSYSTEM.getRobTarget()
-    // let robTarget = await API.MOTION.getRobotPosition()
-    // console.log(`robTarget:`)
-    // console.log(JSON.stringify(robTarget))
-
-    // const jogData = [500, 500, 500, 500, 500, 500]
-    // // const jogData = [1000, 1000, 1000, 1000, 1000, 1000]
-    // // const jogData = [50, 50, 50, 50, 50, 50]
-
-    // await API.MOTION.executeJogging(
-    //   '',
-    //   '',
-    //   '',
-    //   API.MOTION.JOGMODE.GoToPos,
-    //   jogData,
-    //   myTarget
-    // )
-
-    // await API.MOTION.executeJogging(
-    //   '',
-    //   '',
-    //   '',
-    //   API.MOTION.JOGMODE.GoToPos,
-    //   jogData,
-    //   myTarget02
-    // )
-
-    // await API.RWS.releaseMastership('motion')
-
-    // robTarget = await API.RWS.MOTIONSYSTEM.getRobTarget()
-    // console.log(`robTarget:`)
-    // console.log(JSON.stringify(robTarget))
-
-    // state = await API.RWS.getMastershipState('motion')
-    // console.log(`Motion Mastership: ${state}`)
-
-    const app = new App(document.getElementById('app'))
-  })()
-})
+  const app = new App();
+  // const app = new Test(document.getElementById('test'));
+});

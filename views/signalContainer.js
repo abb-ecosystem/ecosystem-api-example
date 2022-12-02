@@ -1,77 +1,95 @@
-define(['views/signal'], function (Signal) {
-  return class SignalContainer {
-    constructor(container, signals) {
-      this.container = container
-      this._parentElement = container
-      this._errorMessage = 'No signals found 😆!'
-      this._message = ''
-      this._signalsData = signals
-      this.signalComponents = []
-
-      this.init()
-    }
-
-    init() {
-      this.render()
-    }
-
-    set signals(signals) {
-      signals.forEach((signal, idx) => {
-        this.signalComponents[idx].value = signal
-      })
-    }
-
-    render() {
-      this.container.innerHTML = SignalContainer.markup(this)
-      this._signals = this.container.querySelectorAll('.signal')
-      this._signals.forEach((signal) =>
-        this.signalComponents.push(
-          new Signal(signal, this._signalsData[signal.dataset.index])
-        )
-      )
-    }
-
-    renderSignals() {
-      return this._signalsData
-        .map((signal, index) => {
-          return this.renderSignal(index)
-        })
-        .join('')
-    }
-
-    renderSignal(i) {
-      let signal_markup
-
-      if (this._signals) {
-        const signal = find(
-          this._signals,
-          (signal) => Number(signal.dataset.index) === i
-        )
-        signal_markup = `<div class="signal" data-ref="${signal.dataset.ref}" data-index="${i}"></div>`
-      } else {
-        signal_markup = `
-      <div class="signal" data-index="${i}"></div>
-    `
-      }
-      return signal_markup
-    }
-
-    static markup(signalContainer) {
-      return `
-    <div class="row">
-      <div class="col-1">
-          ${signalContainer.renderSignals()}
-       </div>
-    </div>
-    `
-    }
-
-    updateSignalAttributes(attr) {
-      const signal = this.signalComponents.find((signal) => {
-        let signalName = signal.id.slice(7)
-        return signalName === attr.Name
-      })
-      signal && signal.updateAttributes(attr)
-    }
+class SignalContainer extends TComponents.Component_A {
+  constructor(container, signals) {
+    super(container);
+    this._parentElement = container;
+    this._errorMessage = 'No signals found 😆!';
+    this._message = '';
+    Array.isArray(signals) ? (this._signalsData = signals) : (this._signalsData = [signals]);
+    this.signalComponents = [];
   }
-})
+
+  async onInit() {
+    this._signalsData.forEach(async (s) => {
+      try {
+        if (typeof s === 'string') s = await API.SIGNAL.getSignal(s);
+        else if (!s || (typeof s === 'object' && s.constructor.name !== 'Signal'))
+          throw new Error(
+            'API.SIGNALS.Signal instance or signal name expected but not detected...'
+          );
+      } catch (e) {
+        TComponents.Popup_A.danger('Signal Container', [e.message, e.description]);
+      }
+    });
+  }
+
+  mapComponents() {
+    this._signals = this.all('.tc-signal-data');
+    this._signals.forEach((signal) => {
+      const s = new TComponents.SignalView_A(
+        signal,
+        this._signalsData[signal.dataset.index],
+        true, //hasSwitch
+        true //hasEditButton
+      );
+      this.signalComponents.push(s);
+    });
+    return { signalComponents: this.signalComponents };
+  }
+
+  onRender() {}
+
+  renderSignals() {
+    return this._signalsData
+      .map((signal, index) => {
+        return this.renderSignal(index);
+      })
+      .join('');
+  }
+
+  renderSignal(i) {
+    let signal_markup;
+
+    if (this._signals) {
+      const signal = this._signals.find((signal) => Number(signal.dataset.index) === i);
+      signal_markup = `<div class="tc-signal-data" data-ref="${signal.dataset.ref}" data-index="${i}"></div>`;
+    } else {
+      signal_markup = `
+        <div class="tc-signal-data" data-index="${i}"></div>
+      `;
+    }
+    return signal_markup;
+  }
+
+  markup(self) {
+    return `
+      <div class="tc-row">
+        <div class="tc-col-1">
+            ${self.renderSignals()}
+         </div>
+      </div>
+      `;
+  }
+
+  set signals(signals) {
+    signals.forEach((signal, idx) => {
+      this.child.signalComponents[idx].value = signal;
+    });
+  }
+
+  updateSignalAttributes(attr) {
+    const signal = this.child.signalComponents.find((signalview) => {
+      return signalview.name === attr.Name;
+    });
+    signal && signal.updateAttributes(attr);
+  }
+
+  getEditButtons() {
+    const editButtons = [];
+    if (this.child.signalComponents.length === 0) return editButtons;
+
+    this.child.signalComponents.forEach((signal) => {
+      editButtons.push(signal.getEditButton());
+    });
+    return editButtons;
+  }
+}

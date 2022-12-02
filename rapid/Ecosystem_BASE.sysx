@@ -1,10 +1,50 @@
 MODULE Ecosystem_BASE(SYSMODULE)
 
-    PERS num ec_Number := 10;
-    PERS robtarget esTarget01:=[[0,0,0],[1,0,0,0],[0,0,0,0],[9E9,9E9,9E9,9E9,9E9,9E9]];
-    PERS robtarget esTarget02:=[[0,0,0],[1,0,0,0],[0,0,0,0],[9E9,9E9,9E9,9E9,9E9,9E9]];
+    PERS num esNumber := 10;
+    LOCAL PERS string esString := "I am a string variable";
+    TASK PERS bool esBool:=FALSE;
+    
+    
+    PERS robtarget esTarget01:=[[586.9355,143.4633,501.8817],[0.06600141,-0.009778698,-0.9976442,-0.01594038],[0,0,0,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+    PERS robtarget esTarget02:=[[586.9352,-173.2587,501.8815],[0.06600121,-0.009778861,-0.9976443,-0.01594038],[-1,-1,-1,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+    
+    PERS robtarget esTray01:=[[586.9355,143.4633,501.8817],[0.06600141,-0.009778698,-0.9976442,-0.01594038],[0,0,0,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+    PERS robtarget esTray02:=[[586.9352,-173.2587,501.8815],[0.06600121,-0.009778861,-0.9976443,-0.01594038],[-1,-1,-1,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+    PERS robtarget esTray03:=[[790.082,-85.8152,507.863],[0.0660015,-0.00977893,-0.997644,-0.0159405],[-1,0,-1,0],[9E+9,9E+9,9E+9,9E+9,9E+9,9E+9]];
+    PERS robtarget esTray04:=[[769.414,160.263,501.882],[0.0660014,-0.00977869,-0.997644,-0.0159405],[0,0,0,0],[9E+9,9E+9,9E+9,9E+9,9E+9,9E+9]];
+    
+    PERS robtarget esTrayGrip:=[[586.935,143.463,501.882],[0.0660014,-0.0097787,-0.997644,-0.0159404],[0,0,0,0],[9E+9,9E+9,9E+9,9E+9,9E+9,9E+9]];
+    PERS robtarget esTrayApproach:=[[633.01,143.463,565.772],[0.0660018,-0.00977868,-0.997644,-0.0159404],[0,0,0,0],[9E+9,9E+9,9E+9,9E+9,9E+9,9E+9]];
+    PERS robtarget esTrayExit:=[[562.396,143.463,585.147],[0.0660015,-0.00977873,-0.997644,-0.0159403],[0,0,0,0],[9E+9,9E+9,9E+9,9E+9,9E+9,9E+9]];
+    
+    PERS num esNumParts:= 20;
+    PERS num esNumRows:= 6;
+    PERS num esNumCols:= 10;
+    PERS num esCurrentPart:=3;
+    PERS bool esSim:= TRUE;
 
-    PROC es_Procedure()
-        TPWrite "Ecosystem module procedure called...";
+    VAR pos ecPose:=[100,200,300];
+    VAR jointtarget ecHome:=[[0,0,0,0,45,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+    
+    PROC es_Procedure_01()
+        TPWrite "Ecosystem module procedure 1 called...";
+    ENDPROC
+
+    PROC es_Procedure_02()
+        TPWrite "Ecosystem module procedure 2 called...";
+    ENDPROC
+    
+    PROC es_moveGofa()
+        MoveAbsJ ecHome\NoEOffs,v100,z50,tool0\WObj:=wobj0;
+        MoveL esTarget01,v100,z50,tool0\WObj:=wobj0;
+        MoveL esTarget02,v100,z50,tool0\WObj:=wobj0;
+        MoveAbsJ ecHome\NoEOffs,v100,z50,tool0\WObj:=wobj0;
+    ENDPROC
+    
+    PROC es_testPickStrategy()
+        MoveL esTrayApproach,v100,z50,tool0\WObj:=wobj0;
+        MoveL esTrayGrip,v50,fine,tool0\WObj:=wobj0;
+        WaitTime 1;
+        MoveL esTrayExit,v100,fine,tool0\WObj:=wobj0;
     ENDPROC
 ENDMODULE
