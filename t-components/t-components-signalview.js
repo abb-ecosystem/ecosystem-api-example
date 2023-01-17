@@ -1,4 +1,5 @@
 'use strict';
+// @ts-ignore
 var TComponents = TComponents || {};
 (function (o) {
   if (!o.hasOwnProperty('SignalView_A')) {
@@ -6,7 +7,7 @@ var TComponents = TComponents || {};
      * Instance of a Signal view containing an indicator, signal information (name, type, device, map) and a optional connection to TComponents.SignalEdit_A component for editing the signal.
      * @class TComponents.SignalView_A
      * @extends TComponents.Component_A
-     * @param {HTMLElement} container - DOM element in which this component is to be inserted
+     * @param {HTMLElement} parent - DOM element in which this component is to be inserted
      * @param {string | object} signal - Signal name, or API.CONFIG.SIGNAL.Signal object
      * @param {boolean} hasSwitch - To enable/disable the precense of a swith
      * @param {boolean} hasEditButton - To enable/disable the editing button
@@ -37,8 +38,8 @@ var TComponents = TComponents || {};
      * @see TComponents.SignalEdit_A
      */
     o.SignalView_A = class SignalView extends TComponents.Component_A {
-      constructor(container, signal, hasSwitch = false, hasEditButton = true) {
-        super(container);
+      constructor(parent, signal, hasSwitch = false, hasEditButton = true) {
+        super(parent);
         this._signal = signal;
         this._id = `signal-view-${API.generateUUID()}`;
         this._hasSwitch = hasSwitch;

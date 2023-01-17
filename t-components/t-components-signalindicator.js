@@ -1,19 +1,20 @@
-'use strict';
+// @ts-ignore
 var TComponents = TComponents || {};
 (function (o) {
   if (!o.hasOwnProperty('SignalIndicator_A')) {
     /**
      * @class TComponents.SignalIndicator_A
      * @extends TComponents.Component_A
-     * @param {HTMLElement} container - HTMLElement that is going to be the parent of the component
+     * @param {HTMLElement} parent - HTMLElement that is going to be the parent of the component
      * @param {string} signal
      * @param {string} [label] - label text
      */
     o.SignalIndicator_A = class SignalIndicator extends TComponents.Component_A {
-      constructor(container, signal, label = '') {
-        super(container);
+      constructor(parent, signal, label = '') {
+        super(parent);
         this._signal = signal;
         this._label = label;
+        this._indicator = new FPComponents.Digital_A();
       }
 
       /**
@@ -23,7 +24,6 @@ var TComponents = TComponents || {};
        * @async
        */
       async onInit() {
-        this._indicator = new FPComponents.Digital_A();
         const cbUpdateIndicator = function (value) {
           this._indicator.active = value;
         };
@@ -31,9 +31,9 @@ var TComponents = TComponents || {};
           if (typeof this._signal === 'string')
             this._signal = await API.SIGNAL.getSignal(this._signal);
 
-          this._signal.addCallbackOnChanged(cbUpdateIndicator.bind(this));
+          this._signal.onChanged(cbUpdateIndicator.bind(this));
           this._signal.subscribe();
-          this._indicator.text = this._signal;
+          // this._indicator.text = this._signal;
           this._indicator.active = await this._signal.getValue();
         } catch (e) {
           TComponents.Popup_A.error(e);

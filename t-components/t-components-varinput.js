@@ -1,4 +1,5 @@
 'use strict';
+// @ts-ignore
 var TComponents = TComponents || {};
 (function (o) {
   if (!o.hasOwnProperty('VarInput_A')) {
@@ -6,14 +7,14 @@ var TComponents = TComponents || {};
      * Input field connected to a RAPID variable
      * @class TComponents.VarInput_A
      * @extends TComponents.Component_A
-     * @param {HTMLElement} container - DOM element in which this component is to be inserted
+     * @param {HTMLElement} parent - DOM element in which this component is to be inserted
      * @param {string} [module] - module to seach for variables
      * @param {string} [variable] - Rapid variable to subpscribe to
      * @param {string} [label] - label text
      */
     o.VarInput_A = class VarInput extends TComponents.Component_A {
-      constructor(container, module = '', variable = '', label = '') {
-        super(container);
+      constructor(parent, module = '', variable = '', label = '') {
+        super(parent);
         this._module = module;
         this._variable = variable;
         this.inputField = new FPComponents.Input_A();
@@ -30,21 +31,17 @@ var TComponents = TComponents || {};
         if (this._module && this._variable) {
           try {
             if (!this.task) this.task = await API.RAPID.getTask();
-            this.varElement = await API.RAPID.getVariable(
-              this.task.name,
-              this._module,
-              this._variable
-            );
-            // this.varElement.addCallbackOnChanged(this.cbUpdateInputField.bind(this));
+            this.varElement = await this.task.getVariable(this._module, this._variable);
             this.varElement.onChanged(this.cbUpdateInputField.bind(this));
             this.inputField.text = await this.varElement.getValue();
             this.inputField.onchange = this.cbOnChange.bind(this);
-            if (this.varElement.type === 'num') this.inputField.regex = /^-?[0-9]+(\.[0-9]+)?$/;
+            if (this.varElement.type === 'num' || this.varElement.type === 'dnum')
+              this.inputField.regex = /^-?[0-9]+(\.[0-9]+)?$/;
             if (this.varElement.type === 'bool')
               this.inputField.regex = /^([Tt][Rr][Uu][Ee]|[Ff][Aa][Ll][Ss][Ee])$/;
           } catch (e) {
             console.error(e);
-            TComponents.Popup_A.error(e);
+            TComponents.Popup_A.error(e, 'TComponents.VarInput_A.onInit');
           }
         }
       }
@@ -120,6 +117,15 @@ var TComponents = TComponents || {};
       }
 
       /**
+       * @alias validator
+       * @type {function}
+       * @memberof TComponents.VarInput_A
+       */
+      set validator(func) {
+        this.inputField.validator = func;
+      }
+
+      /**
        * Callback function to update variable when input field state changes
        * @alias cbOnChange
        * @memberof TComponents.VarInput_A
@@ -135,7 +141,7 @@ var TComponents = TComponents || {};
           } else await this.varElement.setValue(value);
         } catch (e) {
           console.error(e);
-          TComponents.Popup_A.danger('varInput.cbOnChange', [e.message, e.description]);
+          TComponents.Popup_A.error(e, 'TComponents.VarInput_A.cbOnChange');
         }
       }
 
@@ -148,7 +154,7 @@ var TComponents = TComponents || {};
        */
       async cbUpdateInputField(value) {
         this.inputField.text = value;
-        this.trigger('change', value);
+        this.trigger('change' + this._compId, value);
       }
 
       /**
@@ -158,7 +164,7 @@ var TComponents = TComponents || {};
        * @param {function} func
        */
       onChange(func) {
-        this.on('change', func);
+        this.on('change' + this._compId, func);
       }
     };
   }

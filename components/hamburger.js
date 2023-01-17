@@ -5,12 +5,12 @@
 class Hamburger extends TComponents.Component_A {
   /**
    * @brief
-   * @param {HTMLElement} container - HTMLElement that is going to be the parent of the component
+   * @param {HTMLElement} parent - HTMLElement that is going to be the parent of the component
    * @param {string} title
    * @param {boolean} alwaysVisible
    */
-  constructor(container, title, alwaysVisible = true) {
-    super(container);
+  constructor(parent, title, alwaysVisible = true) {
+    super(parent);
     this.viewId = new Map();
 
     this.hamburgerMenu = new FPComponents.Hamburgermenu_A();

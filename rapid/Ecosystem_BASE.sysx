@@ -1,12 +1,12 @@
 MODULE Ecosystem_BASE(SYSMODULE)
 
     PERS num esNumber := 10;
-    LOCAL PERS string esString := "I am a string variable";
+    LOCAL PERS string esString := "I am a string";
     TASK PERS bool esBool:=FALSE;
     
     
     PERS robtarget esTarget01:=[[586.9355,143.4633,501.8817],[0.06600141,-0.009778698,-0.9976442,-0.01594038],[0,0,0,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
-    PERS robtarget esTarget02:=[[586.9352,-173.2587,501.8815],[0.06600121,-0.009778861,-0.9976443,-0.01594038],[-1,-1,-1,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+    PERS robtarget esTarget02:=[[597.986,0,804.151],[0.382683,0,0.92388,0],[0,0,0,0],[9E+9,9E+9,9E+9,9E+9,9E+9,9E+9]];
     
     PERS robtarget esTray01:=[[586.9355,143.4633,501.8817],[0.06600141,-0.009778698,-0.9976442,-0.01594038],[0,0,0,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
     PERS robtarget esTray02:=[[586.9352,-173.2587,501.8815],[0.06600121,-0.009778861,-0.9976443,-0.01594038],[-1,-1,-1,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
@@ -18,13 +18,14 @@ MODULE Ecosystem_BASE(SYSMODULE)
     PERS robtarget esTrayExit:=[[562.396,143.463,585.147],[0.0660015,-0.00977873,-0.997644,-0.0159403],[0,0,0,0],[9E+9,9E+9,9E+9,9E+9,9E+9,9E+9]];
     
     PERS num esNumParts:= 20;
-    PERS num esNumRows:= 6;
+    PERS num esNumRows:= 5;
     PERS num esNumCols:= 10;
     PERS num esCurrentPart:=3;
     PERS bool esSim:= TRUE;
 
-    VAR pos ecPose:=[100,200,300];
-    VAR jointtarget ecHome:=[[0,0,0,0,45,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
+    CONST num pi:=3.1416;
+    PERS pos esPose:=[100,200,300];
+    PERS jointtarget esHome:=[[0,0,0,0,45,0],[9E+09,9E+09,9E+09,9E+09,9E+09,9E+09]];
     
     PROC es_Procedure_01()
         TPWrite "Ecosystem module procedure 1 called...";
@@ -35,10 +36,10 @@ MODULE Ecosystem_BASE(SYSMODULE)
     ENDPROC
     
     PROC es_moveGofa()
-        MoveAbsJ ecHome\NoEOffs,v100,z50,tool0\WObj:=wobj0;
+        MoveAbsJ esHome\NoEOffs,v100,z50,tool0\WObj:=wobj0;
         MoveL esTarget01,v100,z50,tool0\WObj:=wobj0;
         MoveL esTarget02,v100,z50,tool0\WObj:=wobj0;
-        MoveAbsJ ecHome\NoEOffs,v100,z50,tool0\WObj:=wobj0;
+        MoveAbsJ esHome\NoEOffs,v100,z50,tool0\WObj:=wobj0;
     ENDPROC
     
     PROC es_testPickStrategy()

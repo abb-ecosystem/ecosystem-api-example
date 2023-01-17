@@ -1,5 +1,4 @@
-'use strict';
-
+// @ts-ignore
 var TComponents = TComponents || {};
 (function (o) {
   if (!o.hasOwnProperty('VarButton_A')) {
@@ -7,7 +6,7 @@ var TComponents = TComponents || {};
      * Creates a button that triggers registered callback functions and pass them the value of a RAPID variable
      * @class TComponents.VarButton_A
      * @extends TComponents.Component_A
-     * @param {HTMLElement} container - DOM element in which this component is to be inserted
+     * @param {HTMLElement} parent - DOM element in which this component is to be inserted
      * @param {string} module - RAPID module containig the variable
      * @param {string} variable - RAPID variable
      * @param {function} [callback] Callback function
@@ -27,7 +26,7 @@ var TComponents = TComponents || {};
      */
     o.VarButton_A = class VarButton extends TComponents.Component_A {
       constructor(
-        container,
+        parent,
         module,
         variable,
         callback = null,
@@ -35,14 +34,15 @@ var TComponents = TComponents || {};
         img = null,
         task = 'T_ROB1'
       ) {
-        super(container, label);
+        super(parent, label);
         this._module = module;
         this._variable = variable;
         this._taskName = task;
-        this.img = img;
-        // this.handler = handler;
         this.callbacks = [];
         if (callback) this.onClick(callback);
+        this._btn = new FPComponents.Button_A();
+        this._btn.text = this._label;
+        if (img !== null) this._btn.icon = img;
       }
 
       /**
@@ -60,9 +60,6 @@ var TComponents = TComponents || {};
             this._variable
           );
         } catch (e) {}
-        this._btn = new FPComponents.Button_A();
-        this._btn.text = this._label;
-        if (this.img !== null) this._btn.icon = this.img;
 
         const cb = async () => {
           for (let i = 0; i < this.callbacks.length; i++) {

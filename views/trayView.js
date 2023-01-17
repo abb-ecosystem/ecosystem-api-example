@@ -1,20 +1,9 @@
-// const imgTray = 'assets/img/tray_w_p1-4.png';
+// const imgTray = 'assets/img/tray_w_p1-4_400x400.png';
 const imgPickStragety = 'assets/img/tray_pick_strategy.png';
 
 class TrayView extends TComponents.Component_A {
-  constructor(
-    container,
-    label,
-    module,
-    tray1,
-    tray2,
-    tray3,
-    tray4,
-    trayGrip,
-    trayApproach,
-    trayExit
-  ) {
-    super(container, label);
+  constructor(parent, label, module, tray1, tray2, tray3, tray4, trayGrip, trayApproach, trayExit) {
+    super(parent, label);
     this._module = module;
     this._tray1 = tray1;
     this._tray2 = tray2;

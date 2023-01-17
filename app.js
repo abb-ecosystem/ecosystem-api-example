@@ -126,6 +126,6 @@ class App {
       const replace = true;
       await API.RAPID.loadModule(url, replace);
     }
-    this.render();
+    await this.render();
   }
 }

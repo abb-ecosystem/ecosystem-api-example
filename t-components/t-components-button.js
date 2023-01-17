@@ -1,4 +1,4 @@
-'use strict';
+// @ts-ignore
 var TComponents = TComponents || {};
 (function (o) {
   if (!o.hasOwnProperty('Button_A')) {
@@ -18,11 +18,12 @@ var TComponents = TComponents || {};
      *        )
      */
     o.Button_A = class Button extends TComponents.Component_A {
-      constructor(container, callback = null, label = '', img = null) {
-        super(container, label);
-        this.img = img;
+      constructor(parent, callback = null, label = '', icon = null) {
+        super(parent, label);
         this.callbacks = [];
         if (callback) this.onClick(callback);
+        this._btn = new FPComponents.Button_A();
+        this._btn.icon = icon;
       }
 
       /**
@@ -32,9 +33,7 @@ var TComponents = TComponents || {};
        * @async
        */
       async onInit() {
-        this._btn = new FPComponents.Button_A();
         this._btn.text = this._label;
-        if (this.img !== null) this._btn.icon = this.img;
 
         const cb = async (value) => {
           for (let i = 0; i < this.callbacks.length; i++) {
@@ -57,23 +56,13 @@ var TComponents = TComponents || {};
        * @private
        */
       onRender() {
-        const btnEl = this.find('.tc-button');
-        this._btn.attachToElement(btnEl);
+        // const btnEl = this.find(".tc-button");
+        // this._btn.attachToElement(btnEl);
+
+        this._btn.attachToElement(this.container);
 
         const btnElem = this.find('.fp-components-button');
         btnElem.style.setProperty('border-radius', '25px');
-      }
-
-      /**
-       * Generates the HTML definition corresponding to the component.
-       * @private
-       * @param {TComponents.Component_A} self - The instance on which this method was called.
-       * @returns {string}
-       */
-      markup({}) {
-        return `
-          <div class="tc-button tc-item"></div>
-          `;
       }
 
       get label() {
@@ -82,6 +71,22 @@ var TComponents = TComponents || {};
 
       set label(text) {
         this._btn.text = text;
+      }
+
+      get highlight() {
+        return this._btn.highlight;
+      }
+
+      set highlight(value) {
+        this._btn.highlight = value;
+      }
+
+      get icon() {
+        return this._btn.icon;
+      }
+
+      set icon(value) {
+        this._btn.icon = value;
       }
 
       /**

@@ -1,4 +1,5 @@
 'use strict';
+// @ts-ignore
 var TComponents = TComponents || {};
 (function (o) {
   if (!o.hasOwnProperty('SignalSwitch_A')) {
@@ -6,14 +7,15 @@ var TComponents = TComponents || {};
      * Creates an instance of a switch connected to a signal
      * @class TComponents.SignalSwitch_A
      * @extends TComponents.Component_A
-     * @param {HTMLElement} container - DOM element in which this component is to be inserted
+     * @param {HTMLElement} parent - DOM element in which this component is to be inserted
      * @param {string | object} signal - Signal name, or API.CONFIG.SIGNAL.Signal object
      * @param {*} label
      */
     o.SignalSwitch_A = class SignalSwitch extends TComponents.Component_A {
-      constructor(container, signal, label = null) {
-        super(container, label);
+      constructor(parent, signal, label = null) {
+        super(parent, label);
         this._signal = signal;
+        this._switch = new FPComponents.Switch_A();
       }
 
       /**
@@ -23,14 +25,11 @@ var TComponents = TComponents || {};
        * @async
        */
       async onInit() {
-        this._switch = new FPComponents.Switch_A();
-
         try {
           if (typeof this._signal === 'string')
             this._signal = await API.SIGNAL.getSignal(this._signal);
-
           this._switch.active = await this._signal.getValue();
-          this._signal.addCallbackOnChanged(this.cbUpdateSwitch.bind(this));
+          this._signal.onChanged(this.cbUpdateSwitch.bind(this));
           this._signal.subscribe();
         } catch (e) {
           console.error(e);

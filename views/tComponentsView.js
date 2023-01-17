@@ -1,6 +1,6 @@
 class TComponentsView extends TComponents.Component_A {
-  constructor(container, name = 'TComponents') {
-    super(container);
+  constructor(parent, name = 'TComponents') {
+    super(parent);
     this._name = name;
     this._module = 'Ecosystem_BASE';
     this._variable = 'esNumber';
@@ -198,11 +198,9 @@ class TComponentsView extends TComponents.Component_A {
     this.child.varInput.onChange((value) => {
       console.log(`varInput called - value ${value}`);
     });
-
     this.child.varInd.onChange((value) => {
       console.log(`varInd called - value ${value}`);
     });
-
     this.child.varIncrDecrInd.onChange((value) => {
       console.log(`varIncrDecrInd called - value ${value}`);
     });
@@ -210,14 +208,8 @@ class TComponentsView extends TComponents.Component_A {
       console.log(`varIncrDecrInput called - value ${value}`);
     });
 
-    const sections = this.all('.tc-accordion-item');
-    sections.map((section) => {
-      section.addEventListener('click', this.cbArrowClick.bind(this));
-    });
-
     this.child.selectorModule.onSelection(this.cbOnSelectionModule.bind(this));
     this.child.selectorProc.onSelection(this.cbOnSelectionProcedure.bind(this));
-
     // this.child.dropDownMenu.model = { items: ['ab', 'cd', 'ef'] };
     // this.child.dropDownMenu.onselection = (value) => {
     //   console.log(`selection: ${value}`);
@@ -225,9 +217,16 @@ class TComponentsView extends TComponents.Component_A {
     // this.child.dropDownMenu.selected = 1;
     // this.child.dropDownMenu.desc = 'Using FPComponents';
     // this.child.dropDownMenu.attachToElement(this.find('.selector-dropdown'));
-
     this.child.modalWindow.triggerElements(this.child.signalView.getEditButton());
     this.child.modalWindow.triggerElements(this.child.btnTrigger.container);
+
+    this.child.btnRender.highlight = true;
+
+    // Accordion
+    const sections = this.all('.tc-accordion-item');
+    sections.map((section) => {
+      section.addEventListener('click', this.cbArrowClick.bind(this));
+    });
   }
 
   markup({ _name }) {

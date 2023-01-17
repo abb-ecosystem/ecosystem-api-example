@@ -1,4 +1,4 @@
-'use strict';
+// @ts-ignore
 var TComponents = TComponents || {};
 (function (o) {
   if (!o.hasOwnProperty('ButtonProcedure_A')) {
@@ -8,7 +8,7 @@ var TComponents = TComponents || {};
      * Wehn stopOnRelease equals true, then the procedure is started when pressing, and stopped when releasing the button.
      * @class TComponents.ButtonProcedure_A
      * @extends TComponents.Component_A
-     * @param {HTMLElement} container - HTMLElement that is going to be the parent of the component
+     * @param {HTMLElement} parent - HTMLElement that is going to be the parent of the component
      * @param {string} [procedure] - Procedure to be called
      * @param {Boolean} [userLevel] - if true, execution level is set to “user level”, i.e. execute as a service routine.
      * In this case "motor on" is not required in procedures that no motion is executed.
@@ -25,14 +25,14 @@ var TComponents = TComponents || {};
      */
     o.ButtonProcedure_A = class ButtonProcedure extends TComponents.Component_A {
       constructor(
-        container,
+        parent,
         procedure = '',
         userLevel = false,
         label = '',
         stopOnRelease = false,
         task = 'T_ROB1'
       ) {
-        super(container, label);
+        super(parent, label);
         this._task = task;
         this._procedure = procedure;
         this._userLevel = userLevel;
@@ -57,8 +57,9 @@ var TComponents = TComponents || {};
        */
       mapComponents() {
         return {
-          exeBtn: new TComponents.Button_A(
-            this.find('.tc-btn-procedure'),
+          _btn: new TComponents.Button_A(
+            // this.find(".tc-btn-procedure"),
+            this.container,
             this._stopOnRelease ? null : this.cbOnClick.bind(this),
             this._label
           ),
@@ -77,20 +78,6 @@ var TComponents = TComponents || {};
           elemBtnMove.addEventListener('pointerup', this.cbStop.bind(this));
           elemBtnMove.addEventListener('pointerleave', this.cbStop.bind(this));
         }
-      }
-
-      /**
-       * Generates the HTML definition corresponding to the component.
-       * @private
-       * @param {TComponents.Component_A} self - The instance on which this method was called.
-       * @returns {string}
-       */
-      markup({}) {
-        return `
-        <div class="tc-container">
-          <div class="tc-btn-procedure tc-item"></div>
-        </div>
-      `;
       }
 
       /**
@@ -204,6 +191,22 @@ var TComponents = TComponents || {};
           this.rapidTask = await API.RAPID.getTask(this._task);
           this.render();
         })();
+      }
+
+      get highlight() {
+        return this.child._btn.highlight;
+      }
+
+      set highlight(value) {
+        this.child._btn.highlight = value;
+      }
+
+      get icon() {
+        return this.child._btn.icon;
+      }
+
+      set icon(value) {
+        this.child._btn.icon = value;
       }
     };
   }

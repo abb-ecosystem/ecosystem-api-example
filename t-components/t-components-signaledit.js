@@ -1,4 +1,4 @@
-'use strict';
+// @ts-ignore
 var TComponents = TComponents || {};
 (function (o) {
   if (!o.hasOwnProperty('SignalEdit_A')) {
@@ -6,7 +6,7 @@ var TComponents = TComponents || {};
      * Signal editor (normaly used together with the {@link TComponents.ModalWindow_A} and {@link TComponents.SignalView_A} components)
      * @class TComponents.SignalEdit_A
      * @extends TComponents.Component_A
-     * @param {HTMLElement} container - DOM element in which this component is to be inserted
+     * @param {HTMLElement} parent - DOM element in which this component is to be inserted
      * @param {string | object} signal - Signal name, or API.CONFIG.SIGNAL.Signal object
      * @example
      * const signal = new TComponents.SignalView_A(
@@ -36,9 +36,15 @@ var TComponents = TComponents || {};
      * @see TComponents.ModalWindow_A
      */
     o.SignalEdit_A = class SignalEdit extends TComponents.Component_A {
-      constructor(container, signal = null) {
-        super(container);
+      constructor(parent, signal = null) {
+        super(parent);
         this._signal = signal;
+        this._btnUpdate = new FPComponents.Button_A();
+        this._btnUpdate.text = 'update';
+        this._btnUpdate.highlight = true;
+        this._inputMap = new FPComponents.Input_A();
+        this._inputMap.regex = /^-?[0-9]+(\.[0-9]+)?$/;
+        this._inputMap.onchange = this.cbOnChange.bind(this);
       }
 
       /**
@@ -49,17 +55,8 @@ var TComponents = TComponents || {};
        */
       async onInit() {
         await this.setSignal(this._signal);
-
-        this._btnUpdate = new FPComponents.Button_A();
-        this._btnUpdate.text = 'update';
-        this._btnUpdate.highlight = true;
-        this._inputMap = new FPComponents.Input_A();
-        this._inputMap.regex = /^-?[0-9]+(\.[0-9]+)?$/;
-
         this.devices = await API.DEVICE.searchEthernetIPDevices();
         this.devices.push('');
-
-        this._inputMap.onchange = this.cbOnChange.bind(this);
       }
 
       /**
@@ -114,8 +111,8 @@ var TComponents = TComponents || {};
           <div class="tc-cols-4"><h4>Map</h4></div>
         </div>
         <div class="tc-row">
-          <div class="tc-cols-4"><p class="modal-signal-name">${this._data.name}</p></div>
-          <div class="tc-cols-4"><p class="modal-signal-type">${this._data.type}</p></div>
+          <div class="tc-cols-4"><p class="modal-signal-name">${_data.name}</p></div>
+          <div class="tc-cols-4"><p class="modal-signal-type">${_data.type}</p></div>
           <div class="tc-cols-4"><div class="modal-signal-device"></div></div>
           <div class="tc-cols-4"><div class="modal-signal-map tc-item"></div></div>
         </div>
@@ -176,8 +173,6 @@ var TComponents = TComponents || {};
           map: this._inputMap.text,
           device: this.child._ddDevice.selected,
         };
-        console.log('😮');
-        console.log(attr);
 
         const response = await this.handleUpdateButton(attr);
 
@@ -207,7 +202,12 @@ var TComponents = TComponents || {};
       async setSignal(s) {
         if (typeof s === 'string') {
           s = await API.SIGNAL.getSignal(s);
-          this._data = { name: s.name, type: s.type, device: s.device, map: s.map };
+          this._data = {
+            name: s.name,
+            type: s.type,
+            device: s.device,
+            map: s.map,
+          };
         } else if (s !== null && typeof s === 'object' && s.constructor.name === 'Signal') {
           this._data = {
             name: signal.name,

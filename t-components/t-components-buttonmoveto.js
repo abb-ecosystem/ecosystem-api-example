@@ -1,4 +1,4 @@
-'use strict';
+// @ts-ignore
 var TComponents = TComponents || {};
 (function (o) {
   if (!o.hasOwnProperty('ButtonMoveTo_A')) {
@@ -21,8 +21,8 @@ var TComponents = TComponents || {};
      *  await btnMove.render();
      */
     o.ButtonMoveTo_A = class ButtonMoveTo extends TComponents.Component_A {
-      constructor(container, rapid_variable, module, label = '') {
-        super(container, label);
+      constructor(parent, rapid_variable, module, label = '') {
+        super(parent, label);
         this._name = label;
         this._rapidVariable = rapid_variable;
         this._module = module;
@@ -58,10 +58,11 @@ var TComponents = TComponents || {};
        */
       mapComponents() {
         return {
-          _btnMove: new TComponents.Button_A(
-            this.find('.tc-button-move'),
+          _btn: new TComponents.Button_A(
+            // this.find(".tc-button-move"),
+            this.container,
             null,
-            this._label ? this._label : `Move to rapid_variable`
+            this._label ? this._label : `Move to`
           ),
         };
       }
@@ -72,9 +73,10 @@ var TComponents = TComponents || {};
        * @private
        */
       onRender() {
-        if (this.error) this.child._btnMove.enabled = false;
+        if (this.error) this.child._btn.enabled = false;
 
-        const elemBtnMove = this.find('.fp-components-button');
+        // const elemBtnMove = this.find(".fp-components-button");
+        const elemBtnMove = this.container;
         elemBtnMove.addEventListener('pointerdown', this.move.bind(this));
         elemBtnMove.addEventListener('pointerup', this.stop.bind(this));
         elemBtnMove.addEventListener('pointerleave', this.stop.bind(this));
@@ -86,13 +88,13 @@ var TComponents = TComponents || {};
        * @param {TComponents.Component_A} self - The instance on which this method was called.
        * @returns {string}
        */
-      markup({}) {
-        return `
-          <div>
-            <div class="tc-button-move"></div>
-          </div>
-        `;
-      }
+      // markup({}) {
+      //   return `
+      //     <div>
+      //       <div class="tc-button-move"></div>
+      //     </div>
+      //   `;
+      // }
 
       /**
        * Jogs the robot to the position defined at rapid_variable
@@ -101,7 +103,7 @@ var TComponents = TComponents || {};
        * @async
        */
       async move() {
-        if (this.child._btnMove.enabled) {
+        if (this.child._btn.enabled) {
           const jogData = [500, 500, 500, 500, 500, 500];
           this._value = await this.task.getValue(this._module, this._rapidVariable);
           if (!this._value) return;
@@ -117,7 +119,7 @@ var TComponents = TComponents || {};
             );
           } catch (e) {
             this._isJogging = false;
-            TComponents.Popup_A.error(e);
+            TComponents.Popup_A.error(e, 'TComponents.ButtonMoveTo_A');
           }
         }
       }
@@ -129,16 +131,32 @@ var TComponents = TComponents || {};
        * @async
        */
       async stop() {
-        if (this.child._btnMove.enabled) {
+        if (this.child._btn.enabled) {
           if (this._isJogging) {
             try {
               await API.MOTION.stopJogging();
             } catch (e) {
-              TComponents.Popup_A.error(e);
+              TComponents.Popup_A.error(e, 'TComponents.ButtonMoveTo_A');
             }
             this._isJogging = false;
           }
         }
+      }
+
+      get highlight() {
+        return this.child._btn.highlight;
+      }
+
+      set highlight(value) {
+        this.child._btn.highlight = value;
+      }
+
+      get icon() {
+        return this.child._btn.icon;
+      }
+
+      set icon(value) {
+        this.child._btn.icon = value;
       }
     };
   }

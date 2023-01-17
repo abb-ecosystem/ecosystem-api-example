@@ -1,3 +1,4 @@
+// @ts-ignore
 var TComponents = TComponents || {};
 (function (o) {
   if (!o.hasOwnProperty('Dropdown_A')) {
@@ -18,8 +19,8 @@ var TComponents = TComponents || {};
      * ddMenu.render();
      */
     o.Dropdown_A = class Dropdown extends TComponents.Component_A {
-      constructor(container, itemList = [], selected = '', label = '') {
-        super(container);
+      constructor(parent, itemList = [], selected = '', label = '') {
+        super(parent);
 
         this._dropDownMenu = new FPComponents.Dropdown_A();
         this._dropDownMenu.model = { items: itemList };
@@ -35,7 +36,9 @@ var TComponents = TComponents || {};
        * @private
        */
       onRender() {
-        this._dropDownMenu.attachToElement(this.find('.tc-dropdown-menu'));
+        // this._dropDownMenu.attachToElement(this.find(".tc-dropdown-menu"));
+        this._dropDownMenu.attachToElement(this.container);
+        this.find('.fp-components-dropdown').style.setProperty('min-height', '40px');
       }
 
       /**
@@ -44,13 +47,13 @@ var TComponents = TComponents || {};
        * @param {TComponents.Component_A} self - The instance on which this method was called.
        * @returns {string}
        */
-      markup({}) {
-        return `
-        <div>
-          <div class="tc-dropdown-menu tc-item"></div>
-        </div>
-      `;
-      }
+      // markup({}) {
+      //   return `
+      //   <div>
+      //     <div class="tc-dropdown-menu tc-item"></div>
+      //   </div>
+      // `;
+      // }
 
       /**
        * Callback function called when a item is selected, this method calls the callback funciton added with {@link TComponents.Dropdown_A#onSelection |onSelection}

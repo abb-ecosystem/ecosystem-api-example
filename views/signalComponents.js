@@ -1,8 +1,8 @@
 const ToggleImg = 'assets/img/arrows-clockwise-fill.svg';
 
 class SignalComponents extends TComponents.Component_A {
-  constructor(container, signal = '') {
-    super(container);
+  constructor(parent, signal = '') {
+    super(parent);
     this._signal = signal;
   }
 

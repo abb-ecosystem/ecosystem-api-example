@@ -1,4 +1,5 @@
 'use strict';
+// @ts-ignore
 var TComponents = TComponents || {};
 (function (o) {
   if (!o.hasOwnProperty('RapidStartStop_A')) {
@@ -6,13 +7,15 @@ var TComponents = TComponents || {};
      * Called when an instance of this component is created.
      * @class TComponents.RapidStartStop_A
      * @extends TComponents.Component_A
-     * @param {HTMLElement} container - DOM element in which this component is to be inserted
+     * @param {HTMLElement} parent - DOM element in which this component is to be inserted
      * @example
      * const btnStart = new TComponents.RapidStartStop_A(document.querySelector('.btn-start')),
      */
     o.RapidStartStop_A = class RapidStartStop extends TComponents.Component_A {
-      constructor(container) {
-        super(container);
+      constructor(parent) {
+        super(parent);
+        this.imgStop = 't-components/img/png/stop.png';
+        this.imgStart = 't-components/img/png/start.png';
       }
 
       /**
@@ -27,11 +30,11 @@ var TComponents = TComponents || {};
           var executionState = RWS.Rapid.getMonitor('execution');
           executionState.addCallbackOnChanged((eventData) => {
             if (eventData == 'stopped') {
-              this.find('.tc-rapid-feedback').src = 't-components/img/png/stop.png';
+              this.find('.tc-rapid-feedback').src = this.imgStop;
               this.child.btnStart.enabled = true;
               this.child.btnStop.enabled = false;
             } else if (eventData == 'running') {
-              this.find('.tc-rapid-feedback').src = 't-components/img/png/start.png';
+              this.find('.tc-rapid-feedback').src = this.imgStart;
               this.child.btnStart.enabled = false;
               this.child.btnStop.enabled = true;
             }
@@ -61,11 +64,11 @@ var TComponents = TComponents || {};
 
       onRender() {}
 
-      markup({}) {
+      markup({ imgStop }) {
         return `
 
           <div class="tc-container-row tc-item">
-            <img src="assets/img/stop.png" style="width:36px ;height:36px;" class="tc-rapid-feedback tc-item"> </img>
+            <img src="${imgStop}" style="width:36px ;height:36px;" class="tc-rapid-feedback tc-item"> </img>
             <div class="tc-btn-start tc-item"></div>
             <div class="tc-btn-stop tc-item"></div>
           </div>

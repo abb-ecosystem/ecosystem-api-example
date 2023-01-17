@@ -2,10 +2,10 @@ class Variable extends TComponents.Component_A {
   /**
    * @brief Called when an instance of this component is created.
    *
-   * @param {HTMLElement} container - DOM element in which this component is to be inserted
+   * @param {HTMLElement} parent - DOM element in which this component is to be inserted
    */
-  constructor(container, module = null) {
-    super(container);
+  constructor(parent, module = null) {
+    super(parent);
     this._module = module;
     this._ecNumberName = 'esNumber';
   }

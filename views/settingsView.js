@@ -1,8 +1,8 @@
-const imgTray = 'assets/img/tray_w_p1-4.png';
+const imgTray = 'assets/img/tray_w_p1-4_400x400.png';
 
 class SettingsView extends TComponents.Component_A {
-  constructor(container, module, nrParts, rows, columns, currentPart, simMachine) {
-    super(container);
+  constructor(parent, module, nrParts, rows, columns, currentPart, simMachine) {
+    super(parent);
     this._module = module;
     this._nrParts = nrParts;
     this._rows = rows;

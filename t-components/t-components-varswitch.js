@@ -1,4 +1,4 @@
-'use strict';
+// @ts-ignore
 var TComponents = TComponents || {};
 (function (o) {
   if (!o.hasOwnProperty('VarSwitch_A')) {
@@ -6,17 +6,19 @@ var TComponents = TComponents || {};
      * Switch connected to a RAPID variable. The variable must be of type boolean, otherwise an Error is thrown during initialization.
      * @class TComponents.VarSwitch_A
      * @extends TComponents.Component_A
-     * @param {HTMLElement} container - DOM element in which this component is to be inserted
+     * @param {HTMLElement} parent - DOM element in which this component is to be inserted
      * @param {string} [module] - module to seach for variables
      * @param {string} [variable] - Rapid variable to subpscribe to
      * @param {string} [label] - label text
      */
     o.VarSwitch_A = class VarInput extends TComponents.Component_A {
-      constructor(container, module = '', variable = '', label = '') {
-        super(container, label);
+      constructor(parent, module = '', variable = '', label = '') {
+        super(parent, label);
         this._module = module;
         this._variable = variable;
         this.switchBtn = new FPComponents.Switch_A();
+        this.switchBtn.desc = label;
+        this.switchBtn.onchange = this.cbOnChange.bind(this);
       }
 
       /**
@@ -34,12 +36,10 @@ var TComponents = TComponents || {};
               this._module,
               this._variable
             );
-            // this.varElement.addCallbackOnChanged(this.cbUpdateSwitch.bind(this));
-            this.varElement.onChanged(this.cbUpdateSwitch.bind(this));
 
-            this.switchBtn.desc = this._label;
+            this.varElement.onChanged(this.cbUpdateSwitch.bind(this));
             this.switchBtn.active = await this.varElement.getValue();
-            this.switchBtn.onchange = this.cbOnChange.bind(this);
+
             if (this.varElement.type !== 'bool')
               throw new Error(`TComponents.VarSwitch_A : ${this._variable} is not a bool variable`);
           } catch (e) {

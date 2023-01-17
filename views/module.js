@@ -1,6 +1,6 @@
 class Module extends TComponents.Component_A {
-  constructor(container, path, name, isSysmodule = true) {
-    super(container);
+  constructor(parent, path, name, isSysmodule = true) {
+    super(parent);
     this.path = path.replace(/\:$/, '');
     this.name = name;
     this.extension = isSysmodule ? '.sysx' : '.modx';

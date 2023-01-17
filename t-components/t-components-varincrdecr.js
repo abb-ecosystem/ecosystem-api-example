@@ -1,4 +1,5 @@
 'use strict';
+// @ts-ignore
 var TComponents = TComponents || {};
 (function (o) {
   if (!o.hasOwnProperty('VarIncrDecr_A')) {
@@ -6,7 +7,7 @@ var TComponents = TComponents || {};
      * Component connected to a variable together with increment and decrement buttons.
      * @class TComponents.VarIncrDecr_A
      * @extends TComponents.Component_A
-     * @param {HTMLElement} container - DOM element in which this component is to be inserted
+     * @param {HTMLElement} parent - DOM element in which this component is to be inserted
      * @param {string} [module] - module to seach for variables
      * @param {string} [variable] - Rapid variable to subpscribe to
      * @param {boolean} [readOnly] - if true, variable value is displayed and can only be modified with the increment and decrement buttons. If false, the value can also be directly modified
@@ -14,8 +15,8 @@ var TComponents = TComponents || {};
      * @param {string} [label] - label text
      */
     o.VarIncrDecr_A = class VarIncrDecr extends TComponents.Component_A {
-      constructor(container, module = '', variable = '', readOnly = false, steps = 1, label = '') {
-        super(container, label);
+      constructor(parent, module = '', variable = '', readOnly = false, steps = 1, label = '') {
+        super(parent, label);
         this._module = module;
         this._variable = variable;
         this._readOnly = readOnly;
@@ -96,9 +97,9 @@ var TComponents = TComponents || {};
         <div class="tc-container-label">
           <p>${_label}</p>
           <div class="tc-container-row">
-            <div class="tc-varincrdecr-incr"></div>
-            <div class="tc-varincrdecr-var"></div>
-            <div class="tc-varincrdecr-decr"></div>
+            <div class="tc-varincrdecr-decr tc-item"></div>
+            <div class="tc-varincrdecr-var tc-item"></div>
+            <div class="tc-varincrdecr-incr tc-item"></div>
           </div>
         </div>
           `;

@@ -1,7 +1,7 @@
 class SignalContainer extends TComponents.Component_A {
-  constructor(container, signals) {
-    super(container);
-    this._parentElement = container;
+  constructor(parent, signals) {
+    super(parent);
+    this._parentElement = parent;
     this._errorMessage = 'No signals found 😆!';
     this._message = '';
     Array.isArray(signals) ? (this._signalsData = signals) : (this._signalsData = [signals]);

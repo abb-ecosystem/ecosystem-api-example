@@ -2,7 +2,7 @@
 
 declare namespace TComponents {
   // class Component_A {
-  //   constructor(container: HTMLElement);
+  //   constructor(parent: HTMLElement);
   //   init(): Promise<void>;
   //   render(render: boolean): void | string;
   //   markup(self: Component_A): string;
@@ -41,7 +41,7 @@ declare namespace TComponents {
    * @class TComponents.Component_A
    * @memberof TComponents
    * @extends  {TComponents.Eventing_A}
-   * @param {HTMLElement} container - HTMLElement that is going to be the parent of the component.
+   * @param {HTMLElement} parent - HTMLElement that is going to be the parent of the component.
    * @param {string} [label] - Label text
    */
   class Component_A extends TComponents.Eventing_A {
@@ -51,10 +51,10 @@ declare namespace TComponents {
      * @constructor
      * @memberof TComponents
      * @extends TComponents.Eventing_A
-     * @param {HTMLElement} container - HTMLElement that is going to be the parent of the component.
+     * @param {HTMLElement} parent - HTMLElement that is going to be the parent of the component.
      * @param {string} [label] - Label text
      */
-    constructor(container: HTMLElement, label?: string);
+    constructor(parent: HTMLElement, label?: string);
 
     /**
      * Check if an entry is
@@ -196,7 +196,7 @@ declare namespace TComponents {
    * Rounded button that triggers a callback when pressed. Additional callbacks can be added with the {@link TComponents.Button_A#onClick|onClick} method.
    * @class TComponents.Button_A
    * @extends TComponents.Component_A
-   * @param {HTMLElement} container - HTMLElement that is going to be the parent of the component
+   * @param {HTMLElement} parent - HTMLElement that is going to be the parent of the component
    * @param {function|null} [callback] - Function to be called when button is pressed
    * @param {string} [label] - Label of the component
    * @param {string|null} [img] - Path to image file
@@ -212,13 +212,13 @@ declare namespace TComponents {
      *
      * @constructor
      * @extends {TComponents.Component_A}
-     * @param {HTMLElement} container - HTMLElement that is going to be the parent of the component
+     * @param {HTMLElement} parent - HTMLElement that is going to be the parent of the component
      * @param {function|null} [callback] - Function to be called when button is pressed
      * @param {string} [label] - Label of the component
      * @param {string|null} [img] - Path to image file
      */
     constructor(
-      container: HTMLElement,
+      parent: HTMLElement,
       callback?: Function | null,
       label?: string,
       img?: string | null
@@ -229,7 +229,7 @@ declare namespace TComponents {
   //   handler: () => {};
   //   label: string;
   //   img: string | null;
-  //   constructor(container: HTMLElement, handler: () => {}, label: string, img: string | null);
+  //   constructor(parent: HTMLElement, handler: () => {}, label: string, img: string | null);
   //   init(): Promise<void>;
   //   render(): void;
   //   markup(self: Button_A): string;
@@ -241,7 +241,7 @@ declare namespace TComponents {
    * Button to jog the robot to a position provided by a RAPID robtarget variable.
    * @class TComponents.ButtonMoveTo_A
    * @extends TComponents.Component_A
-   * @param {HTMLElement} container - HTMLElement that is going to be the parent of the component
+   * @param {HTMLElement} parent - HTMLElement that is going to be the parent of the component
    * @param {string} rapid_variable - Rapid variable to subpscribe to
    * @param {string} module - Module containig the rapid variable
    * @param {string} [label] - label text
@@ -259,12 +259,12 @@ declare namespace TComponents {
     /**
      * @constructor
      * @extends {TComponents.Component_A}
-     * @param {HTMLElement} container - HTMLElement that is going to be the parent of the component
+     * @param {HTMLElement} parent - HTMLElement that is going to be the parent of the component
      * @param {string} rapid_variable - Rapid variable to subpscribe to
      * @param {string} module - Module containig the rapid variable
      * @param {string} [label] - label text
      */
-    constructor(container: HTMLElement, rapid_variable: string, module: string, label?: string);
+    constructor(parent: HTMLElement, rapid_variable: string, module: string, label?: string);
     /**
      * Jogs the robot to the position defined at rapid_variable
      * @alias move
@@ -287,7 +287,7 @@ declare namespace TComponents {
    * Wehn stopOnRelease equals true, then the procedure is started when pressing, and stopped when releasing the button.
    * @class TComponents.ButtonProcedure_A
    * @extends TComponents.Component_A
-   * @param {HTMLElement} container - HTMLElement that is going to be the parent of the component
+   * @param {HTMLElement} parent - HTMLElement that is going to be the parent of the component
    * @param {string} [procedure] - Procedure to be called
    * @param {Boolean} [userLevel] - if true, execution level is set to “user level”, i.e. execute as a service routine.
    * In this case "motor on" is not required in procedures that no motion is executed.
@@ -304,7 +304,7 @@ declare namespace TComponents {
    */
   class ButtonProcedure_A extends TComponents.Component_A {
     constructor(
-      container: any,
+      parent: any,
       procedure?: string,
       userLevel?: boolean,
       label?: string,
@@ -360,13 +360,13 @@ declare namespace TComponents {
    * Button to restart the controller.
    * @class TComponents.ButtonReboot_A
    * @extends TComponents.Component_A
-   * @param {HTMLElement} container - HTMLElement that is going to be the parent of the component
+   * @param {HTMLElement} parent - HTMLElement that is going to be the parent of the component
    * @example
    * const btnReboot = new TComponents.ButtonReboot_A(document.querySelector('.reboot-view'));
    * btnRebbot.render();
    */
   class ButtonReboot_A extends TComponents.Component_A {
-    constructor(container: any);
+    constructor(parent: any);
     /**
      * Restarts the controller
      * @alias reboot
@@ -380,7 +380,7 @@ declare namespace TComponents {
    * Button to teach the current position into a RAPID robtarget variable
    * @class TComponents.ButtonTeach_A
    * @extends TComponents.Component_A
-   * @param {HTMLElement} container
+   * @param {HTMLElement} parent
    * @param {string} rapid_variable - Rapid variable to subpscribe to
    * @param {string} module - Module containig the rapid variable
    * @param {string} [label] - label text
@@ -398,12 +398,12 @@ declare namespace TComponents {
     /**
      * @constructor
      * @extends TComponents.Component_A
-     * @param {HTMLElement} container
+     * @param {HTMLElement} parent
      * @param {string} rapid_variable - Rapid variable to subpscribe to
      * @param {string} module - Module containig the rapid variable
      * @param {string} [label] - label text
      */
-    constructor(container: HTMLElement, rapid_variable: string, module: string, label?: string);
+    constructor(parent: HTMLElement, rapid_variable: string, module: string, label?: string);
     /**
      * Saves the current robot position in to rapid_variable. This method is called when pressing the instance button.
      * @alias teach
@@ -417,7 +417,7 @@ declare namespace TComponents {
    * Component that combine {@link TComponents.ButtonTeach_A} and {@link TComponents.ButtonMoveTo_A} together.
    * @class TComponents.ButtonTeachMove_A
    * @extends TComponents.Component_A
-   * @param {HTMLElement} container
+   * @param {HTMLElement} parent
    * @param {string} rapid_variable - Rapid variable to subpscribe to
    * @param {string} module - Module containig the rapid variable
    * @param {string} [label] - label text
@@ -434,18 +434,18 @@ declare namespace TComponents {
   class ButtonTeachMove_A extends TComponents.Component_A {
     /**
      * @constructor
-     * @param {HTMLElement} container
+     * @param {HTMLElement} parent
      * @param {string} rapid_variable - Rapid variable to subpscribe to
      * @param {string} module - Module containig the rapid variable
      * @param {string} [label] - label text
      */
-    constructor(container: HTMLElement, location: any, module: string, label?: string);
+    constructor(parent: HTMLElement, location: any, module: string, label?: string);
   }
 
   /**
    * @class TComponents.Dropdown_A
    * @extends TComponents.Component_A
-   * @param {HTMLElement} container - HTMLElement that is going to be the parent of the component
+   * @param {HTMLElement} parent - HTMLElement that is going to be the parent of the component
    * @param {string} [itemList] - List of dropdown items
    * @param {string} [selected] - item that shall be shown as selected after first render
    * @param {string} [label] - label text
@@ -461,12 +461,12 @@ declare namespace TComponents {
   class Dropdown_A extends TComponents.Component_A {
     /**
      * @constructor
-     * @param {HTMLElement} container - HTMLElement that is going to be the parent of the component
+     * @param {HTMLElement} parent - HTMLElement that is going to be the parent of the component
      * @param {string[]} [itemList] - List of dropdown items
      * @param {string} [selected] - item that shall be shown as selected after first render
      * @param {string} [label] - label text
      */
-    constructor(container: HTMLElement, itemList?: string[], selected?: string, label?: string);
+    constructor(parent: HTMLElement, itemList?: string[], selected?: string, label?: string);
     /**
      * Adds a callback function to be called when an item is selected
      * @alias onSelection
@@ -494,7 +494,7 @@ declare namespace TComponents {
   }
 
   // class Dropdown_A extends Component_A {
-  //   constructor(container: HTMLElement, itemList?: string[], selected?: string, label?: string);
+  //   constructor(parent: HTMLElement, itemList?: string[], selected?: string, label?: string);
   //   init(): Promise<void>;
   //   render(): void;
   //   markup({ label: string }: Dropdown_A): string;
@@ -508,7 +508,7 @@ declare namespace TComponents {
    *
    * @class TComponents.ModalWindow_A
    * @extends TComponents.Component_A
-   * @param {HTMLElement} container - HTMLElement that is going to be the parent of the component
+   * @param {HTMLElement} parent - HTMLElement that is going to be the parent of the component
    * @param {TComponents.Component_A | HTMLElement | null} [content] - Component/Element to be displayed in the modal window
    * @example
    * const editSignal = new TComponents.SignalEdit_A(
@@ -528,7 +528,7 @@ declare namespace TComponents {
    * @see TComponents.SignalView_A
    */
   class ModalWindow_A extends TComponents.Component_A {
-    constructor(container: any, content?: any);
+    constructor(parent: any, content?: any);
     /**
      * Adds a callback funciton to the component. This will be called after the button is pressed and released
      * @alias onClick
@@ -572,12 +572,12 @@ declare namespace TComponents {
    * Called when an instance of this component is created.
    * @class TComponents.MotorsOnOff_A
    * @extends TComponents.Component_A
-   * @param {HTMLElement} container - DOM element in which this component is to be inserted
+   * @param {HTMLElement} parent - DOM element in which this component is to be inserted
    * @example
    * const switchMotors = new TComponents.MotorsOnOff_A(document.querySelector('.switch-motors')),
    */
   class MotorsOnOff_A extends TComponents.Component_A {
-    constructor(container: any, label?: string);
+    constructor(parent: any, label?: string);
     setIcon(val: any): Promise<void>;
     cbSwitch(onoff: any): Promise<void>;
   }
@@ -586,16 +586,16 @@ declare namespace TComponents {
    * Called when an instance of this component is created.
    * @class TComponents.OpMode_A
    * @extends TComponents.Component_A
-   * @param {HTMLElement} container - DOM element in which this component is to be inserted
+   * @param {HTMLElement} parent - DOM element in which this component is to be inserted
    * @example
    * const opMode = new TComponents.OpMode_A(document.querySelector('.radio-opmode')),
    */
   class OpMode_A extends TComponents.Component_A {
     /**
      * @constructor
-     * @param {HTMLElement} container - DOM element in which this component is to be inserted
+     * @param {HTMLElement} parent - DOM element in which this component is to be inserted
      */
-    constructor(container: HTMLElement);
+    constructor(parent: HTMLElement);
     OpModeChanged(mode: any): Promise<void>;
     cbOpModeAuto(): Promise<void>;
     cbOpModeMan(): Promise<void>;
@@ -753,9 +753,9 @@ declare namespace TComponents {
   class RapidStartStop_A extends TComponents.Component_A {
     /**
      * @constructor
-     * @param {HTMLElement} container - DOM element in which this component is to be inserted
+     * @param {HTMLElement} parent - DOM element in which this component is to be inserted
      */
-    constructor(container: HTMLElement);
+    constructor(parent: HTMLElement);
     cbStart(): Promise<void>;
     cbStop(): Promise<void>;
   }
@@ -764,7 +764,7 @@ declare namespace TComponents {
    * Signal editor (normaly used together with the {@link TComponents.ModalWindow_A} and {@link TComponents.SignalView_A} components)
    * @class TComponents.SignalEdit_A
    * @extends TComponents.Component_A
-   * @param {HTMLElement} container - DOM element in which this component is to be inserted
+   * @param {HTMLElement} parent - DOM element in which this component is to be inserted
    * @param {string | object} signal - Signal name, or API.CONFIG.SIGNAL.Signal object
    * @example
    * const signal = new TComponents.SignalView_A(
@@ -796,28 +796,28 @@ declare namespace TComponents {
   class SignalEdit_A extends TComponents.Component_A {
     /**
      * @constructor
-     * @param {HTMLElement} container - DOM element in which this component is to be inserted
+     * @param {HTMLElement} parent - DOM element in which this component is to be inserted
      * @param {string | object} signal - Signal name, or API.CONFIG.SIGNAL.Signal object
      */
-    constructor(container: HTMLElement, signal?: string | object);
+    constructor(parent: HTMLElement, signal?: string | object);
     onUpdate(handler: any): void;
   }
 
   /**
    * @class TComponents.SignalIndicator_A
    * @extends TComponents.Component_A
-   * @param {HTMLElement} container - HTMLElement that is going to be the parent of the component
+   * @param {HTMLElement} parent - HTMLElement that is going to be the parent of the component
    * @param {string} signal
    * @param {string} [label] - label text
    */
   class SignalIndicator_A extends TComponents.Component_A {
     /**
      * @constructor
-     * @param {HTMLElement} container - HTMLElement that is going to be the parent of the component
+     * @param {HTMLElement} parent - HTMLElement that is going to be the parent of the component
      * @param {string} signal
      * @param {string} [label] - label text
      */
-    constructor(container: HTMLElement, signal: string, label?: string);
+    constructor(parent: HTMLElement, signal: string, label?: string);
     get signal(): void;
   }
 
@@ -825,18 +825,18 @@ declare namespace TComponents {
    * Creates an instance of a switch connected to a signal
    * @class TComponents.SignalSwitch_A
    * @extends TComponents.Component_A
-   * @param {HTMLElement} container - DOM element in which this component is to be inserted
+   * @param {HTMLElement} parent - DOM element in which this component is to be inserted
    * @param {string | object} signal - Signal name, or API.CONFIG.SIGNAL.Signal object
    * @param {*} label
    */
   class SignalSwitch_A extends TComponents.Component_A {
     /**
      * @constructor
-     * @param {HTMLElement} container - DOM element in which this component is to be inserted
+     * @param {HTMLElement} parent - DOM element in which this component is to be inserted
      * @param {string | object} signal - Signal name, or API.CONFIG.SIGNAL.Signal object
      * @param {string} label
      */
-    constructor(container: HTMLElement, signal: string | object, label?: string);
+    constructor(parent: HTMLElement, signal: string | object, label?: string);
     cbUpdateSwitch(value: any): Promise<void>;
     cbOnChange(value: any): Promise<void>;
     active(value?: boolean): void;
@@ -847,7 +847,7 @@ declare namespace TComponents {
    * Instance of a Signal view containing an indicator, signal information (name, type, device, map) and a optional connection to TComponents.SignalEdit_A component for editing the signal.
    * @class TComponents.SignalView_A
    * @extends TComponents.Component_A
-   * @param {HTMLElement} container - DOM element in which this component is to be inserted
+   * @param {HTMLElement} parent - DOM element in which this component is to be inserted
    * @param {string | object} signal - Signal name, or API.CONFIG.SIGNAL.Signal object
    * @param {boolean} hasSwitch - To enable/disable the precense of a swith
    * @param {boolean} hasEditButton - To enable/disable the editing button
@@ -880,13 +880,13 @@ declare namespace TComponents {
   class SignalView_A extends TComponents.Component_A {
     /**
      * @constructor
-     * @param {HTMLElement} container - DOM element in which this component is to be inserted
+     * @param {HTMLElement} parent - DOM element in which this component is to be inserted
      * @param {string | object} signal - Signal name, or API.CONFIG.SIGNAL.Signal object
      * @param {boolean} hasSwitch - To enable/disable the precense of a swith
      * @param {boolean} hasEditButton - To enable/disable the editing button
      */
     constructor(
-      container: HTMLElement,
+      parent: HTMLElement,
       signal: string | object,
       hasSwitch?: boolean,
       hasEditButton?: boolean
@@ -897,7 +897,7 @@ declare namespace TComponents {
    * Creates a button that triggers registered callback functions and pass them the value of a RAPID variable
    * @class TComponents.VarButton_A
    * @extends TComponents.Component_A
-   * @param {HTMLElement} container - DOM element in which this component is to be inserted
+   * @param {HTMLElement} parent - DOM element in which this component is to be inserted
    * @param {string} module - RAPID module containig the variable
    * @param {string} variable - RAPID variable
    * @param {function} [callback] Callback function
@@ -918,7 +918,7 @@ declare namespace TComponents {
   class VarButton_A extends TComponents.Component_A {
     /**
      * @constructor
-     * @param {HTMLElement} container - DOM element in which this component is to be inserted
+     * @param {HTMLElement} parent - DOM element in which this component is to be inserted
      * @param {string} module - RAPID module containig the variable
      * @param {string} variable - RAPID variable
      * @param {function} [callback] Callback function
@@ -927,7 +927,7 @@ declare namespace TComponents {
      * @param {string} [task] - RAPID Task in which the variable is contained (default = "T_ROB1" )
      */
     constructor(
-      container: HTMLElement,
+      parent: HTMLElement,
       module: string,
       variable: string,
       callback?: Function,
@@ -948,7 +948,7 @@ declare namespace TComponents {
    * Component connected to a variable together with increment and decrement buttons.
    * @class TComponents.VarIncrDecr_A
    * @extends TComponents.Component_A
-   * @param {HTMLElement} container - DOM element in which this component is to be inserted
+   * @param {HTMLElement} parent - DOM element in which this component is to be inserted
    * @param {string} [module] - module to seach for variables
    * @param {string} [variable] - Rapid variable to subpscribe to
    * @param {boolean} [readOnly] - if true, variable value is displayed and can only be modified with the increment and decrement buttons. If false, the value can also be directly modified
@@ -958,7 +958,7 @@ declare namespace TComponents {
   class VarIncrDecr_A extends TComponents.Component_A {
     /**
      * @constructor
-     * @param {HTMLElement} container - DOM element in which this component is to be inserted
+     * @param {HTMLElement} parent - DOM element in which this component is to be inserted
      * @param {string} [module] - module to seach for variables
      * @param {string} [variable] - Rapid variable to subpscribe to
      * @param {boolean} [readOnly] - if true, variable value is displayed and can only be modified with the increment and decrement buttons. If false, the value can also be directly modified
@@ -966,7 +966,7 @@ declare namespace TComponents {
      * @param {string} [label] - label text
      */
     constructor(
-      container: HTMLElement,
+      parent: HTMLElement,
       module?: string,
       variable?: string,
       readOnly?: boolean,
@@ -1034,7 +1034,7 @@ declare namespace TComponents {
   //   readonly steps: number;
   //   readonly _label: string;
   //   constructor(
-  //     container: HTMLElement,
+  //     parent: HTMLElement,
   //     module?: string,
   //     variable?: string,
   //     isInput?: boolean,
@@ -1059,7 +1059,7 @@ declare namespace TComponents {
    * Display field connected to a RAPID variable. It supports variables of type "num", "bool" and "strings".
    * @class TComponents.VarIndicator_A
    * @extends TComponents.Component_A
-   * @param {HTMLElement} container - DOM element in which this component is to be inserted
+   * @param {HTMLElement} parent - DOM element in which this component is to be inserted
    * @param {string} [module] - module to seach for variables
    * @param {string} [variable] - Rapid variable to subpscribe to
    * @param {string} [label] - label text
@@ -1069,14 +1069,14 @@ declare namespace TComponents {
   class VarIndicator_A extends TComponents.Component_A {
     /**
      * @constructor
-     * @param {HTMLElement} container - DOM element in which this component is to be inserted
+     * @param {HTMLElement} parent - DOM element in which this component is to be inserted
      * @param {string} [module] - module to seach for variables
      * @param {string} [variable] - Rapid variable to subpscribe to
      * @param {string} [label] - label text
      * @param {boolean} [useIndicatorBorder] - if true, creates a border around the value
      */
     constructor(
-      container: HTMLElement,
+      parent: HTMLElement,
       module?: string,
       variable?: string,
       label?: string,
@@ -1103,7 +1103,7 @@ declare namespace TComponents {
      * @alias cbUpdateInputField
      * @memberof TComponents.VarIndicator_A
      * @async
-     *
+     * @private
      */
     cbVarChanged(value: any): void;
     /**
@@ -1128,7 +1128,7 @@ declare namespace TComponents {
   //   readonly task: any;
   //   readonly varElement: any;
   //   readonly _varValue: number;
-  //   constructor(container: HTMLElement, module?: string, variable?: string, label?: string);
+  //   constructor(parent: HTMLElement, module?: string, variable?: string, label?: string);
   //   init(): Promise<void>;
   //   render(): void;
   //   markup({ _label, _id, _varValue }: VarIndicator_A): string;
@@ -1144,7 +1144,7 @@ declare namespace TComponents {
    * Input field connected to a RAPID variable
    * @class TComponents.VarInput_A
    * @extends TComponents.Component_A
-   * @param {HTMLElement} container - DOM element in which this component is to be inserted
+   * @param {HTMLElement} parent - DOM element in which this component is to be inserted
    * @param {string} [module] - module to seach for variables
    * @param {string} [variable] - Rapid variable to subpscribe to
    * @param {string} [label] - label text
@@ -1152,12 +1152,12 @@ declare namespace TComponents {
   class VarInput_A extends TComponents.Component_A {
     /**
      * @constructor
-     * @param {HTMLElement} container - DOM element in which this component is to be inserted
+     * @param {HTMLElement} parent - DOM element in which this component is to be inserted
      * @param {string} [module] - module to seach for variables
      * @param {string} [variable] - Rapid variable to subpscribe to
      * @param {string} [label] - label text
      */
-    constructor(container: HTMLElement, module?: string, variable?: string, label?: string);
+    constructor(parent: HTMLElement, module?: string, variable?: string, label?: string);
     set variable(arg: string);
     /**
      * RAPID variable
@@ -1203,7 +1203,7 @@ declare namespace TComponents {
   //   readonly inputField: FPComponents.Input_A;
   //   readonly task: any;
   //   readonly varElement: any;
-  //   constructor(container: HTMLElement, module?: string, variable?: string, label?: string);
+  //   constructor(parent: HTMLElement, module?: string, variable?: string, label?: string);
   //   init(): Promise<void>;
   //   render(): void;
   //   markup(self: VarInput_A): string;
@@ -1221,7 +1221,7 @@ declare namespace TComponents {
    * Switch connected to a RAPID variable. The variable must be of type boolean, otherwise an Error is thrown during initialization.
    * @class TComponents.VarSwitch_A
    * @extends TComponents.Component_A
-   * @param {HTMLElement} container - DOM element in which this component is to be inserted
+   * @param {HTMLElement} parent - DOM element in which this component is to be inserted
    * @param {string} [module] - module to seach for variables
    * @param {string} [variable] - Rapid variable to subpscribe to
    * @param {string} [label] - label text
@@ -1229,12 +1229,12 @@ declare namespace TComponents {
   class VarSwitch_A extends TComponents.Component_A {
     /**
      * @constructor
-     * @param {HTMLElement} container - DOM element in which this component is to be inserted
+     * @param {HTMLElement} parent - DOM element in which this component is to be inserted
      * @param {string} [module] - module to seach for variables
      * @param {string} [variable] - Rapid variable to subpscribe to
      * @param {string} [label] - label text
      */
-    constructor(container: HTMLElement, module?: string, variable?: string, label?: string);
+    constructor(parent: HTMLElement, module?: string, variable?: string, label?: string);
     set variable(arg: string);
     /**
      * RAPID variable
@@ -1271,9 +1271,9 @@ declare namespace TComponents {
 
   // class ProcButton_A extends Component_A {
   //   constructor(
-  //     container: HTMLElement,
+  //     parent: HTMLElement,
   //     procedure?: string,
-  //     isServiceRoutine?: false,
+  //     userLevel?: false,
   //     label?: string,
   //     task?: string,
   //   );
@@ -1283,8 +1283,8 @@ declare namespace TComponents {
   //   cbOnClick(): Promise<void>;
   //   get procedure(): string;
   //   set procedure(text: string);
-  //   get isServiceRoutine(): boolean;
-  //   set isServiceRoutine(is: boolean);
+  //   get userLevel(): boolean;
+  //   set userLevel(is: boolean);
   //   get label(): string;
   //   set label(text: string);
   //   get task(): string;
@@ -1295,7 +1295,7 @@ declare namespace TComponents {
    * Base class used by the different TComponents selectors:
    * @class TComponents.Selector_A
    * @extends TComponents.Component_A
-   * @param {HTMLElement} container - HTMLElement that is going to be the parent of the component
+   * @param {HTMLElement} parent - HTMLElement that is going to be the parent of the component
    * @param {string} [selected] - item that shall be shown as selected after first render
    * @param {string} [label] - label text
    * @param {string[]} [itemList]
@@ -1310,12 +1310,12 @@ declare namespace TComponents {
     /**
      * @constructor
      * @extends TComponents.Component_A
-     * @param {HTMLElement} container - HTMLElement that is going to be the parent of the component
+     * @param {HTMLElement} parent - HTMLElement that is going to be the parent of the component
      * @param {string} [selected] - item that shall be shown as selected after first render
      * @param {string} [label] - label text
      * @param {string[]} [itemList]
      */
-    constructor(container: HTMLElement, selected?: string, label?: string, itemList?: string[]);
+    constructor(parent: HTMLElement, selected?: string, label?: string, itemList?: string[]);
     cbOnSelection(selection: any): Promise<void>;
     set selected(arg: string);
     /**
@@ -1352,12 +1352,17 @@ declare namespace TComponents {
    * Selector displaying variables available inside a module at the controller
    * @class TComponents.SelectorVariables_A
    * @extends TComponents.Selector_A
-   * @param {HTMLElement} container - HTMLElement that is going to be the parent of the component
+   * @param {HTMLElement} parent - HTMLElement that is going to be the parent of the component
    * @param {string} module - module to seach for variables
    * @param {boolean} [isInUse] - only return symbols that are used in a Rapid program, i.e. a type declaration that has no d variable will not be returned when this flag is set true.
    * @param {string} [selected] - item that shall be shown as selected after first render
    * @param {string} [label] - label text
    * @param {boolean} [addNoSelection] - if true, and empty selector item is placed as first item
+   * @param {object} [filter] - The following filters can be applied:
+   * <br>&emsp;name - name of the data symbol (not casesensitive)
+   * <br>&emsp;symbolType - valid values: 'constant', 'variable', 'persistent' (array with multiple values is supported)
+   * <br>&emsp;dataType - type of the data, e.g. 'num'(only one data type is supported)
+   * i.e. a type declaration that has no declared variable will not be returned when this flag is set true.
    * @example
    *  const selectorVar = new TComponents.SelectorVariables_A(
    *     document.querySelector('.selector-var'),
@@ -1372,40 +1377,52 @@ declare namespace TComponents {
     /**
      * @constructor
      * @extends TComponents.Selector_A
-     * @param {HTMLElement} container - HTMLElement that is going to be the parent of the component
+     * @param {HTMLElement} parent - HTMLElement that is going to be the parent of the component
      * @param {string} module - module to seach for variables
      * @param {boolean} [isInUse] - only return symbols that are used in a Rapid program, i.e. a type declaration that has no d variable will not be returned when this flag is set true.
      * @param {string} [selected] - item that shall be shown as selected after first render
      * @param {string} [label] - label text
      * @param {boolean} [addNoSelection] - if true, and empty selector item is placed as first item
+     * @param {object} [filter] - The following filters can be applied:
+     * <br>&emsp;name - name of the data symbol (not casesensitive)
+     * <br>&emsp;symbolType - valid values: 'constant', 'variable', 'persistent' (array with multiple values is supported)
+     * <br>&emsp;dataType - type of the data, e.g. 'num'(only one data type is supported)
+     * i.e. a type declaration that has no declared variable will not be returned when this flag is set true.
      */
     constructor(
-      container: HTMLElement,
+      parent: HTMLElement,
       module?: string,
       isInUse?: boolean,
       selected?: string,
       label?: string,
-      addNoSelection?: boolean
+      addNoSelection?: boolean,
+      filter?: object
     );
     /**
      * Updates the content of selector based on {@link module} parameter
      * @alias updateSearch
      * @param {string} module - Module to search for procedures
+     * @param {object} [filter] - The following filters can be applied:
+     * <br>&emsp;name - name of the data symbol (not casesensitive)
+     * <br>&emsp;symbolType - valid values: 'constant', 'variable', 'persistent' (array with multiple values is supported)
+     * <br>&emsp;dataType - type of the data, e.g. 'num'(only one data type is supported)
+     * i.e. a type declaration that has no declared variable will not be returned when this flag is set true.
      * @memberof TComponents.SelectorVariables_A
      */
-    updateSearch(module: string, render?: boolean): Promise<void>;
+    updateSearch(module: string, filter?: object): Promise<void>;
   }
 
   /**
    * Selector displaying procedures available inside a module at the controller
    * @class TComponents.SelectorProcedures_A
    * @extends TComponents.Selector_A
-   * @param {HTMLElement} container - HTMLElement that is going to be the parent of the component
+   * @param {HTMLElement} parent - HTMLElement that is going to be the parent of the component
    * @param {string} module - module to search for procedures
    * @param {boolean} isInUse - only return symbols that are used in a Rapid program, i.e. a type declaration that has no d variable will not be returned when this flag is set true.
    * @param {string} [selected] - item that shall be shown as selected after first render
    * @param {string} [label] - label text
    * @param {boolean} [addNoSelection] - if true, and empty selector item is placed as first item
+   * @param {string} [filter] - only procedures containing the filter patern (not casesensitive)
    * @example
    *  const procSelector = new TComponents.SelectorProcedures_A(
    *     document.querySelector('.proc-dropdown'),
@@ -1421,39 +1438,43 @@ declare namespace TComponents {
     /**
      * @constructor
      * @extends TComponents.Selector_A
-     * @param {HTMLElement} container - HTMLElement that is going to be the parent of the component
+     * @param {HTMLElement} parent - HTMLElement that is going to be the parent of the component
      * @param {string} module - module to search for procedures
      * @param {boolean} isInUse - only return symbols that are used in a Rapid program, i.e. a type declaration that has no d variable will not be returned when this flag is set true.
      * @param {string} [selected] - item that shall be shown as selected after first render
      * @param {string} [label] - label text
      * @param {boolean} [addNoSelection] - if true, and empty selector item is placed as first item
+     * @param {string} [filter] - only procedures containing the filter patern (not casesensitive)
      */
     constructor(
-      container: HTMLElement,
+      parent: HTMLElement,
       module?: string,
       isInUse?: boolean,
       selected?: string,
       label?: string,
-      addNoSelection?: boolean
+      addNoSelection?: boolean,
+      filter?: string
     );
     /**
      * Updates the content of selector based on {@link module} parameter
      * @alias updateSearch
      * @param {string} module - Module to search for procedures
+     * @param {string} [filter] - only procedures containing the filter patern (not casesensitive)
      * @memberof TComponents.SelectorProcedures_A
      */
-    updateSearch(module: string): Promise<void>;
+    updateSearch(module: string, filter?: string): Promise<void>;
   }
 
   /**
    * Selector displaying modules available at the controller
    * @class TComponents.SelectorModules_A
    * @extends TComponents.Selector_A
-   * @param {HTMLElement} container - HTMLElement that is going to be the parent of the component
+   * @param {HTMLElement} parent - HTMLElement that is going to be the parent of the component
    * @param {boolean} isInUse - only return symbols that are used in a Rapid program, i.e. a type declaration that has no d variable will not be returned when this flag is set true.
    * @param {string} [selected] - item that shall be shown as selected after first render
    * @param {string} [label] - label text
    * @param {boolean} [addNoSelection] - if true, and empty selector item is placed as first item
+   * @param {string} [filter] - only modules containing the filter patern (not casesensitive)
    * @example
    * const modSelector = new TComponents.SelectorModules_A(
    *    document.querySelector('.module-dropdown'),
@@ -1467,32 +1488,35 @@ declare namespace TComponents {
     /**
      * @constructor
      * @extends TComponents.Selector_A
-     * @param {HTMLElement} container - HTMLElement that is going to be the parent of the component
+     * @param {HTMLElement} parent - HTMLElement that is going to be the parent of the component
      * @param {boolean} isInUse - only return symbols that are used in a Rapid program, i.e. a type declaration that has no d variable will not be returned when this flag is set true.
      * @param {string} [selected] - item that shall be shown as selected after first render
      * @param {string} [label] - label text
      * @param {boolean} [addNoSelection] - if true, and empty selector item is placed as first item
+     * @param {string} [filter] - only modules containing the filter patern (not casesensitive)
      */
     constructor(
-      container: HTMLElement,
+      parent: HTMLElement,
       isInUse?: boolean,
       selected?: string,
       label?: string,
-      addNoSelection?: boolean
+      addNoSelection?: boolean,
+      filter?: string
     );
     /**
      * Updates the content of selector based available modules
      * @alias updateSearch
      * @memberof TComponents.SelectorModules_A
+     * @param {string} [filter] - only modules containing the filter patern (not casesensitive)
      */
-    updateSearch(): Promise<void>;
+    updateSearch(filter?: string): Promise<void>;
   }
 
   /**
    * Selector displaying Ethernet/IP devices available at the controller
    * @class TComponents.SelectorEthernetIPDevices_A
    * @extends TComponents.Selector_A
-   * @param {HTMLElement} container - HTMLElement that is going to be the parent of the component
+   * @param {HTMLElement} parent - HTMLElement that is going to be the parent of the component
    * @param {string} [selected] - item that shall be shown as selected after first render
    * @param {string} [label] - label text
    * @param {boolean} [addNoSelection] - if true, and empty selector item is placed as first item
@@ -1508,17 +1532,12 @@ declare namespace TComponents {
     /**
      * @constructor
      * @extends TComponents.Selector_A
-     * @param {HTMLElement} container - HTMLElement that is going to be the parent of the component
+     * @param {HTMLElement} parent - HTMLElement that is going to be the parent of the component
      * @param {string} [selected] - item that shall be shown as selected after first render
      * @param {string} [label] - label text
      * @param {boolean} [addNoSelection] - if true, and empty selector item is placed as first item
      */
-    constructor(
-      container: HTMLElement,
-      selected?: string,
-      label?: string,
-      addNoSelection?: boolean
-    );
+    constructor(parent: HTMLElement, selected?: string, label?: string, addNoSelection?: boolean);
     /**
      * Updates the content of selector based available Ethernet/IP devices
      * @alias updateSearch
@@ -1531,7 +1550,7 @@ declare namespace TComponents {
    * Selector displaying modules available at the controller
    * @class TComponents.SelectorSignals_A
    * @extends TComponents.Selector_A
-   * @param {HTMLElement} container - HTMLElement that is going to be the parent of the component
+   * @param {HTMLElement} parent - HTMLElement that is going to be the parent of the component
    * @param {object} filter - An object with filter information:
    * <br>&emsp;(string) name signal name
    * <br>&emsp;(string) device device name
@@ -1555,7 +1574,7 @@ declare namespace TComponents {
     /**
      * @ckonstructor
      * @extends TComponents.Selector_A
-     * @param {HTMLElement} container - HTMLElement that is going to be the parent of the component
+     * @param {HTMLElement} parent - HTMLElement that is going to be the parent of the component
      * @param {object} filter - An object with filter information:
      * <br>&emsp;(string) name signal name
      * <br>&emsp;(string) device device name
@@ -1569,7 +1588,7 @@ declare namespace TComponents {
      * @param {boolean} [addNoSelection] - if true, and empty selector item is placed as first item
      */
     constructor(
-      container: HTMLElement,
+      parent: HTMLElement,
       filter?: object,
       selected?: string,
       label?: string,
@@ -1594,7 +1613,7 @@ declare namespace TComponents {
   //   class Selector_A extends Component_A {
   //     readonly _label: string;
   //     readonly _selected: string;
-  //     constructor(container: HTMLElement, label?: string);
+  //     constructor(parent: HTMLElement, label?: string);
   //     render(): void;
   //     markup(self: Selector_A): string;
   //     cbOnSelection(selection: string): Promise<void>;
@@ -1610,7 +1629,7 @@ declare namespace TComponents {
   //     module: string;
   //     isInUse: boolean;
   //     constructor(
-  //       container: HTMLElement,
+  //       parent: HTMLElement,
   //       module?: string | null,
   //       isInUse?: boolean,
   //       selected?: string,
@@ -1624,7 +1643,7 @@ declare namespace TComponents {
   //     module: string;
   //     isInUse: boolean;
   //     constructor(
-  //       container: HTMLElement,
+  //       parent: HTMLElement,
   //       module: string | null,
   //       isInUse: boolean,
   //       selected?: string,
@@ -1636,12 +1655,12 @@ declare namespace TComponents {
 
   //   class SelectorModules_A extends Selector_A {
   //     isInUse: boolean;
-  //     constructor(container: HTMLElement, isInUse?: boolean, selected?: string, label?: string);
+  //     constructor(parent: HTMLElement, isInUse?: boolean, selected?: string, label?: string);
   //     init(): Promise<void>;
   //   }
 
   //   class SelectorEthernetIPDevices_A extends Selector_A {
-  //     constructor(container: HTMLElement, selected?: string, label?: string);
+  //     constructor(parent: HTMLElement, selected?: string, label?: string);
   //     init(): Promise<void>;
   //     updateSearch(): Promise<void>;
   //   }
@@ -1649,10 +1668,10 @@ declare namespace TComponents {
   class TemplateView_A extends TComponents.Component_A {
     /**
      * @constructor
-     * @param {HTMLElement} container - DOM element in which this component is to be inserted
+     * @param {HTMLElement} parent - DOM element in which this component is to be inserted
      * @param {string} [name] - Example of pasing a prop to the component
      */
-    constructor(container: HTMLElement, name?: string);
+    constructor(parent: HTMLElement, name?: string);
     name: string;
     /**
      * Contains component specific asynchronous implementation (like access to controller).
@@ -1684,11 +1703,19 @@ declare namespace TComponents {
      * @param {TComponents.Component_A} self - The instance on which this method was called.
      * @returns {string}
      */
+
+    /**
+     * Registers callback function to a click event
+     * @alias onClick
+     * @param {function} func
+     */
+    onClick(func: Function): void;
+
     markup(self: TComponents.Component_A): string;
   }
 
   //   class SelectorSignals_A extends Selector_A {
-  //     constructor(container: HTMLElement, filter: object, selected?: string, label?: string);
+  //     constructor(parent: HTMLElement, filter: object, selected?: string, label?: string);
   //     init(): Promise<void>;
   //     updateSearch(filter: object): Promise<void>;
   //   }

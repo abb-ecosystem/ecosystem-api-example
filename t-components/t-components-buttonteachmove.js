@@ -1,4 +1,5 @@
 'use strict';
+// @ts-ignore
 var TComponents = TComponents || {};
 (function (o) {
   if (!o.hasOwnProperty('ButtonTeachMove_A')) {
@@ -6,7 +7,7 @@ var TComponents = TComponents || {};
      * Component that combine {@link TComponents.ButtonTeach_A} and {@link TComponents.ButtonMoveTo_A} together.
      * @class TComponents.ButtonTeachMove_A
      * @extends TComponents.Component_A
-     * @param {HTMLElement} container
+     * @param {HTMLElement} parent
      * @param {string} rapid_variable - Rapid variable to subpscribe to
      * @param {string} module - Module containig the rapid variable
      * @param {string} [label] - label text
@@ -21,8 +22,8 @@ var TComponents = TComponents || {};
      *  await btnTeach.render();
      */
     o.ButtonTeachMove_A = class ButtonTeachMove extends TComponents.Component_A {
-      constructor(container, location, module, label = '') {
-        super(container, label);
+      constructor(parent, location, module, label = '') {
+        super(parent, label);
         this._location = location;
         this._module = module;
         this.robTarget = null;
@@ -61,8 +62,8 @@ var TComponents = TComponents || {};
       markup({ _location, _label }) {
         return `
           <div id="${_location}" class="tc-btnteachmove-location tc-btnteachmove-location-row">
-            <div class="tc-button-teachmove-teach tc-button-teachmove-btn"></div>
-            <div class="tc-button-teachmove-move tc-button-teachmove-btn"></div>
+            <div class="tc-button-teachmove-teach tc-button-teachmove-btn tc-item"></div>
+            <div class="tc-button-teachmove-move tc-button-teachmove-btn tc-item"></div>
             <p>${_label}</p>
           </div>
         `;
@@ -78,7 +79,7 @@ tComponentStyle.innerHTML = `
   display: flex;
   flex-direction: column;
   height: 100px;
-  width: 400px;
+  width: max-content;
   /* justify-content: space-around; */
   align-items: flex-start;
   padding-left: 20px;

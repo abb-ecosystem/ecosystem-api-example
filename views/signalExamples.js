@@ -1,6 +1,6 @@
 class SignalExamples extends TComponents.Component_A {
-  constructor(container) {
-    super(container);
+  constructor(parent) {
+    super(parent);
   }
 
   async onInit() {
@@ -101,6 +101,8 @@ class SignalExamples extends TComponents.Component_A {
   async cbConfirmLoadConfiguration(action) {
     if (action === 'ok') {
       let url = `${configPath}/${configName}.cfg`;
+      console.log('💥');
+      console.log(url);
       const action = 'replace';
       try {
         await API.loadConfiguration(url, action);

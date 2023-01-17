@@ -1,4 +1,5 @@
 'use strict';
+// @ts-ignore
 var TComponents = TComponents || {};
 (function (o) {
   if (!o.hasOwnProperty('ModalWindow_A')) {
@@ -6,7 +7,7 @@ var TComponents = TComponents || {};
      *
      * @class TComponents.ModalWindow_A
      * @extends TComponents.Component_A
-     * @param {HTMLElement} container - HTMLElement that is going to be the parent of the component
+     * @param {HTMLElement} parent - HTMLElement that is going to be the parent of the component
      * @param {TComponents.Component_A | HTMLElement | null} [content] - Component/Element to be displayed in the modal window
      * @example
      * const editSignal = new TComponents.SignalEdit_A(
@@ -26,8 +27,8 @@ var TComponents = TComponents || {};
      * @see TComponents.SignalView_A
      */
     o.ModalWindow_A = class ModalWindow extends TComponents.Component_A {
-      constructor(container, content = null) {
-        super(container);
+      constructor(parent, content = null) {
+        super(parent);
         this.content = content;
         this.handler = [];
       }

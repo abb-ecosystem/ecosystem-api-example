@@ -4,8 +4,8 @@ class Procedure extends TComponents.Component_A {
    *
    * @param {HTMLElement} container - DOM element in which this component is to be inserted
    */
-  constructor(container, module = null) {
-    super(container);
+  constructor(parent, module = null) {
+    super(parent);
   }
 
   async onInit() {
@@ -66,12 +66,11 @@ class Procedure extends TComponents.Component_A {
         </div>
       </div>
     </div>
-
     `;
   }
 
   cbIsSR(checked) {
-    this.child.btnProcedure.isServiceRoutine = checked;
+    this.child.btnProcedure.userLevel = checked;
   }
 
   async cbOnSelectionModule(selection) {

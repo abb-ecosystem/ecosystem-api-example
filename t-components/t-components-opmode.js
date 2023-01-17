@@ -1,4 +1,4 @@
-'use strict';
+// @ts-ignore
 var TComponents = TComponents || {};
 (function (o) {
   if (!o.hasOwnProperty('OpMode_A')) {
@@ -6,13 +6,19 @@ var TComponents = TComponents || {};
      * Called when an instance of this component is created.
      * @class TComponents.OpMode_A
      * @extends TComponents.Component_A
-     * @param {HTMLElement} container - DOM element in which this component is to be inserted
+     * @param {HTMLElement} parent - DOM element in which this component is to be inserted
      * @example
      * const opMode = new TComponents.OpMode_A(document.querySelector('.radio-opmode')),
      */
     o.OpMode_A = class OpMode extends TComponents.Component_A {
-      constructor(container) {
-        super(container);
+      constructor(parent) {
+        super(parent);
+        this.radioMan = new FPComponents.Radio_A();
+        this.radioAuto = new FPComponents.Radio_A();
+        this.radioMan.onclick = this.cbOpModeMan.bind(this);
+        this.radioAuto.onclick = this.cbOpModeAuto.bind(this);
+        this.radioAuto.desc = 'Automatic';
+        this.radioMan.desc = 'Manual';
       }
 
       /**
@@ -22,23 +28,10 @@ var TComponents = TComponents || {};
        * @async
        */
       async onInit() {
-        (this.radioMan = new FPComponents.Radio_A()),
-          (this.radioAuto = new FPComponents.Radio_A()),
-          (this.radioMan.onclick = this.cbOpModeMan.bind(this));
-        this.radioAuto.onclick = this.cbOpModeAuto.bind(this);
-
-        this.radioAuto.desc = 'Automatic';
-        this.radioMan.desc = 'Manual';
-
         this.initOpMode = await RWS.Controller.getOperationMode();
-
         const opModeSub = RWS.Controller.getMonitor('operation-mode');
         opModeSub.addCallbackOnChanged(this.OpModeChanged.bind(this));
         await opModeSub.subscribe();
-      }
-
-      mapComponents() {
-        return {};
       }
 
       onRender() {
@@ -74,12 +67,12 @@ var TComponents = TComponents || {};
 
       async cbOpModeAuto() {
         this.radioMan.checked = false;
-        var feedback = await RWS.Controller.setOperationMode('automatic'); //Sets controller to automatic mode
+        await RWS.Controller.setOperationMode('automatic'); //Sets controller to automatic mode
       }
 
       async cbOpModeMan() {
         this.radioAuto.checked = false;
-        var feedback = await RWS.Controller.setOperationMode('manual'); //Sets controller to manual mode
+        await RWS.Controller.setOperationMode('manual'); //Sets controller to manual mode
       }
     };
   }

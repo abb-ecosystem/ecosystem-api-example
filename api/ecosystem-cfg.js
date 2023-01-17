@@ -9,7 +9,7 @@ if (typeof API.constructedCfg === 'undefined') {
      * @constant
      * @type {number}
      */
-    cfg.ECOSYSTEM_CFG_LIB_VERSION = '0.1';
+    cfg.ECOSYSTEM_CFG_LIB_VERSION = '0.2';
 
     /**
      * @alias API.CONFIG
@@ -43,7 +43,7 @@ if (typeof API.constructedCfg === 'undefined') {
         const answer = await RWS.CFG.loadConfiguration(filepath, action);
       } catch (e) {
         console.error(e);
-        API.rejectWithStatus(`Failed to load ${file} `, e);
+        API.rejectWithStatus(`Failed to load ${filepath} `, e);
       }
     };
 
@@ -304,8 +304,8 @@ if (typeof API.constructedCfg === 'undefined') {
 
         /**
          * Subscribe to the signal and set the callback function
-         * @param {*} callback function to be called on change
-         * @returns {undefine | Promise<{}>} - undefine if success, otherwise a reject Promise
+         * @param {function} callback function to be called on change
+         * @returns {undefined | Promise<{}>} - undefine if success, otherwise a reject Promise
          */
         async subscribe(callback) {
           try {
@@ -322,7 +322,7 @@ if (typeof API.constructedCfg === 'undefined') {
           return await this.signal.unsubscribe();
         }
 
-        addCallbackOnChanged(callback) {
+        onChanged(callback) {
           try {
             if (!this.signal) {
               console.log(`Signal ${this.name} not available for subscription`);
@@ -342,11 +342,6 @@ if (typeof API.constructedCfg === 'undefined') {
             return API.rejectWithStatus(`Failed to add callback to signal ${this.name}`, e);
           }
         }
-
-        // async handler(value) {
-        //   if (!this.signal) return
-        //   this.signal.setValue(value)
-        // }
       }
 
       /**

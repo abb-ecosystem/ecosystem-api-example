@@ -1,5 +1,3 @@
-'use strict';
-
 var API = API || {};
 if (typeof API.constructedRapid === 'undefined') {
   (function (r) {
@@ -9,7 +7,7 @@ if (typeof API.constructedRapid === 'undefined') {
      * @constant
      * @type {number}
      */
-    r.ECOSYSTEM_RAPID_LIB_VERSION = '0.2';
+    r.ECOSYSTEM_RAPID_LIB_VERSION = '0.3';
 
     /**
      * Shallow compare does check for equality. When comparing scalar values (numbers, strings)
@@ -179,6 +177,9 @@ if (typeof API.constructedRapid === 'undefined') {
           let pp;
           let progress;
 
+          console.log('😥');
+          console.log(`proc: ${proc}, userLevel : ${userLevel}`);
+
           try {
             ///////////////////////////////////////////////////////////////////////////
             progress = 'step0'; // check conditions (execution state, operation mode)
@@ -191,11 +192,11 @@ if (typeof API.constructedRapid === 'undefined') {
               progress = 'step1'; // 1 - check controller state
               //////////////////////////////////////////////////////////////////////
               let state = await RWS.Controller.getControllerState();
-              if (state === API.CONTROLLER.STATE.GuardStop) {
-                throw new Error(
-                  'Controller state in Guard Stop - procedure execution not possible'
-                );
-              }
+              // if (state === API.CONTROLLER.STATE.GuardStop) {
+              //   throw new Error(
+              //     'Controller state in Guard Stop - procedure execution not possible'
+              //   );
+              // }
               if (state !== API.CONTROLLER.STATE.MotorsOn && userLevel === false) {
                 throw new Error('Turn on the motors to execute procedure');
               }
@@ -255,7 +256,6 @@ if (typeof API.constructedRapid === 'undefined') {
               console.log('ExecutionStae already RUNNING!!!!');
             }
           } catch (e) {
-            console.log('😶');
             API.log(`💥 Exception occur at ${progress}`);
             switch (progress) {
               case 'step2': //
@@ -384,17 +384,42 @@ if (typeof API.constructedRapid === 'undefined') {
          * @memberof API.RAPID.Task
          * @param {string} module - module where the search takes place
          * @param {boolean} [isInUse] only return symbols that are used in a Rapid program,
+         * @param {object} [filter] - The following filters can be applied:
+         * <br>&emsp;name - name of the data symbol (not casesensitive)
+         * <br>&emsp;symbolType - valid values: 'constant', 'variable', 'persistent' (array with multiple values is supported)
+         * <br>&emsp;dataType - type of the data, e.g. 'num'(only one data type is supported)
          * i.e. a type declaration that has no declared variable will not be returned when this flag is set true.
          * @returns {Promise<object>}
          */
-        async searchVariables(module = null, isInUse = false) {
+        async searchVariables(module = null, isInUse = false, filter = {}) {
           let vars = [];
           try {
             var properties = RWS.Rapid.getDefaultSearchProperties();
             properties.searchURL = `RAPID/${this.name}${module === null ? `` : `/${module}`}`;
-            properties.types = RWS.Rapid.SymbolTypes.rapidData;
+
+            let symbolType = 0;
+            if (filter.hasOwnProperty('symbolType')) {
+              const hasValue = (value) => {
+                if (value.toLowerCase() === 'constant')
+                  symbolType += RWS.Rapid.SymbolTypes.constant;
+                else if (value.toLowerCase() === 'variable')
+                  symbolType += RWS.Rapid.SymbolTypes.variable;
+                else if (value.toLowerCase() === 'persistent')
+                  symbolType += RWS.Rapid.SymbolTypes.persistent;
+              };
+              Array.isArray(filter.symbolType)
+                ? filter.symbolType.map((entry) => hasValue(entry))
+                : hasValue(filter.symbolType);
+            } else {
+              symbolType = RWS.Rapid.SymbolTypes.rapidData;
+            }
+            properties.types = symbolType;
+
             properties.isInUse = isInUse;
-            var hits = await RWS.Rapid.searchSymbols(properties);
+            const regexp = filter.hasOwnProperty('name') ? `^.*${filter.name}.*$` : '';
+            const dataType = filter.hasOwnProperty('dataType') ? filter.dataType : '';
+
+            var hits = await RWS.Rapid.searchSymbols(properties, dataType, regexp);
 
             if (hits.length > 0) {
               for (let i = 0; i < hits.length; i++) {
@@ -417,23 +442,24 @@ if (typeof API.constructedRapid === 'undefined') {
          * @param {string} module - module where the search takes place
          * @param {boolean} [isInUse] only return symbols that are used in a Rapid program,
          * i.e. a type declaration that has no declared variable will not be returned when this flag is set true.
+         * @param {string} [filter] - only symbols containing the string patern (not casesensitive)
          * @returns {Promise<object>}
          */
-        async searchProcedures(module = null, isInUse = false) {
+        async searchProcedures(module = null, isInUse = false, filter = '') {
           try {
-            let procs = [];
+            let items = [];
             var properties = await RWS.Rapid.getDefaultSearchProperties();
             properties.searchURL = `RAPID/${this.name}${module === null ? `` : `/${module}`}`;
             properties.types = RWS.Rapid.SymbolTypes.procedure;
             properties.isInUse = isInUse;
-            var hits = await RWS.Rapid.searchSymbols(properties);
+            const regexp = filter !== '' ? `^.*${filter}.*$` : '';
+            var hits = await RWS.Rapid.searchSymbols(properties, '', regexp);
             if (hits.length > 0) {
               for (let i = 0; i < hits.length; i++) {
-                // console.log(JSON.stringify(hits[i]))
-                procs.push(hits[i]);
+                items.push(hits[i]);
               }
             }
-            return procs;
+            return items;
           } catch (e) {
             return API.rejectWithStatus(
               `Failed to search procedures -  module: ${module}, isInUse: ${isInUse}`,
@@ -448,24 +474,26 @@ if (typeof API.constructedRapid === 'undefined') {
          * @memberof API.RAPID.Task
          * @param {boolean} [isInUse] only return symbols that are used in a Rapid program,
          * i.e. a type declaration that has no declared variable will not be returned when this flag is set true.
+         * @param {string} [filter] - only symbols containing the string patern (not casesensitive)
          * @returns {Promise<object>}
          */
-        async searchModules(isInUse = false) {
-          let procs = [];
+        async searchModules(isInUse = false, filter = '') {
+          let items = [];
 
           try {
             var properties = await RWS.Rapid.getDefaultSearchProperties();
             properties.searchURL = `RAPID/${this.name}`;
             properties.types = RWS.Rapid.SymbolTypes.module;
             properties.isInUse = isInUse;
-            var hits = await RWS.Rapid.searchSymbols(properties);
+            const regexp = filter !== '' ? `^.*${filter}.*$` : '';
+            var hits = await RWS.Rapid.searchSymbols(properties, '', regexp);
             if (hits.length > 0) {
               for (let i = 0; i < hits.length; i++) {
                 // console.log(JSON.stringify(hits[i]))
-                procs.push(hits[i]);
+                items.push(hits[i]);
               }
             }
-            return procs;
+            return items;
           } catch (e) {
             return API.rejectWithStatus(`Failed to search modules -  isInUse: ${isInUse}`, e);
           }
@@ -600,6 +628,7 @@ if (typeof API.constructedRapid === 'undefined') {
           this.props = props;
           this.var = variable;
           this.callbacks = [];
+          this._subscrided = false;
         }
 
         get name() {
@@ -662,6 +691,29 @@ if (typeof API.constructedRapid === 'undefined') {
          */
         async subscribe(raiseInitial = false) {
           try {
+            await this._onChanged();
+
+            // const ret = await Promise.race(this.var.subscribe(raiseInitial), timeout(TIMEOUT_SEC));
+            if (!this._subscrided) {
+              await this.var.subscribe(raiseInitial);
+              this._subscrided = true;
+            }
+          } catch (e) {
+            return API.rejectWithStatus(`Failed to subscribe variable "${this.name}"`, e);
+          }
+        }
+
+        async unsubscribe() {
+          if (this._subscrided) return this.var.unsubscribe();
+        }
+
+        /**
+         * Internal callback for variable specific handling. This method is called inside the subscribe method
+         * @returns {undefined | Promise<{}>} undefined at success, reject Promise at fail.
+         * @protected
+         */
+        async _onChanged() {
+          try {
             const cb = async (value) => {
               if (value === undefined) {
                 value = await this.var.getValue();
@@ -670,30 +722,8 @@ if (typeof API.constructedRapid === 'undefined') {
             };
 
             this.var.addCallbackOnChanged(cb.bind(this));
-
-            // const ret = await Promise.race(this.var.subscribe(raiseInitial), timeout(TIMEOUT_SEC));
-            await this.var.subscribe(raiseInitial);
           } catch (e) {
-            return API.rejectWithStatus(`Failed to subscribe variable "${this.name}"`);
-          }
-        }
-
-        async unsubscribe() {
-          return this.var.unsubscribe();
-        }
-
-        addCallbackOnChanged(callback) {
-          try {
-            const cb = async (value) => {
-              if (value === undefined) {
-                value = await this.var.getValue();
-              }
-              callback(value);
-            };
-
-            this.var.addCallbackOnChanged(cb.bind(this));
-          } catch (e) {
-            return API.rejectWithStatus(`Failed to add callback to ${this.name}`, e);
+            return API.rejectWithStatus(`Failed to add callback on changed for "${this.name}"`);
           }
         }
 
@@ -713,11 +743,11 @@ if (typeof API.constructedRapid === 'undefined') {
         }
 
         /**
-         * Subscribe to a RAPID variable
-         * @param {boolean} raiseInitial raises an event after subscription
+         * Internal callback for variable specific handling. This method is called inside the subscribe method
          * @returns {undefined | Promise<{}>} undefined at success, reject Promise at fail.
+         * @protected
          */
-        async subscribe(raiseInitial = false) {
+        async _onChanged() {
           try {
             const cb = async (value) => {
               if (value === undefined) {
@@ -728,11 +758,8 @@ if (typeof API.constructedRapid === 'undefined') {
             };
 
             this.var.addCallbackOnChanged(cb.bind(this));
-
-            // const ret = await Promise.race(this.var.subscribe(raiseInitial), timeout(TIMEOUT_SEC));
-            await this.var.subscribe(raiseInitial);
           } catch (e) {
-            return API.rejectWithStatus(`Failed to subscribe variable "${this.name}"`);
+            return API.rejectWithStatus(`Failed to add callback on changed for "${this.name}"`);
           }
         }
       }
@@ -748,11 +775,11 @@ if (typeof API.constructedRapid === 'undefined') {
         }
 
         /**
-         * Subscribe to a RAPID variable
-         * @param {boolean} raiseInitial raises an event after subscription
+         * Internal callback for variable specific handling. This method is called inside the subscribe method
          * @returns {undefined | Promise<{}>} undefined at success, reject Promise at fail.
+         * @protected
          */
-        async subscribe(raiseInitial = false) {
+        async _onChanged() {
           try {
             const cb = async (value) => {
               if (value === undefined) {
@@ -760,15 +787,44 @@ if (typeof API.constructedRapid === 'undefined') {
               }
 
               // this.trigger('changed', value.toLowerCase());
-              this.trigger('changed', value === 'TRUE' ? true : false);
+              this.trigger('changed', value === 'TRUE' || value === 'true' ? true : false);
             };
 
             this.var.addCallbackOnChanged(cb.bind(this));
-
-            // const ret = await Promise.race(this.var.subscribe(raiseInitial), timeout(TIMEOUT_SEC));
-            await this.var.subscribe(raiseInitial);
           } catch (e) {
-            return API.rejectWithStatus(`Failed to subscribe variable "${this.name}"`);
+            return API.rejectWithStatus(`Failed to add callback on changed for "${this.name}"`);
+          }
+        }
+      }
+
+      class VariableNum extends Variable {
+        async getValue() {
+          const value = Number(await super.getValue());
+          return value;
+        }
+
+        async setValue(value) {
+          super.setValue(Number(value));
+        }
+
+        /**
+         * Internal callback for variable specific handling. This method is called inside the subscribe method
+         * @returns {undefined | Promise<{}>} undefined at success, reject Promise at fail.
+         * @protected
+         */
+        async _onChanged() {
+          try {
+            const cb = async (value) => {
+              if (value === undefined) {
+                value = await this.var.getValue();
+              }
+
+              this.trigger('changed', Number(value));
+            };
+
+            this.var.addCallbackOnChanged(cb.bind(this));
+          } catch (e) {
+            return API.rejectWithStatus(`Failed to add callback on changed for "${this.name}"`);
           }
         }
       }
@@ -784,31 +840,40 @@ if (typeof API.constructedRapid === 'undefined') {
        * @returns RWS.RAPID Data object
        */
       this.getVariable = async (task, module, name, id = null) => {
-        try {
-          const v = await RWS.Rapid.getData(task, module, name);
-          const p = await v.getProperties();
+        if (task && module && name) {
+          let found = this.variables.find((v) => v.name === name);
+          try {
+            let variable;
+            if (found) {
+              variable = found;
+            } else {
+              const v = await RWS.Rapid.getData(task, module, name);
+              const p = await v.getProperties();
 
-          let variable;
-          if (p.dataType === 'string') variable = new VariableString(v, p);
-          else if (p.dataType === 'bool') variable = new VariableBool(v, p);
-          else variable = new Variable(v, p);
-          variable.subscribe();
-          this.variables.push(variable);
+              if (p.dataType === 'string') variable = new VariableString(v, p);
+              else if (p.dataType === 'bool') variable = new VariableBool(v, p);
+              else if (p.dataType === 'num' || p.dataType === 'dnum')
+                variable = new VariableNum(v, p);
+              else variable = new Variable(v, p);
+            }
 
-          if (id !== null) {
-            const cb = function (value) {
-              const elem = document.getElementById(id);
-              elem && (elem.textContent = value);
-            };
-            // await variable.addCallbackOnChanged(cb);
-            variable.onChanged(cb);
+            //check again before pushing
+            const findIndex = this.variables.findIndex((v) => v.name === name);
+
+            if (findIndex === -1) {
+              variable.subscribe();
+              this.variables.push(variable);
+            } else {
+              variable = this.variables[findIndex];
+            }
+
+            return variable;
+          } catch (e) {
+            return API.rejectWithStatus(
+              `Failed to subscribe to variable ${name} at ${task}->${module} module.`,
+              e
+            );
           }
-          return variable;
-        } catch (e) {
-          return API.rejectWithStatus(
-            `Failed to subscribe to variable ${name} at ${task}->${module} module.`,
-            e
-          );
         }
       };
 
@@ -823,8 +888,6 @@ if (typeof API.constructedRapid === 'undefined') {
         const t = await RWS.Rapid.getTask(task);
         return new Task(t);
       };
-
-      // this.callProcedure = async function (name, task = 'T_ROB1') {}
 
       /**
        * Load a RAPID module from a file

@@ -1,3 +1,7 @@
+'use strict';
+// @ts-ignore
+var TComponents = TComponents || {};
+
 (function (o) {
   if (!o.hasOwnProperty('Popup_A')) {
     const OK = 'ok';
@@ -133,9 +137,9 @@
        *  };
        * @todo Optimize the parsing of error object
        */
-      static error(e, callback = null) {
+      static error(e, msg1 = '', callback = null) {
         const entries = Object.entries(e);
-        const msgArray = [];
+        const msgArray = msg1 === '' ? [] : [e.message];
         entries.forEach(([key, value]) => {
           if (key !== 'message') {
             const json = JSON.stringify(value, null, 2)
@@ -152,7 +156,11 @@
             ? FPComponents.Popup_A.STYLE.DANGER
             : FPComponents.Popup_A.STYLE.WARNING;
 
-        FPComponents.Popup_A.message(e.message, msgArray, callback, severity);
+        if (msg1 === '') {
+          FPComponents.Popup_A.message(e.message, msgArray, callback, severity);
+        } else {
+          FPComponents.Popup_A.message(msg1, msgArray, callback, severity);
+        }
       }
 
       /**

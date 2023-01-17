@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Load a CSS file
  * @param {string} href - path of css file
@@ -12,7 +10,7 @@ function tComponentsLoadCSS(href) {
   link.href = href;
   head.appendChild(link);
 }
-const T_COMPONENTS_BASE_VERSION = '0.2';
+const T_COMPONENTS_BASE_VERSION = '0.3';
 
 tComponentsLoadCSS('t-components/t-components.css');
 
@@ -44,6 +42,8 @@ var TComponents = TComponents || {};
       on(eventName, callback) {
         if (typeof callback !== 'function') throw new Error('callback is not a valid function');
         const handlers = this.events[eventName] || [];
+        if (handlers.includes(callback)) return;
+
         handlers.push(callback);
         this.events[eventName] = handlers;
       }
@@ -60,7 +60,6 @@ var TComponents = TComponents || {};
         if (!handlers || handlers.length === 0) {
           return;
         }
-
         handlers.forEach((callback) => {
           callback(data);
         });
@@ -81,16 +80,23 @@ var TComponents = TComponents || {};
      * @property {string} _label - internal variable to store the label.
      */
     o.Component_A = class Component extends TComponents.Eventing_A {
-      constructor(container, label = '') {
+      constructor(parent, label = '') {
         super();
 
-        if (!Component._isHTMLElement(container))
+        if (!Component._isHTMLElement(parent))
           throw new Error(`HTML element container required but not detected`);
-        this.container = container;
+        this._compId = `${this.constructor.name}-${API.generateUUID()}`;
+
+        this.child = [];
+
+        this._anchor = parent;
+        this.container = document.createElement('div');
+        this.container.id = this._compId;
+        this._anchor.appendChild(this.container);
+
         this.template = null;
         this.initDone = false;
         this._compId = `${this.constructor.name}-${API.generateUUID()}`;
-        /** */
         this._label = label;
         this._enabled = true;
       }
@@ -118,7 +124,6 @@ var TComponents = TComponents || {};
        * @async
        */
       async initChildrenComponents() {
-        this.child = [];
         const childArray = [];
         const componentsMap = this.mapComponents();
 
@@ -164,20 +169,22 @@ var TComponents = TComponents || {};
         if (this.initDone === false) {
           return await this.init();
         } else {
-          this.container.innerHTML = '';
           this.template = document.createElement('template');
           this.template.innerHTML = this.markup(this);
+
+          // this.container.innerHTML = '';
+          // this.container.innerHTML = this.markup(this);
 
           const labelEl = this.find('.tc-container-label');
           this._label && labelEl
             ? labelEl && labelEl.querySelector('p').classList.remove('tc-hidden')
             : labelEl && labelEl.querySelector('p').classList.add('tc-hidden');
 
+          this.container.innerHTML = '';
+          this.container.appendChild(this.template.content);
+
           await this.initChildrenComponents();
-
           this.onRender();
-
-          this.container.append(this.template.content);
 
           return this;
         }
@@ -263,7 +270,12 @@ var TComponents = TComponents || {};
        * @param {HTMLElement} element - Container DOM element
        */
       attachToElement(element) {
-        this.container = element;
+        if (!Component._isHTMLElement(element))
+          throw new Error(`HTML element container required but not detected`);
+
+        this._anchor.removeChild(this.container);
+        this._anchor = element;
+        this._anchor.appendChild(this.container);
       }
 
       /**
@@ -280,7 +292,12 @@ var TComponents = TComponents || {};
       static _hasChildOwnProperty(obj, property, result = []) {
         if (typeof obj === 'object' && obj !== null) {
           for (const val of Object.values(obj)) {
-            if (typeof val === 'object' && val !== null && val !== obj) {
+            if (
+              typeof val === 'object' &&
+              val !== null &&
+              val !== obj &&
+              !this._isHTMLElement(val)
+            ) {
               if (val.hasOwnProperty(property)) {
                 result.push(val);
               }
@@ -318,11 +335,13 @@ var TComponents = TComponents || {};
        * @returns {HTMLElement} An Element object representing the first element wthin the component that matches the specified set of CSS selectors, or null is returned if there are no matches.
        */
       find(selector) {
-        var el = null;
-        if (this.container.hasChildNodes()) {
-          el = this.container.querySelector(selector);
-        }
-        return el ? el : this.template && this.template.content.querySelector(selector);
+        // var el = null;
+        // if (this.container.hasChildNodes()) {
+        //   el = this.container.querySelector(selector);
+        // }
+        // return el ? el : this.template && this.template.content.querySelector(selector);
+
+        return this.container.querySelector(selector);
       }
 
       /**
@@ -333,18 +352,20 @@ var TComponents = TComponents || {};
        * @returns {HTMLElement[]} An Array of Elements that matches the specified CSS selector, or empty array is returned if there are no matches.
        */
       all(selector) {
-        var aContainer = Array.from(this.container.querySelectorAll(selector));
-        var nlTemplate = this.template && this.template.content.querySelectorAll(selector);
+        // var aContainer = Array.from(this.container.querySelectorAll(selector));
+        // var nlTemplate = this.template && this.template.content.querySelectorAll(selector);
 
-        if (nlTemplate) {
-          Array.from(nlTemplate).forEach(function (ele) {
-            var isDuplicate = aContainer.some((ele2) => ele === ele2);
-            if (!isDuplicate) {
-              aContainer[aContainer.length] = ele;
-            }
-          });
-        }
-        return aContainer;
+        // if (nlTemplate) {
+        //   Array.from(nlTemplate).forEach(function (ele) {
+        //     var isDuplicate = aContainer.some((ele2) => ele === ele2);
+        //     if (!isDuplicate) {
+        //       aContainer[aContainer.length] = ele;
+        //     }
+        //   });
+        // }
+        // return aContainer;
+
+        return Array.from(this.container.querySelectorAll(selector));
       }
 
       /**
@@ -436,6 +457,38 @@ var TComponents = TComponents || {};
           }
         }
         this.container.style.cssText = s;
+      }
+
+      /**
+       * Adds a class to underlying element(s) containing the input selector
+       * @alias cssAddClass
+       * @memberof TComponents.Component_A
+       * @param {string} selector - CSS selector, if class: ".selector", if identifier: "#selector"
+       * @param {string} newClass - name of the class to appy (without dot)
+       * @param {boolean} [all] - if true it will apply the class to all selector found, otherwise it applies to the first one found
+       */
+      cssAddClass(selector, className, all = false) {
+        if (className) {
+          const c = className.replace(/^\s/g, '');
+          const el = all ? this.find(selector) : this.all(selector);
+          Array.isArray(el) ? el.forEach((el) => el.classList.add(c)) : el.classList.add(c);
+        }
+      }
+
+      /**
+       * Adds a class to underlying element(s) containing the input selector
+       * @alias cssAddClass
+       * @memberof TComponents.Component_A
+       * @param {string} selector - CSS selector, if class: ".selector", if identifier: "#selector"
+       * @param {string} className - name of the class to appy (without dot)
+       * @param {boolean} [all] - if true it will apply the class to all selector found, otherwise it applies to the first one found
+       */
+      cssRemoveClass(selector, className, all = false) {
+        if (className) {
+          const c = className.replace(/^\s/g, '');
+          const el = all ? this.find(selector) : this.all(selector);
+          Array.isArray(el) ? el.forEach((el) => el.classList.remove(c)) : el.classList.add(c);
+        }
       }
     };
   }

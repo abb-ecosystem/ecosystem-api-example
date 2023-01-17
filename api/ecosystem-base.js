@@ -136,7 +136,7 @@ if (typeof API.constructedBase === 'undefined') {
      * @private
      */
     es.log = (msg) => {
-      es.verbose && console.log(msg);
+      es.verbose && console.log(JSON.stringify(msg));
     };
 
     /**
@@ -160,7 +160,7 @@ if (typeof API.constructedBase === 'undefined') {
     es.rejectWithStatus = function (message, item = {}) {
       if (es.verbose) {
         API.log(message);
-        API.log(item);
+        API.error(item);
       }
       let r = createStatusObject(message, item);
       return Promise.reject(r);
@@ -226,7 +226,7 @@ if (typeof API.constructedBase === 'undefined') {
      * @memberof API
      * @param {function} func - Function containing the condition
      * @param {number} interval_ms - Interval in miliseconds
-     * @returns {}
+     * @returns {Promise<>}
      * @private
      */
     es.waitForCondition = async function (func, interval_ms = 100) {
@@ -260,6 +260,7 @@ if (typeof API.constructedBase === 'undefined') {
       on(eventName, callback) {
         if (typeof callback !== 'function') throw new Error('callback is not a valid function');
         const handlers = this.events[eventName] || [];
+        if (handlers.includes(callback)) return;
         handlers.push(callback);
         this.events[eventName] = handlers;
       }
@@ -504,8 +505,6 @@ if (typeof API.constructedBase === 'undefined') {
        */
       this.restart = async function (mode = RWS.Controller.RestartModes.restart) {
         try {
-          console.log('💥');
-          console.log(mode);
           await API.sleep(1000);
           RWS.Controller.restartController(mode);
         } catch (e) {

@@ -1,5 +1,5 @@
-// import { v4 as uuidv4 } from 'uuid'
 'use strict';
+// @ts-ignore
 var TComponents = TComponents || {};
 (function (o) {
   if (!o.hasOwnProperty('VarIndicator_A')) {
@@ -7,7 +7,7 @@ var TComponents = TComponents || {};
      * Display field connected to a RAPID variable. It supports variables of type "num", "bool" and "strings".
      * @class TComponents.VarIndicator_A
      * @extends TComponents.Component_A
-     * @param {HTMLElement} container - DOM element in which this component is to be inserted
+     * @param {HTMLElement} parent - DOM element in which this component is to be inserted
      * @param {string} [module] - module to seach for variables
      * @param {string} [variable] - Rapid variable to subpscribe to
      * @param {string} [label] - label text
@@ -15,8 +15,8 @@ var TComponents = TComponents || {};
      * @todo add restriction to association to not supported variables, liek robtarget
      */
     o.VarIndicator_A = class VarIndicator extends TComponents.Component_A {
-      constructor(container, module = '', variable = '', label = '', useIndicatorBorder = false) {
-        super(container, label);
+      constructor(parent, module = '', variable = '', label = '', useIndicatorBorder = false) {
+        super(parent, label);
         this._module = module;
         this._variable = variable;
         this._id = `tc-varindicator-${API.generateUUID()}`;
@@ -37,10 +37,9 @@ var TComponents = TComponents || {};
             this.varElement = await API.RAPID.getVariable(
               this.task.name,
               this._module,
-              this._variable,
-              this._id
+              this._variable
             );
-            this.varElement.addCallbackOnChanged(this.cbVarChanged.bind(this));
+            this.varElement.onChanged(this.cbVarChanged.bind(this));
 
             this._varValue = await this.varElement.getValue();
           }
@@ -114,6 +113,9 @@ var TComponents = TComponents || {};
        * @private
        */
       cbVarChanged(value) {
+        const elem = this.find(`#${this._id}`);
+        elem && (elem.textContent = value);
+
         this.trigger('change', value);
       }
 
@@ -137,11 +139,8 @@ var TComponents = TComponents || {};
         const indicator = this.find('.tc-varindicator-ind');
         if (value) {
           if (indicator.style.border) indicator.style.removeProperty('border');
-          // indicator.style.setProperty('border', 'groove');
-          // indicator.style.setProperty('min-width', '90px');
         } else {
           indicator.style.setProperty('border', 'none');
-          // indicator.style.setProperty('min-width', '100%');
         }
       }
     };

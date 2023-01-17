@@ -4,8 +4,16 @@
     <title>ABB Ecosystem</title>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" href="./favicon.ico" />
+    <link rel="icon" href="./assets/img/puzzle-piece-light.svg" />
     <link rel="stylesheet" type="text/css" href="app.css" />
+    <!-- Preload the LCP image with a high fetchpriority so it starts loading with the stylesheet. -->
+    <!-- <link
+      rel="preload"
+      fetchpriority="high"
+      as="image"
+      href="assets/img/tray_w_p1-4_400x400.png"
+      type="image/png"
+    /> -->
 
     <script src="rws-api/omnicore-rws.js"></script>
 
@@ -13,61 +21,61 @@
     <script src="fp-components/fp-components-common.js"></script>
     <script src="fp-components/fp-components-button-a.js"></script>
     <script src="fp-components/fp-components-checkbox-a.js"></script>
-    <script src="fp-components/fp-components-digital-a.js"></script>
-    <script src="fp-components/fp-components-dropdown-a.js"></script>
+    <script defer src="fp-components/fp-components-digital-a.js"></script>
+    <script defer src="fp-components/fp-components-dropdown-a.js"></script>
     <script src="fp-components/fp-components-input-a.js"></script>
-    <script src="fp-components/fp-components-levelmeter-a.js"></script>
-    <script src="fp-components/fp-components-linechart-a.js"></script>
+    <script defer src="fp-components/fp-components-levelmeter-a.js"></script>
+    <script defer src="fp-components/fp-components-linechart-a.js"></script>
     <script src="fp-components/fp-components-popup-a.js"></script>
-    <script src="fp-components/fp-components-radio-a.js"></script>
-    <script src="fp-components/fp-components-switch-a.js"></script>
-    <script src="fp-components/fp-components-tabcontainer-a.js"></script>
-    <script src="fp-components/fp-components-toggle-a.js"></script>
-    <script src="fp-components/fp-components-foldin-a.js"></script>
-    <script src="fp-components/fp-components-menu-a.js"></script>
+    <script defer src="fp-components/fp-components-radio-a.js"></script>
+    <script defer src="fp-components/fp-components-switch-a.js"></script>
+    <script defer src="fp-components/fp-components-tabcontainer-a.js"></script>
+    <script defer src="fp-components/fp-components-toggle-a.js"></script>
+    <script defer src="fp-components/fp-components-foldin-a.js"></script>
+    <script defer src="fp-components/fp-components-menu-a.js"></script>
     <script src="fp-components/fp-components-hamburgermenu-a.js"></script>
-    <script src="fp-components/fp-components-slider-a.js"></script>
-    <script src="fp-components/fp-components-contextmenu-a.js"></script>
+    <script defer src="fp-components/fp-components-slider-a.js"></script>
+    <script defer src="fp-components/fp-components-contextmenu-a.js"></script>
 
     <script src="api/ecosystem-base.js"></script>
 
     <script src="t-components/t-components-base.js"></script>
-    <script src="t-components/t-components-popup.js"></script>
+    <script defer src="t-components/t-components-popup.js"></script>
     <script src="t-components/t-components-button.js"></script>
-    <script src="t-components/t-components-dropdown.js"></script>
+    <script defer src="t-components/t-components-dropdown.js"></script>
     <script src="t-components/t-components-varinput.js"></script>
     <script src="t-components/t-components-varindicator.js"></script>
     <script src="t-components/t-components-varincrdecr.js"></script>
     <script src="t-components/t-components-varbutton.js"></script>
     <script src="t-components/t-components-varswitch.js"></script>
-    <script src="t-components/t-components-selectors.js"></script>
-    <script src="t-components/t-components-buttonreboot.js"></script>
-    <script src="t-components/t-components-buttonprocedure.js"></script>
-    <script src="t-components/t-components-buttonmoveto.js"></script>
-    <script src="t-components/t-components-buttonteach.js"></script>
-    <script src="t-components/t-components-buttonteachmove.js"></script>
-    <script src="t-components/t-components-signaledit.js"></script>
-    <script src="t-components/t-components-signalindicator.js"></script>
-    <script src="t-components/t-components-signalswitch.js"></script>
-    <script src="t-components/t-components-signalview.js"></script>
-    <script src="t-components/t-components-modalwindow.js"></script>
-    <script src="t-components/t-components-templateview.js"></script>
+    <script defer src="t-components/t-components-selectors.js"></script>
+    <script defer src="t-components/t-components-buttonreboot.js"></script>
+    <script defer src="t-components/t-components-buttonprocedure.js"></script>
+    <script defer src="t-components/t-components-buttonmoveto.js"></script>
+    <script defer src="t-components/t-components-buttonteach.js"></script>
+    <script defer src="t-components/t-components-buttonteachmove.js"></script>
+    <script defer src="t-components/t-components-signaledit.js"></script>
+    <script defer src="t-components/t-components-signalindicator.js"></script>
+    <script defer src="t-components/t-components-signalswitch.js"></script>
+    <script defer src="t-components/t-components-signalview.js"></script>
+    <script defer src="t-components/t-components-modalwindow.js"></script>
+    <script defer src="t-components/t-components-templateview.js"></script>
     <script src="t-components/t-components-rapidstartstop.js"></script>
     <script src="t-components/t-components-motorsonoff.js"></script>
     <script src="t-components/t-components-opmode.js"></script>
 
     <!-- Application specific modules -->
     <script src="components/hamburger.js"></script>
-    <script src="views/variables.js"></script>
-    <script src="views/module.js"></script>
-    <script src="views/procedures.js"></script>
     <script src="views/settingsView.js"></script>
-    <script src="views/trayView.js"></script>
-    <script src="views/signalComponents.js"></script>
-    <script src="views/signalExamples.js"></script>
-    <script src="views/signalContainer.js"></script>
-    <script src="views/signalConfigurator.js"></script>
-    <script src="views/tComponentsView.js"></script>
+    <script defer src="views/variables.js"></script>
+    <script defer src="views/module.js"></script>
+    <script defer src="views/procedures.js"></script>
+    <script defer src="views/trayView.js"></script>
+    <script defer src="views/signalComponents.js"></script>
+    <script defer src="views/signalExamples.js"></script>
+    <script defer src="views/signalContainer.js"></script>
+    <script defer src="views/signalConfigurator.js"></script>
+    <script defer src="views/tComponentsView.js"></script>
 
     <script src="test.js"></script>
     <script src="app.js"></script>

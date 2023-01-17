@@ -1,4 +1,4 @@
-'use strict';
+// @ts-ignore
 var TComponents = TComponents || {};
 (function (o) {
   if (!o.hasOwnProperty('TemplateView_A')) {
@@ -6,14 +6,16 @@ var TComponents = TComponents || {};
      * Reference example for building a new TComponent
      * @class TComponents.TemplateView_A
      * @extends TComponents.Component_A
-     * @param {HTMLElement} container - DOM element in which this component is to be inserted
+     * @param {HTMLElement} parent - DOM element in which this component is to be inserted
      * @param {string} [name] - Example of pasing a prop to the component
      *
      */
     o.TemplateView_A = class TemplateView extends TComponents.Component_A {
-      constructor(container, name = 'Template Component') {
-        super(container);
+      constructor(parent, name = 'Template Component') {
+        super(parent);
         this.name = name;
+        this.btnFPComp = new FPComponents.Button_A();
+        this.btnFPComp.text = `FPComponent button`;
       }
 
       /**
@@ -23,7 +25,9 @@ var TComponents = TComponents || {};
        * @memberof TComponents.TemplateView_A
        * @async
        */
-      onInit() {}
+      onInit() {
+        this.btnFPComp.onclick = this.cbOnClick.bind(this);
+      }
 
       /**
        * Instantiation of TComponents sub-components that shall be initialized in a synchronous way.
@@ -41,7 +45,6 @@ var TComponents = TComponents || {};
             },
             `TComponent button`
           ),
-          btnFPComp: new FPComponents.Button_A(),
         };
       }
 
@@ -52,14 +55,8 @@ var TComponents = TComponents || {};
        * @memberof TComponents.TemplateView_A
        */
       onRender() {
-        const cbOnClick = () => {
-          TComponents.Popup_A.danger('I am another callback');
-        };
-        this.child.btnFPComp.text = `FPComponent button`;
-        this.child.btnFPComp.onclick = cbOnClick;
-        this.child.btnFPComp.attachToElement(this.find('.fpcomponent-example-btn'));
-
-        this.child.btnTComp.onClick(cbOnClick);
+        this.btnFPComp.attachToElement(this.find('.fpcomponent-example-btn'));
+        this.child.btnTComp.onClick(this.cbOnClick.bind(this));
       }
 
       /**
@@ -78,6 +75,20 @@ var TComponents = TComponents || {};
           </div>
           
           `;
+      }
+
+      cbOnClick() {
+        TComponents.Popup_A.danger('I am another callback');
+        this.trigger('click');
+      }
+
+      /**
+       * Registers callback function to a click event
+       * @alias onClick
+       * @param {function} func
+       */
+      onClick(func) {
+        this.on('click', func);
       }
     };
   }

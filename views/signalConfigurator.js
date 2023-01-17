@@ -1,6 +1,6 @@
 class SignalConfigurator extends TComponents.Component_A {
-  constructor(container) {
-    super(container);
+  constructor(parent) {
+    super(parent);
   }
 
   async onInit() {
