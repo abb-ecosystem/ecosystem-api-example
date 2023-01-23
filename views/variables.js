@@ -7,7 +7,7 @@ class Variable extends TComponents.Component_A {
   constructor(parent, module = null) {
     super(parent);
     this._module = module;
-    this._ecNumberName = 'esNumber';
+    this._esNumber = 'esNumber';
   }
 
   async onInit() {
@@ -23,25 +23,25 @@ class Variable extends TComponents.Component_A {
       varCtrl: new TComponents.VarInput_A(
         this.find('.var-ctrl'),
         this._module,
-        this._ecNumberName,
-        this._ecNumberName
+        this._esNumber,
+        this._esNumber
       ),
       varInd: new TComponents.VarIndicator_A(
         this.find('.var-ind'),
         this._module,
-        this._ecNumberName,
-        this._ecNumberName
+        this._esNumber,
+        this._esNumber
       ),
       varIncrDecrInd: new TComponents.VarIncrDecr_A(
         this.find('.var-incr-decr-ind'),
         this._module,
-        this._ecNumberName,
+        this._esNumber,
         false
       ),
       varIncrDecrCtrl: new TComponents.VarIncrDecr_A(
         this.find('.var-incr-decr-ctrl'),
         this._module,
-        this._ecNumberName
+        this._esNumber
       ),
       toggleBtn: new TComponents.Button_A(
         this.find('.toggle-view'),

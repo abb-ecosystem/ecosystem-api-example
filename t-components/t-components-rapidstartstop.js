@@ -2,6 +2,8 @@
 // @ts-ignore
 var TComponents = TComponents || {};
 (function (o) {
+  const imgStop = 't-components/img/png/stop.png';
+
   if (!o.hasOwnProperty('RapidStartStop_A')) {
     /**
      * Called when an instance of this component is created.

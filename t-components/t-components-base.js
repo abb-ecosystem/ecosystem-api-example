@@ -10,7 +10,7 @@ function tComponentsLoadCSS(href) {
   link.href = href;
   head.appendChild(link);
 }
-const T_COMPONENTS_BASE_VERSION = '0.3';
+const T_COMPONENTS_BASE_VERSION = '0.4';
 
 tComponentsLoadCSS('t-components/t-components.css');
 
@@ -181,10 +181,13 @@ var TComponents = TComponents || {};
             : labelEl && labelEl.querySelector('p').classList.add('tc-hidden');
 
           this.container.innerHTML = '';
+          this.container.classList.add('tc-hidden');
           this.container.appendChild(this.template.content);
 
           await this.initChildrenComponents();
           this.onRender();
+
+          this.container.classList.remove('tc-hidden');
 
           return this;
         }

@@ -39,6 +39,7 @@ class Hamburger extends TComponents.Component_A {
 
     const baseEl = this.container.querySelector('.fp-components-base');
     baseEl.classList.remove('fp-components-base');
+    this.container.classList.add('tc-container');
   }
 
   addView(name, content, image, active = false) {
