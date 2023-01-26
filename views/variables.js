@@ -41,7 +41,8 @@ class Variable extends TComponents.Component_A {
       varIncrDecrCtrl: new TComponents.VarIncrDecr_A(
         this.find('.var-incr-decr-ctrl'),
         this._module,
-        this._esNumber
+        this._esNumber,
+        true
       ),
       toggleBtn: new TComponents.Button_A(
         this.find('.toggle-view'),

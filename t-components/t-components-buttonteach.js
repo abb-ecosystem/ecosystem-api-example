@@ -5,11 +5,13 @@ var TComponents = TComponents || {};
     /**
      * Button to teach the current position into a RAPID robtarget variable
      * @class TComponents.ButtonTeach_A
-     * @extends TComponents.Component_A
+     * @extends TComponents.Button_A
      * @param {HTMLElement} container
      * @param {string} rapid_variable - Rapid variable to subpscribe to
      * @param {string} module - Module containig the rapid variable
      * @param {string} [label] - label text
+     * @param {function|null} [callback] - Function to be called when button is pressed
+     * @param {string|null} [img] - Path to image file
      * @example
      *
      * const btnTeach = new TComponents.ButtonTeach_A(
@@ -20,9 +22,9 @@ var TComponents = TComponents || {};
      *  );
      *  await btnTeach.render();
      */
-    o.ButtonTeach_A = class ButtonTeach extends TComponents.Component_A {
-      constructor(parent, rapid_variable, module, label = '') {
-        super(parent, label);
+    o.ButtonTeach_A = class ButtonTeach extends TComponents.Button_A {
+      constructor(parent, rapid_variable, module, label = '', callback = null, icon = null) {
+        super(parent, callback, label, icon);
         this._rapidVariable = rapid_variable;
         this._module = module;
         this._value = null;
@@ -31,40 +33,24 @@ var TComponents = TComponents || {};
       /**
        * Contains component specific asynchronous implementation (like access to controller).
        * This method is called internally during initialization process orchestrated by {@link init() init}.
-       * @private
+       * @protected
        * @async
        */
       async onInit() {
-        // this._btn = new FPComponents.Button_A();
-        // this._btn.text = label ? label : `Teach rapid_variable`;
-        // this._btn.onclick = this.teach.bind(this);
-
         try {
+          await super.onInit();
+
           this.task = await API.RAPID.getTask();
           this._value = await this.task.getValue(this._module, this._rapidVariable);
+          if (!this.label) this.label = 'Teach';
+          this.onClick(this.teach.bind(this));
         } catch (e) {
-          this.child._btn.enabled = false;
+          this._btn.enabled = false;
           TComponents.Popup_A.warning(`Teach button`, [
             `Error when gettin variable ${this._rapidVariable}`,
             e.message,
           ]);
         }
-      }
-
-      /**
-       * Instantiation of TComponents sub-components that shall be initialized in a synchronous way.
-       * All this components are then accessible within {@link onRender() onRender} method by using this.child.<component-instance>
-       * @private
-       * @returns {object} Contains all child TComponents instances used within the component.
-       */
-      mapComponents() {
-        return {
-          _btn: new TComponents.Button_A(
-            this.container,
-            this.teach.bind(this),
-            this._label ? this._label : `Teach`
-          ),
-        };
       }
 
       /**
@@ -78,24 +64,8 @@ var TComponents = TComponents || {};
         try {
           await this.task.setValue(this._module, this._rapidVariable, this._value);
         } catch (e) {
-          TComponents.Popup_A.error(e);
+          TComponents.Popup_A.error(e, `ButtonTeach: robtarget: ${this._rapidVariable}`);
         }
-      }
-
-      get highlight() {
-        return this.child._btn.highlight;
-      }
-
-      set highlight(value) {
-        this.child._btn.highlight = value;
-      }
-
-      get icon() {
-        return this.child._btn.icon;
-      }
-
-      set icon(value) {
-        this.child._btn.icon = value;
       }
     };
   }

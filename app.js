@@ -1,7 +1,7 @@
 /**
  *
  */
-const T_COMPONENTS_EXAMPLE_VERSION = '1.0.2';
+const T_COMPONENTS_EXAMPLE_VERSION = '1.0.3';
 
 const path = window.location.pathname.split('/');
 const dir = path[path.length - 2];

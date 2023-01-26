@@ -106,7 +106,6 @@ var TComponents = TComponents || {};
        * @alias label
        * @type {string}
        * @memberof TComponents.VarSwitch_A
-       * @private
        */
       get label() {
         return this.switchBtn.desc ? this.switchBtn.desc : '';
@@ -120,13 +119,32 @@ var TComponents = TComponents || {};
       }
 
       /**
+       * Component status: true if active, false otherwise
+       * @alias active
+       * @type {boolean}
+       * @memberof TComponents.VarSwitch_A
+       * @private
+       */
+      get active() {
+        return this.switchBtn.active;
+      }
+
+      /**
+       * @private
+       */
+      set active(value) {
+        this.switchBtn.active = value;
+      }
+
+      /**
        * Callback function to update variable when switch state changes
        * @alias cbOnChange
        * @memberof TComponents.VarSwitch_A
        * @async
-       * @private
        */
       async cbOnChange(value) {
+        console.log('😎');
+        console.log(`VarSwitch --cbOnChange -- value: ${value}`);
         try {
           await this.varElement.setValue(value);
         } catch (e) {
@@ -140,10 +158,20 @@ var TComponents = TComponents || {};
        * @alias cbUpdateSwitch
        * @memberof TComponents.VarSwitch_A
        * @async
-       * @private
        */
       cbUpdateSwitch(value) {
         this.switchBtn.active = value;
+        this.trigger('change' + this._compId, value);
+      }
+
+      /**
+       * Adds a callback function that will be called when the RAPID variable value changes
+       * @alias onChange
+       * @memberof TComponents.VarSwitch_A
+       * @param {function} func
+       */
+      onChange(func) {
+        this.on('change' + this._compId, func);
       }
     };
   }

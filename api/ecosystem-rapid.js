@@ -7,7 +7,7 @@ if (typeof API.constructedRapid === 'undefined') {
      * @constant
      * @type {number}
      */
-    r.ECOSYSTEM_RAPID_LIB_VERSION = '0.3';
+    r.ECOSYSTEM_RAPID_LIB_VERSION = '0.4';
 
     /**
      * Shallow compare does check for equality. When comparing scalar values (numbers, strings)
@@ -177,8 +177,7 @@ if (typeof API.constructedRapid === 'undefined') {
           let pp;
           let progress;
 
-          console.log('😥');
-          console.log(`proc: ${proc}, userLevel : ${userLevel}`);
+          API.log(`proc: ${proc}, userLevel : ${userLevel}`);
 
           try {
             ///////////////////////////////////////////////////////////////////////////
@@ -253,13 +252,13 @@ if (typeof API.constructedRapid === 'undefined') {
               progress = 'step7'; // 7 - pointer back to original position
               //////////////////////////////////////////////////////////////////////
             } else {
-              console.log('ExecutionStae already RUNNING!!!!');
+              API.log('ExecutionStae already RUNNING!!!!');
             }
           } catch (e) {
             API.log(`💥 Exception occur at ${progress}`);
             switch (progress) {
               case 'step2': //
-                console.log('10067: Program Pointer Reset');
+                API.log('10067: Program Pointer Reset');
                 return API.rejectWithStatus('Program Pointer Reset', {
                   message: 'Unable to reset the program pointer for task T_ROB1.',
                   description: `The program will not start.&#13;&#10;Causes: &#13;&#10;
@@ -277,7 +276,7 @@ if (typeof API.constructedRapid === 'undefined') {
                   await setTimeout(() => {}, 2000);
                   state = await RWS.Rapid.getExecutionState();
                   if (state === 'stopped') {
-                    console.log('Rapid execution stopped.');
+                    API.log('Rapid execution stopped.');
                   }
                 }
                 return API.rejectWithStatus('Execute procedure failed.', e);
@@ -343,7 +342,7 @@ if (typeof API.constructedRapid === 'undefined') {
           var hits = await RWS.Rapid.searchSymbols(properties);
           if (hits.length > 0) {
             for (let i = 0; i < hits.length; i++) {
-              // console.log(JSON.stringify(hits[i]))
+              // API.log(JSON.stringify(hits[i]));
               vars.push(hits[i]);
             }
           }
@@ -489,7 +488,7 @@ if (typeof API.constructedRapid === 'undefined') {
             var hits = await RWS.Rapid.searchSymbols(properties, '', regexp);
             if (hits.length > 0) {
               for (let i = 0; i < hits.length; i++) {
-                // console.log(JSON.stringify(hits[i]))
+                // API.log(JSON.stringify(hits[i]));
                 items.push(hits[i]);
               }
             }

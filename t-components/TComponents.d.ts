@@ -22,7 +22,7 @@ declare namespace TComponents {
      * @alias on
      * @memberof TComponents.Eventing_A
      * @param {string} eventName - name of the triggering event
-     * @param {function} callback -function to be called when event is triggered
+     * @param {Function} callback -function to be called when event is triggered
      */
     on(eventName: string, callback: Function): void;
     /**
@@ -40,7 +40,7 @@ declare namespace TComponents {
    * This is the base parent class of all TComponent.
    * @class TComponents.Component_A
    * @memberof TComponents
-   * @extends  {TComponents.Eventing_A}
+   * @extends  TComponents.Eventing_A
    * @param {HTMLElement} parent - HTMLElement that is going to be the parent of the component.
    * @param {string} [label] - Label text
    */
@@ -66,25 +66,25 @@ declare namespace TComponents {
      */
     static _isHTMLElement(o: any): boolean;
 
-    /**
-     * @protected
-     */
+    // /**
+    //  * @protected
+    //  */
     protected container: HTMLElement;
-    /**
-     * @protected
-     */
+    // /**
+    //  * @protected
+    //  */
     protected _compId: string;
-    /**
-     * @protected
-     */
+    // /**
+    //  * @protected
+    //  */
     protected _label: string;
-    /**
-     * @protected
-     */
+    // /**
+    //  * @protected
+    //  */
     protected _enabled: boolean;
-    /**
-     * @protected
-     */
+    // /**
+    //  * @protected
+    //  */
     protected child: any;
     /**
      * Initialization of a component. Any asynchronous operaiton (like access to controller) is done here.
@@ -175,13 +175,13 @@ declare namespace TComponents {
      * @param {boolean} enable - if true, the component is framed, if false, not frame is shown
      */
     cssContainer(enable?: boolean): void;
-    /**
-     * Changes the position of the label
-     * @alias cssLabelAside
-     * @memberof TComponents.Component_A
-     * @param {*} enable - if true, the labels appears at the left side, otherwise on the top-left corner
-     */
-    cssLabelAside(enable?: any): void;
+    // /**
+    //  * Changes the position of the label
+    //  * @alias cssLabelAside
+    //  * @memberof TComponents.Component_A
+    //  * @param {*} enable - if true, the labels appears at the left side, otherwise on the top-left corner
+    //  */
+    // cssLabelAside(enable?: any): void;
     /**
      * Sets or returns the contents of a style declaration as a string.
      * @alias css
@@ -197,7 +197,7 @@ declare namespace TComponents {
    * @class TComponents.Button_A
    * @extends TComponents.Component_A
    * @param {HTMLElement} parent - HTMLElement that is going to be the parent of the component
-   * @param {function|null} [callback] - Function to be called when button is pressed
+   * @param {Function|null} [callback] - Function to be called when button is pressed
    * @param {string} [label] - Label of the component
    * @param {string|null} [img] - Path to image file
    * @example
@@ -213,7 +213,7 @@ declare namespace TComponents {
      * @constructor
      * @extends {TComponents.Component_A}
      * @param {HTMLElement} parent - HTMLElement that is going to be the parent of the component
-     * @param {function|null} [callback] - Function to be called when button is pressed
+     * @param {Function|null} [callback] - Function to be called when button is pressed
      * @param {string} [label] - Label of the component
      * @param {string|null} [img] - Path to image file
      */
@@ -221,30 +221,58 @@ declare namespace TComponents {
       parent: HTMLElement,
       callback?: Function | null,
       label?: string,
-      img?: string | null
+      icon?: string | null
     );
-  }
 
-  // class Button_A extends Component_A {
-  //   handler: () => {};
-  //   label: string;
-  //   img: string | null;
-  //   constructor(parent: HTMLElement, handler: () => {}, label: string, img: string | null);
-  //   init(): Promise<void>;
-  //   render(): void;
-  //   markup(self: Button_A): string;
-  //   get text(): string;
-  //   set text(t: string);
-  // }
+    /**
+     * @protected
+     */
+    protected _btn: FPComponents.Button_A;
+
+    /**
+     * Contains component specific asynchronous implementation (like access to controller).
+     * This method is called internally during initialization process orchestrated by {@link init() init}.
+     * @protected
+     * @async
+     */
+    protected onInit(): void;
+
+    /**
+     * Contains component specific asynchronous implementation (like access to controller).
+     * This method is called internally during initialization process orchestrated by {@link init() init}.
+     * @alias onRender
+     * @memberof TComponents.Button_A
+     */
+    protected onRender(): void;
+
+    /**
+     * Adds a callback funciton to the component. This will be called after the button is pressed and released
+     * @alias onClick
+     * @memberof TComponents.Button_A
+     * @param   {Function}  func    The callback function which is called when the button is pressed
+     */
+    onClick(func: Function): void;
+
+    /**
+     * Callback function which is called when the button is pressed, it trigger any function registered with {@link onClick() onClick}
+     * @alias cbOnClick
+     * @memberof TComponents.Button_A
+     * @param   {any}  value
+     * @async
+     */
+    protected cbOnClick(value): void;
+  }
 
   /**
    * Button to jog the robot to a position provided by a RAPID robtarget variable.
    * @class TComponents.ButtonMoveTo_A
-   * @extends TComponents.Component_A
+   * @extends TComponents.Button_A
    * @param {HTMLElement} parent - HTMLElement that is going to be the parent of the component
    * @param {string} rapid_variable - Rapid variable to subpscribe to
    * @param {string} module - Module containig the rapid variable
+   * @param {Function|null} [callback] - Function to be called when button is pressed
    * @param {string} [label] - label text
+   * @param {string|null} [icon] - Path to image file
    * @example
    *
    * const btnMove = new TComponents.ButtonMoveTo_A(
@@ -255,16 +283,34 @@ declare namespace TComponents {
    *  );
    *  await btnMove.render();
    */
-  class ButtonMoveTo_A extends TComponents.Component_A {
+  class ButtonMoveTo_A extends TComponents.Button_A {
     /**
      * @constructor
      * @extends {TComponents.Component_A}
      * @param {HTMLElement} parent - HTMLElement that is going to be the parent of the component
      * @param {string} rapid_variable - Rapid variable to subpscribe to
      * @param {string} module - Module containig the rapid variable
+     * @param {Function|null} [callback] - Function to be called when button is pressed
      * @param {string} [label] - label text
+     * @param {string|null} [icon] - Path to image file
      */
-    constructor(parent: HTMLElement, rapid_variable: string, module: string, label?: string);
+    constructor(
+      parent: HTMLElement,
+      rapid_variable: string,
+      module: string,
+      callback?: Function | null,
+      label?: string,
+      icon?: string | null
+    );
+
+    /**
+     * Contains component specific asynchronous implementation (like access to controller).
+     * This method is called internally during initialization process orchestrated by {@link init() init}.
+     * @protected
+     * @async
+     */
+    onInit(): void;
+
     /**
      * Jogs the robot to the position defined at rapid_variable
      * @alias move
@@ -294,6 +340,8 @@ declare namespace TComponents {
    * @param {string} [label] - label text
    * @param {boolean} [stopOnRelease]
    * @param {string} [task]
+   * @param {Function|null} [callback] - Function to be called when button is pressed
+   * @param {string|null} [icon] - Path to image file
    * @example
    * btnProcedure: new TComponents.ButtonProcedure_A(
    *   document.querySelector('.my-class'),
@@ -302,14 +350,16 @@ declare namespace TComponents {
    *   'Execute'
    * ),
    */
-  class ButtonProcedure_A extends TComponents.Component_A {
+  class ButtonProcedure_A extends TComponents.Button_A {
     constructor(
       parent: any,
       procedure?: string,
       userLevel?: boolean,
       label?: string,
       stopOnRelease?: boolean,
-      task?: string
+      task?: string,
+      callback?: Function,
+      icon?
     );
     /**
      * Excecutes a procedure when button is pressed. The behaviour depends on the constructor stopOnRelease (default=false).
@@ -323,7 +373,7 @@ declare namespace TComponents {
     cbOnClick(): Promise<void>;
     /**
      * Stops running procedure
-     * @alias cbOnClick
+     * @alias cbStop
      * @memberof TComponents.ButtonProcedure_A
      * @async
      *
@@ -361,12 +411,15 @@ declare namespace TComponents {
    * @class TComponents.ButtonReboot_A
    * @extends TComponents.Component_A
    * @param {HTMLElement} parent - HTMLElement that is going to be the parent of the component
+   * @param {Function|null} [callback] - Function to be called when button is pressed
+   * @param {string} [label] - Label of the component
+   * @param {string|null} [icon] - Path to image file
    * @example
    * const btnReboot = new TComponents.ButtonReboot_A(document.querySelector('.reboot-view'));
    * btnRebbot.render();
    */
   class ButtonReboot_A extends TComponents.Component_A {
-    constructor(parent: any);
+    constructor(parent: HTMLElement, callback?: Function, label?: string, icon?: string | null);
     /**
      * Restarts the controller
      * @alias reboot
@@ -379,11 +432,13 @@ declare namespace TComponents {
   /**
    * Button to teach the current position into a RAPID robtarget variable
    * @class TComponents.ButtonTeach_A
-   * @extends TComponents.Component_A
+   * @extends TComponents.Button_A
    * @param {HTMLElement} parent
    * @param {string} rapid_variable - Rapid variable to subpscribe to
    * @param {string} module - Module containig the rapid variable
    * @param {string} [label] - label text
+   * @param {Function|null} [callback] - Function to be called when button is pressed
+   * @param {string|null} [icon] - Path to image file
    * @example
    *
    * const btnTeach = new TComponents.ButtonTeach_A(
@@ -402,8 +457,17 @@ declare namespace TComponents {
      * @param {string} rapid_variable - Rapid variable to subpscribe to
      * @param {string} module - Module containig the rapid variable
      * @param {string} [label] - label text
+     * @param {Function|null} [callback] - Function to be called when button is pressed
+     * @param {string|null} [icon] - Path to image file
      */
-    constructor(parent: HTMLElement, rapid_variable: string, module: string, label?: string);
+    constructor(
+      parent: HTMLElement,
+      rapid_variable: string,
+      module: string,
+      label?: string,
+      callback?: Function,
+      icon?
+    );
     /**
      * Saves the current robot position in to rapid_variable. This method is called when pressing the instance button.
      * @alias teach
@@ -471,7 +535,7 @@ declare namespace TComponents {
      * Adds a callback function to be called when an item is selected
      * @alias onSelection
      * @memberof TComponents.Dropdown_A
-     * @param {function} func
+     * @param {Function} func
      * @todo Currently only one function is possible. Change the method to accept multiple callbacks
      */
     onSelection(func: Function): void;
@@ -548,7 +612,7 @@ declare namespace TComponents {
      * Registar a function to be called before the window is openned
      * @alias onOpen
      * @memberof TComponents.ModalWindow_A
-     * @param {function} func
+     * @param {Function} func
      */
     onOpen(func: Function): void;
     /**
@@ -896,11 +960,11 @@ declare namespace TComponents {
   /**
    * Creates a button that triggers registered callback functions and pass them the value of a RAPID variable
    * @class TComponents.VarButton_A
-   * @extends TComponents.Component_A
+   * @extends TComponents.Button_A
    * @param {HTMLElement} parent - DOM element in which this component is to be inserted
    * @param {string} module - RAPID module containig the variable
    * @param {string} variable - RAPID variable
-   * @param {function} [callback] Callback function
+   * @param {Function} [callback] Callback function
    * @param {string} [label] - Label text
    * @param {string} [img] - Path to image file
    * @param {string} [task] - RAPID Task in which the variable is contained (default = "T_ROB1" )
@@ -915,13 +979,13 @@ declare namespace TComponents {
    *    'Up'
    *  ).render();
    */
-  class VarButton_A extends TComponents.Component_A {
+  class VarButton_A extends TComponents.Button_A {
     /**
      * @constructor
      * @param {HTMLElement} parent - DOM element in which this component is to be inserted
      * @param {string} module - RAPID module containig the variable
      * @param {string} variable - RAPID variable
-     * @param {function} [callback] Callback function
+     * @param {Function} [callback] Callback function
      * @param {string} [label] - Label text
      * @param {string} [img] - Path to image file
      * @param {string} [task] - RAPID Task in which the variable is contained (default = "T_ROB1" )
@@ -935,13 +999,6 @@ declare namespace TComponents {
       img?: string,
       task?: string
     );
-    /**
-     * Adds a callback to be called when the button is pressed. Multiple callbacks can be registered by calling this method multiple times.
-     * @alias onClick
-     * @memberof TComponents.VarButton_A
-     * @param   {function}  callback    The callback function which is called when the button is pressed
-     */
-    onClick(callback: Function): void;
   }
 
   /**
@@ -1025,7 +1082,7 @@ declare namespace TComponents {
      * Adds a callback function that will be called when the RAPID variable value changes
      * @alias onChange
      * @memberof TComponents.VarIncrDecr_A
-     * @param {function} func
+     * @param {Function} func
      */
     onChange(func: Function): void;
   }
@@ -1110,7 +1167,7 @@ declare namespace TComponents {
      * Adds a callback function that will be called when the RAPID variable value changes
      * @alias onChange
      * @memberof TComponents.VarIndicator_A
-     * @param {function} func
+     * @param {Function} func
      */
     onChange(func: Function): void;
     /**
@@ -1179,43 +1236,26 @@ declare namespace TComponents {
      * @alias cbOnChange
      * @memberof TComponents.VarInput_A
      * @async
-     *
+     * @private
      */
     cbOnChange(value: any): Promise<void>;
+
     /**
      * Callback function to update input field when variable changes
      * @alias cbUpdateInputField
      * @memberof TComponents.VarInput_A
      * @async
-     *
      */
     cbUpdateInputField(value: any): void;
+
     /**
      * Adds a callback function that will be called when the RAPID variable value changes
      * @alias onChange
      * @memberof TComponents.VarInput_A
-     * @param {function} func
+     * @param {Function} func
      */
     onChange(func: Function): void;
   }
-
-  // class VarInput_A extends Component_A {
-  //   readonly inputField: FPComponents.Input_A;
-  //   readonly task: any;
-  //   readonly varElement: any;
-  //   constructor(parent: HTMLElement, module?: string, variable?: string, label?: string);
-  //   init(): Promise<void>;
-  //   render(): void;
-  //   markup(self: VarInput_A): string;
-  //   get variable(): string;
-  //   set variable(text: string);
-  //   get module(): string;
-  //   set module(text: string);
-  //   get label(): string;
-  //   set label(text: string);
-  //   cbOnChange(value): Promise<void>;
-  //   cbOnChanged(value): void;
-  // }
 
   /**
    * Switch connected to a RAPID variable. The variable must be of type boolean, otherwise an Error is thrown during initialization.
@@ -1335,7 +1375,7 @@ declare namespace TComponents {
     /**
      * Add a callback on selection
      * @alias onSelection
-     * @param {function} func - callback function
+     * @param {Function} func - callback function
      * @memberof TComponents.Selector_A
      */
     onSelection(func: Function): void;
@@ -1707,7 +1747,7 @@ declare namespace TComponents {
     /**
      * Registers callback function to a click event
      * @alias onClick
-     * @param {function} func
+     * @param {Function} func
      */
     onClick(func: Function): void;
 

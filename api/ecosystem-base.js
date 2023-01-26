@@ -14,7 +14,7 @@ if (typeof API.constructedBase === 'undefined') {
      * @constant
      * @type {number}
      */
-    es.ECOSYSTEM_LIB_VERSION = '0.3';
+    es.ECOSYSTEM_LIB_VERSION = '0.4';
 
     const TIMEOUT_SEC = 5;
     es.verbose = false;
@@ -226,7 +226,7 @@ if (typeof API.constructedBase === 'undefined') {
      * @memberof API
      * @param {function} func - Function containing the condition
      * @param {number} interval_ms - Interval in miliseconds
-     * @returns {Promise<>}
+     * @returns {Promise}
      * @private
      */
     es.waitForCondition = async function (func, interval_ms = 100) {
@@ -253,7 +253,7 @@ if (typeof API.constructedBase === 'undefined') {
       /**
        * Subscribe to an event
        * @alias on
-       * @memberof API.Eventing_A
+       * @memberof API.Events
        * @param {string} eventName - name of the triggering event
        * @param {function} callback -function to be called when event is triggered
        */
@@ -268,7 +268,7 @@ if (typeof API.constructedBase === 'undefined') {
       /**
        * Triggers all callback fuction that have subscribe to an event
        * @alias trigger
-       * @memberof TComponents.Eventing_A
+       * @memberof API.Events
        * @param {string} eventName - Name of the event to be triggered
        * @param {any} data - Data passed to the callback as input parameter
        */
@@ -506,7 +506,7 @@ if (typeof API.constructedBase === 'undefined') {
       this.restart = async function (mode = RWS.Controller.RestartModes.restart) {
         try {
           await API.sleep(1000);
-          RWS.Controller.restartController(mode);
+          await RWS.Controller.restartController(mode);
         } catch (e) {
           return API.rejectWithStatus('Failed to restart controller', e);
         }

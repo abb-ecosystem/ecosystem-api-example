@@ -60,7 +60,6 @@ var TComponents = TComponents || {};
       /**
        * Generates the HTML definition corresponding to the component.
        * @private
-       * @param {TComponents.Component_A} self - The instance on which this method was called.
        * @returns {string}
        */
       markup({ _label, _id, _varValue }) {
@@ -110,7 +109,6 @@ var TComponents = TComponents || {};
        * @alias cbUpdateInputField
        * @memberof TComponents.VarIndicator_A
        * @async
-       * @private
        */
       cbVarChanged(value) {
         const elem = this.find(`#${this._id}`);

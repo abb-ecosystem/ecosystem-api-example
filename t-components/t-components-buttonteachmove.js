@@ -41,14 +41,12 @@ var TComponents = TComponents || {};
           _btnMoveTo: new TComponents.ButtonMoveTo_A(
             this.find('.tc-button-teachmove-move'),
             this._location,
-            this._module,
-            'Move to'
+            this._module
           ),
           _btnTeach: new TComponents.ButtonTeach_A(
             this.find('.tc-button-teachmove-teach'),
             this._location,
-            this._module,
-            'Teach'
+            this._module
           ),
         };
       }

@@ -10,7 +10,7 @@ function tComponentsLoadCSS(href) {
   link.href = href;
   head.appendChild(link);
 }
-const T_COMPONENTS_BASE_VERSION = '0.4';
+const T_COMPONENTS_BASE_VERSION = '0.5';
 
 tComponentsLoadCSS('t-components/t-components.css');
 
@@ -19,6 +19,7 @@ tComponentsLoadCSS('t-components/t-components.css');
  * @namespace TComponents
  */
 
+// @ts-ignore
 var TComponents = TComponents || {};
 (function (o) {
   if (!o.hasOwnProperty('Component_A')) {
@@ -72,7 +73,7 @@ var TComponents = TComponents || {};
      * @class TComponents.Component_A
      * @memberof TComponents
      * @extends TComponents.Eventing_A
-     * @param {HTMLElement} container - HTMLElement that is going to be the parent of the component.
+     * @param {HTMLElement} parent - HTMLElement that is going to be the parent of the component.
      * @param {string} [label] - Label text.
      * @property {HTMLElement} container - Container element where the component is to be attached
      * @property {object} child - object containing all instances returned by {@link TComponents.Component_A.mapComponents} method.
@@ -104,7 +105,6 @@ var TComponents = TComponents || {};
       /**
        * Initialization of a component. Any asynchronous operaiton (like access to controller) is done here.
        * @async
-       * @private
        * @returns {Promise<object>} The TComponents instance on which this method was called.
        */
       async init() {
@@ -316,7 +316,6 @@ var TComponents = TComponents || {};
        * @alias _isHTMLElement
        * @memberof TComponents.Component_A
        * @static
-       * @private
        * @param {any} o
        * @returns {boolean} true if entry is an HTMLElement, false otherwise
        */
@@ -424,17 +423,17 @@ var TComponents = TComponents || {};
           : this.container.classList.remove('tc-container-box');
       }
 
-      /**
-       * Changes the position of the label
-       * @alias cssLabelAside
-       * @memberof TComponents.Component_A
-       * @param {*} enable - if true, the labels appears at the left side, otherwise on the top-left corner
-       */
-      cssLabelAside(enable = true) {
-        enable
-          ? this.find('.tc-container-label').classList.add('tc-container-row')
-          : this.find('.tc-container-label').classList.remove('tc-container-row');
-      }
+      // /**
+      //  * Changes the position of the label
+      //  * @alias cssLabelAside
+      //  * @memberof TComponents.Component_A
+      //  * @param {*} enable - if true, the labels appears at the left side, otherwise on the top-left corner
+      //  */
+      // cssLabelAside(enable = true) {
+      //   enable
+      //     ? this.find('.tc-container-label').classList.add('tc-container-row')
+      //     : this.find('.tc-container-label').classList.remove('tc-container-row');
+      // }
 
       /**
        * Sets or returns the contents of a style declaration as a string.
@@ -467,7 +466,7 @@ var TComponents = TComponents || {};
        * @alias cssAddClass
        * @memberof TComponents.Component_A
        * @param {string} selector - CSS selector, if class: ".selector", if identifier: "#selector"
-       * @param {string} newClass - name of the class to appy (without dot)
+       * @param {string} className - name of the class to appy (without dot)
        * @param {boolean} [all] - if true it will apply the class to all selector found, otherwise it applies to the first one found
        */
       cssAddClass(selector, className, all = false) {

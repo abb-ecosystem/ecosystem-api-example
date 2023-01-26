@@ -33,7 +33,7 @@ class SignalConfigurator extends TComponents.Component_A {
       ),
       editSignal: editSignal,
       modalWindow: new TComponents.ModalWindow_A(this.find('.modal-window'), editSignal),
-      btnReboot: new TComponents.ButtonReboot_A(this.find('.reboot-view')),
+      btnReboot: new TComponents.ButtonReboot_A(this.find('.reboot-view'), true),
     };
   }
 

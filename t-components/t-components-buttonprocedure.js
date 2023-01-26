@@ -7,7 +7,7 @@ var TComponents = TComponents || {};
      * When stopOnRelease equals false, then the procedure is started after press and release of the button.
      * Wehn stopOnRelease equals true, then the procedure is started when pressing, and stopped when releasing the button.
      * @class TComponents.ButtonProcedure_A
-     * @extends TComponents.Component_A
+     * @extends TComponents.Button_A
      * @param {HTMLElement} parent - HTMLElement that is going to be the parent of the component
      * @param {string} [procedure] - Procedure to be called
      * @param {Boolean} [userLevel] - if true, execution level is set to “user level”, i.e. execute as a service routine.
@@ -15,6 +15,8 @@ var TComponents = TComponents || {};
      * @param {string} [label] - label text
      * @param {boolean} [stopOnRelease]
      * @param {string} [task]
+     * @param {function|null} [callback] - Function to be called when button is pressed
+     * @param {string|null} [img] - Path to image file
      * @example
      * btnProcedure: new TComponents.ButtonProcedure_A(
      *   document.querySelector('.my-class'),
@@ -23,17 +25,19 @@ var TComponents = TComponents || {};
      *   'Execute'
      * ),
      */
-    o.ButtonProcedure_A = class ButtonProcedure extends TComponents.Component_A {
+    o.ButtonProcedure_A = class ButtonProcedure extends TComponents.Button_A {
       constructor(
         parent,
         procedure = '',
         userLevel = false,
         label = '',
         stopOnRelease = false,
-        task = 'T_ROB1'
+        task = 'T_ROB1',
+        callback = null,
+        icon = null
       ) {
-        super(parent, label);
-        this._task = task;
+        super(parent, callback, label, icon);
+        this._taskName = task;
         this._procedure = procedure;
         this._userLevel = userLevel;
         this._stopOnRelease = stopOnRelease;
@@ -42,36 +46,30 @@ var TComponents = TComponents || {};
       /**
        * Contains component specific asynchronous implementation (like access to controller).
        * This method is called internally during initialization process orchestrated by {@link init() init}.
-       * @private
+       * @protected
        * @async
        */
       async onInit() {
-        if (!this.rapidTask) this.rapidTask = await API.RAPID.getTask(this._task);
-      }
-
-      /**
-       * Instantiation of TComponents sub-components that shall be initialized in a synchronous way.
-       * All this components are then accessible within {@link onRender() onRender} method by using this.child.<component-instance>
-       * @private
-       * @returns {object} Contains all child TComponents instances used within the component.
-       */
-      mapComponents() {
-        return {
-          _btn: new TComponents.Button_A(
-            // this.find(".tc-btn-procedure"),
-            this.container,
-            this._stopOnRelease ? null : this.cbOnClick.bind(this),
-            this._label
-          ),
-        };
+        try {
+          await super.onInit();
+          if (!this.rapidTask) this.rapidTask = await API.RAPID.getTask(this._taskName);
+        } catch (e) {
+          this.error = true;
+          TComponents.Popup_A.error(e, `TComponents.ButtonProcedure`);
+        }
       }
 
       /**
        * Contains component specific asynchronous implementation (like access to controller).
        * This method is called internally during initialization process orchestrated by {@link init() init}.
-       * @private
+       * @protected
        */
       onRender() {
+        super.onRender();
+
+        this._stopOnRelease || this.onClick(this.cbOnClick.bind(this));
+        if (this.error) this._btn.enabled = false;
+
         if (this._stopOnRelease) {
           const elemBtnMove = this.find('.fp-components-button');
           elemBtnMove.addEventListener('pointerdown', this.cbOnClick.bind(this));
@@ -105,14 +103,14 @@ var TComponents = TComponents || {};
             this.stopped = true;
           } catch (e) {
             this.stopped = true;
-            if (!this.stop) TComponents.Popup_A.danger(`Procedure ${this._procedure}`, e.message);
+            if (!this.stop) TComponents.Popup_A.error(e, `Procedure ${this._procedure}`);
           }
         }
       }
 
       /**
        * Stops running procedure
-       * @alias cbOnClick
+       * @alias cbStop
        * @memberof TComponents.ButtonProcedure_A
        * @async
        * @private
@@ -158,55 +156,21 @@ var TComponents = TComponents || {};
       }
 
       /**
-       * Component label text
-       * @alias label
-       * @type {string}
-       * @memberof TComponents.ButtonProcedure_A
-       * @private
-       */
-      get label() {
-        return this._label;
-      }
-      /**
-       * @private
-       */
-      set label(text) {
-        this._label = text;
-        this.render();
-      }
-
-      /**
        * Task containing the procedure (default value "T_ROB1").
        * @alias task
        * @type {string}
        * @memberof TComponents.ButtonProcedure_A
        */
       get task() {
-        return this._task;
+        return this._taskName;
       }
 
       set task(text) {
         (async () => {
-          this._task = text;
-          this.rapidTask = await API.RAPID.getTask(this._task);
+          this._taskName = text;
+          this.rapidTask = await API.RAPID.getTask(this._taskName);
           this.render();
         })();
-      }
-
-      get highlight() {
-        return this.child._btn.highlight;
-      }
-
-      set highlight(value) {
-        this.child._btn.highlight = value;
-      }
-
-      get icon() {
-        return this.child._btn.icon;
-      }
-
-      set icon(value) {
-        this.child._btn.icon = value;
       }
     };
   }

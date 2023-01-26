@@ -108,7 +108,7 @@ var tComponentStyle = document.createElement('style');
 tComponentStyle.innerHTML = `
 
 .tc-settingview-img {
-  width: 350px;
+  width: 300px;
   height: auto;
   padding: 0px 50px;
 }

@@ -341,3 +341,72 @@
 h4 {
   margin: 0.5rem;
 }
+
+/* === flexbox support for the flexPendant ===  */
+
+.flex {
+  display: flex;
+}
+
+.flex-row {
+  flex-direction: row;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+.justify-between > :not(:first-child) {
+  margin-left: auto;
+}
+
+.justify-around > div {
+  margin-left: auto;
+}
+.justify-around > div:last-child {
+  margin-right: auto;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.flex-row.gap-0p5 > * + * {
+  margin-left: 0.125rem; /* 2px */
+}
+
+.flex-row.gap-1 > * + * {
+  margin-left: 0.25rem; /* 4px */
+}
+
+.flex-row.gap-2 > * + * {
+  margin-left: 0.5rem; /* 8px */
+}
+
+.flex-row.gap-4 > * + * {
+  margin-left: 1rem; /* 16px */
+}
+
+.flex-row.gap-8 > * + * {
+  margin-left: 2rem; /* 32px */
+}
+
+.flex-col.gap-0p5 > * + * {
+  margin-top: 0.125rem; /* 2px */
+}
+
+.flex-col.gap-1 > * + * {
+  margin-top: 0.25rem; /* 4px */
+}
+
+.flex-col.gap-2 > * + * {
+  margin-top: 0.5rem; /* 8px */
+}
+
+.flex-col.gap-4 > * + * {
+  margin-top: 1rem; /* 16px */
+}
+
+.flex-col.gap-8 > * + * {
+  margin-top: 1rem; /* 32px */
+}

@@ -85,34 +85,35 @@ class TComponentsView extends TComponents.Component_A {
         this._module,
         this._variable,
         async function (value) {
-          console.log(`VarButton_A : value = ${value}`);
+          console.log(`tComponentsView: VarButton_A : value = ${value}`);
+          console.log(this);
           TComponents.Popup_A.message('I am a Message window', [
-            `Variable ${this._varialbe} equals:`,
+            `Variable ${this._variable} equals:`,
             '',
             value,
           ]);
           TComponents.Popup_A.info('I am a Information window', [
-            `Variable ${this._varialbe} equals:`,
+            `Variable ${this._variable} equals:`,
             '',
             value,
           ]);
           TComponents.Popup_A.warning('I am a Warning window', [
-            `Variable ${this._varialbe} equals:`,
+            `Variable ${this._variable} equals:`,
             '',
             value,
           ]);
           TComponents.Popup_A.danger('I am a Error window', [
-            `Variable ${this._varialbe} equals:`,
+            `Variable ${this._variable} equals:`,
             '',
             value,
           ]);
           TComponents.Popup_A.confirm('I am a Confirm window', [
-            `Variable ${this._varialbe} equals:`,
+            `Variable ${this._variable} equals:`,
             '',
             value,
           ]);
-        },
-        'VarButton_A'
+        }.bind(this),
+        'Call variable and popups'
       ),
       btnProcedure: new TComponents.ButtonProcedure_A(
         this.find('.btn-procedure'),

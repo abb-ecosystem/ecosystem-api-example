@@ -103,7 +103,6 @@ var TComponents = TComponents || {};
        * @alias label
        * @type {string}
        * @memberof TComponents.VarInput_A
-       * @private
        */
       get label() {
         return this.inputField.desc ? this.inputField.desc : '';
@@ -130,7 +129,6 @@ var TComponents = TComponents || {};
        * @alias cbOnChange
        * @memberof TComponents.VarInput_A
        * @async
-       * @private
        */
       async cbOnChange(value) {
         try {
@@ -150,7 +148,6 @@ var TComponents = TComponents || {};
        * @alias cbUpdateInputField
        * @memberof TComponents.VarInput_A
        * @async
-       * @private
        */
       async cbUpdateInputField(value) {
         this.inputField.text = value;

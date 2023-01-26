@@ -5,11 +5,13 @@ var TComponents = TComponents || {};
     /**
      * Button to jog the robot to a position provided by a RAPID robtarget variable.
      * @class TComponents.ButtonMoveTo_A
-     * @extends TComponents.Component_A
+     * @extends TComponents.Button_A
      * @param {HTMLElement} container - HTMLElement that is going to be the parent of the component
      * @param {string} rapid_variable - Rapid variable to subpscribe to
      * @param {string} module - Module containig the rapid variable
-     * @param {string} [label] - label text
+     * @param {function|null} [callback] - Function to be called when button is pressed
+     * @param {string} [label] - Label of the component
+     * @param {string|null} [icon] - Path to image file
      * @example
      *
      * const btnMove = new TComponents.ButtonMoveTo_A(
@@ -20,10 +22,9 @@ var TComponents = TComponents || {};
      *  );
      *  await btnMove.render();
      */
-    o.ButtonMoveTo_A = class ButtonMoveTo extends TComponents.Component_A {
-      constructor(parent, rapid_variable, module, label = '') {
-        super(parent, label);
-        this._name = label;
+    o.ButtonMoveTo_A = class ButtonMoveTo extends TComponents.Button_A {
+      constructor(parent, rapid_variable, module, label = '', callback = null, icon = null) {
+        super(parent, callback, label, icon);
         this._rapidVariable = rapid_variable;
         this._module = module;
         this._value = null;
@@ -33,16 +34,18 @@ var TComponents = TComponents || {};
       /**
        * Contains component specific asynchronous implementation (like access to controller).
        * This method is called internally during initialization process orchestrated by {@link init() init}.
-       * @private
+       * @protected
        * @async
        */
       async onInit() {
         try {
+          await super.onInit();
           this.task = await API.RAPID.getTask();
           this._value = await this.task.getValue(this._module, this._rapidVariable);
+          if (!this.label) this.label = 'Move to';
         } catch (e) {
           this.error = true;
-          this._name = this._name;
+
           TComponents.Popup_A.warning(`Move to button`, [
             `Error when gettin variable ${this._rapidVariable}`,
             e.message,
@@ -51,50 +54,19 @@ var TComponents = TComponents || {};
       }
 
       /**
-       * Instantiation of TComponents sub-components that shall be initialized in a synchronous way.
-       * All this components are then accessible within {@link onRender() onRender} method by using this.child.<component-instance>
-       * @private
-       * @returns {object} Contains all child TComponents instances used within the component.
-       */
-      mapComponents() {
-        return {
-          _btn: new TComponents.Button_A(
-            // this.find(".tc-button-move"),
-            this.container,
-            null,
-            this._label ? this._label : `Move to`
-          ),
-        };
-      }
-
-      /**
        * Contains component specific asynchronous implementation (like access to controller).
        * This method is called internally during initialization process orchestrated by {@link init() init}.
-       * @private
+       * @protected
        */
       onRender() {
-        if (this.error) this.child._btn.enabled = false;
+        super.onRender();
+        if (this.error) this._btn.enabled = false;
 
-        // const elemBtnMove = this.find(".fp-components-button");
         const elemBtnMove = this.container;
         elemBtnMove.addEventListener('pointerdown', this.move.bind(this));
         elemBtnMove.addEventListener('pointerup', this.stop.bind(this));
         elemBtnMove.addEventListener('pointerleave', this.stop.bind(this));
       }
-
-      /**
-       * Generates the HTML definition corresponding to the component.
-       * @private
-       * @param {TComponents.Component_A} self - The instance on which this method was called.
-       * @returns {string}
-       */
-      // markup({}) {
-      //   return `
-      //     <div>
-      //       <div class="tc-button-move"></div>
-      //     </div>
-      //   `;
-      // }
 
       /**
        * Jogs the robot to the position defined at rapid_variable
@@ -103,7 +75,7 @@ var TComponents = TComponents || {};
        * @async
        */
       async move() {
-        if (this.child._btn.enabled) {
+        if (this._btn.enabled) {
           const jogData = [500, 500, 500, 500, 500, 500];
           this._value = await this.task.getValue(this._module, this._rapidVariable);
           if (!this._value) return;
@@ -131,7 +103,7 @@ var TComponents = TComponents || {};
        * @async
        */
       async stop() {
-        if (this.child._btn.enabled) {
+        if (this._btn.enabled) {
           if (this._isJogging) {
             try {
               await API.MOTION.stopJogging();
@@ -141,22 +113,6 @@ var TComponents = TComponents || {};
             this._isJogging = false;
           }
         }
-      }
-
-      get highlight() {
-        return this.child._btn.highlight;
-      }
-
-      set highlight(value) {
-        this.child._btn.highlight = value;
-      }
-
-      get icon() {
-        return this.child._btn.icon;
-      }
-
-      set icon(value) {
-        this.child._btn.icon = value;
       }
     };
   }
