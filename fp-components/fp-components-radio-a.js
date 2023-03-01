@@ -1,11 +1,11 @@
 
-// (c) Copyright 2020-2021 ABB
+// (c) Copyright 2020-2023 ABB
 //
 // Any unauthorized use, reproduction, distribution,
 // or disclosure to third parties is strictly forbidden.
 // ABB reserves all rights regarding Intellectual Property Rights
 
-// OmniCore App SDK 1.1
+// OmniCore App SDK 1.2
 
 'use strict';
 
@@ -164,16 +164,16 @@ var FPComponents = FPComponents || {};
                 if (this._root !== null) {
 
                     this._root.style.borderWidth    = ( 2*s).toString() + "px";
-                    this._root.style.borderRadius   = (16*s).toString() + "px";
-                    this._root.style.width          = (16*s).toString() + "px";
-                    this._root.style.height         = (16*s).toString() + "px";
+                    this._root.style.borderRadius   = (12*s).toString() + "px";
+                    this._root.style.width          = (24*s).toString() + "px";
+                    this._root.style.height         = (24*s).toString() + "px";
 
                     let markerDiv = this._root.getElementsByTagName("div")[0];
-                    markerDiv.style.width           = (10*s).toString() + "px";
-                    markerDiv.style.height          = (10*s).toString() + "px";
-                    markerDiv.style.borderRadius    = (10*s).toString() + "px";
-                    markerDiv.style.marginLeft      = ( 3*s).toString() + "px";
-                    markerDiv.style.marginTop       = ( 3*s).toString() + "px";
+                    markerDiv.style.width           = ( 8*s).toString() + "px";
+                    markerDiv.style.height          = ( 8*s).toString() + "px";
+                    markerDiv.style.borderRadius    = ( 4*s).toString() + "px";
+                    markerDiv.style.marginLeft      = ( 6*s).toString() + "px";
+                    markerDiv.style.marginTop       = ( 6*s).toString() + "px";
                 }
             }
 
@@ -182,7 +182,7 @@ var FPComponents = FPComponents || {};
             }            
         }
 
-        o.Radio_A.VERSION = "1.1";
+        o.Radio_A.VERSION = "1.2";
 
     }
 

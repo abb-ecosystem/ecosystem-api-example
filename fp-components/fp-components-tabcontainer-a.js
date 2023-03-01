@@ -1,11 +1,11 @@
 
-// (c) Copyright 2020-2021 ABB
+// (c) Copyright 2020-2023 ABB
 //
 // Any unauthorized use, reproduction, distribution,
 // or disclosure to third parties is strictly forbidden.
 // ABB reserves all rights regarding Intellectual Property Rights
 
-// OmniCore App SDK 1.1
+// OmniCore App SDK 1.2
 
 'use strict';
 
@@ -523,7 +523,7 @@ var FPComponents = FPComponents || {};
             }
         }
 
-        o.Tabcontainer_A.VERSION = "1.1";
+        o.Tabcontainer_A.VERSION = "1.2";
 
         o.Tabcontainer_A._SIDEBUTTON_ENABLED    = " fp-components-tabcontainer-sidebutton fp-components-tabcontainer-sidebutton-active ";
         o.Tabcontainer_A._SIDEBUTTON_DISABLED   = " fp-components-tabcontainer-sidebutton ";

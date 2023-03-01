@@ -1,8 +1,10 @@
+import TComponents from '../t-components/index.js';
+
 /**
  * @brief Hamburger menu componet
  *
  */
-class Hamburger extends TComponents.Component_A {
+export default class Hamburger extends TComponents.Component_A {
   /**
    * @brief
    * @param {HTMLElement} parent - HTMLElement that is going to be the parent of the component

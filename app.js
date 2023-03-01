@@ -1,31 +1,26 @@
-/**
- *
- */
-const T_COMPONENTS_EXAMPLE_VERSION = '1.0.3';
+import TComponents from './t-components/index.js';
+import RapidView from './views/rapid.js';
+import TrayView from './views/trayView.js';
+import IoView from './views/ios.js';
+import TComponentsView from './views/tComponentsView.js';
+import About from './views/about.js';
+
+import { moduleName, modulePath, configPath, configName } from './constants/common.js';
 
 const path = window.location.pathname.split('/');
 const dir = path[path.length - 2];
 
-const moduleName = 'Ecosystem_BASE';
-const modulePath = `HOME/WebApps/${dir ? dir : 'EcosystemApi'}/rapid`;
-const configName = 'EIO_ECOSYSTEM_GUIDE';
-const configPath = `HOME/WebApps/${dir ? dir : 'EcosystemApi'}/config`;
-
-// const imgMod = 'assets/img/brackets-round-fill.svg';
-const imgVar = 'assets/img/wrench.png';
-const imgProc = 'assets/img/abb_tray_input.png';
-const imgSettings = 'assets/img/ABB_picto_40x40_gear.png';
-
-class App {
-  constructor() {
-    this.init();
+export default class App extends TComponents.Component_A {
+  constructor(parent) {
+    super(parent, { options: { async: false } });
   }
 
-  async init() {
+  async onInit() {
     const task = await API.RAPID.getTask();
     const modules = await task.searchModules();
     const moduleFound = modules.some((module) => module.name === moduleName);
     if (!moduleFound) {
+      this.error = true;
       TComponents.Popup_A.confirm(
         `${moduleName} module not yet loaded on the controller`,
         ['This module is required for this WebApp.', 'Do you want to load the module?'],
@@ -33,80 +28,63 @@ class App {
       );
     }
 
-    if (moduleFound) this.render();
+    const signalFound = await API.SIGNAL.search({ name: 'di_is_gripper_closed' }, true);
+    console.log('😊', signalFound);
+    if (signalFound.length === 0) {
+      this.error = true;
+      TComponents.Popup_A.confirm(
+        `Required signals not yet loaded on the controller`,
+        [
+          'Youl can load a demo singal configuration.',
+          'A system restart will be executed.',
+          'Do you want to proceed?',
+        ],
+        this.cbConfirmLoadConfiguration.bind(this)
+      );
+    }
   }
 
-  async render() {
-    /**
-     * RAPID TAB
-     */
-    // document.querySelector('#rapid-view').style.backgroundColor = '#EBEBEB';
+  mapComponents() {
+    return this.error
+      ? {}
+      : {
+          /**
+           * RAPID TAB
+           */
+          rapidView: new RapidView(this.find('#rapid-view')),
+          /**
+           * TComponents
+           */
+          tComponents: new TComponentsView(this.find('#tc-view')),
+          /**
+           * MOTION TAB
+           */
+          trayView: new TrayView(
+            this.find('#motion-view'),
+            'Tray Configuration',
+            moduleName,
+            'esTray01',
+            'esTray02',
+            'esTray03',
+            'esTray04',
+            'esTrayGrip',
+            'esTrayApproach',
+            'esTrayExit'
+          ),
+          /**
+           * DIGITAL IO TAB
+           */
+          ioView: new IoView(this.find('#io-view')),
+          /**
+           * About
+           */
+          about: new About(this.find('#about-view')),
+        };
+  }
 
-    const swElement = document.querySelector('#settings-view-container');
-    const varElement = document.querySelector('#variable-container');
-    const procElement = document.querySelector('#procedure-container');
-
-    const settingsView = await new SettingsView(
-      swElement,
-      moduleName,
-      'esNumParts',
-      'esNumRows',
-      'esNumCols',
-      'esCurrentPart',
-      'esSim'
-    ).render();
-
-    const procedure = await new Procedure(procElement, moduleName).render();
-    const variable = await new Variable(varElement, moduleName).render();
-
-    /**
-     * MOTION TAB
-     */
-
-    const traySetup = new TrayView(
-      document.querySelector('.tray-setup'),
-      'Tray Configuration',
-      moduleName,
-      'esTray01',
-      'esTray02',
-      'esTray03',
-      'esTray04',
-      'esTrayGrip',
-      'esTrayApproach',
-      'esTrayExit'
-    );
-
-    traySetup.render();
-    document.querySelector('#motion-view').style.backgroundColor = '#EBEBEB';
-    traySetup.cssContainer(true);
-
-    /**
-     * DIGITAL IO TAB
-     */
-    document.querySelector('#io-view').style.backgroundColor = '#EBEBEB';
-
-    const signalExamples = new SignalExamples(document.querySelector('.signal-components'));
-    signalExamples.cssContainer(true);
-    signalExamples.render();
-
-    const signalConfig = new SignalConfigurator(document.querySelector('.signal-configurator'));
-    signalConfig.cssContainer(true);
-    signalConfig.render();
-
-    /**
-     * TComponents
-     */
-    const tComponents = new TComponentsView(document.querySelector('#tc-view'));
-    tComponents.render();
-
-    /**
-     * HAMBURGER CONTAINER
-     */
-    const hamburger = new Hamburger(document.querySelector('#hamburger-container'), 'RAPID', true);
-    hamburger.addView('Settings View', swElement, imgSettings, true);
-    hamburger.addView('Variables', varElement, imgVar, false);
-    hamburger.addView('Procedures', procElement, imgProc, false);
-    await hamburger.render();
+  async onRender() {
+    if (this.error) return;
+    this.container.classList.add('tc-container');
 
     /**
      * TAB CONTAINER
@@ -118,14 +96,50 @@ class App {
     tabContainer.addTab('TComponents', 'tc-view');
     tabContainer.addTab('About', 'about-view');
     tabContainer.attachToId('tab-container');
+
+    // console.log('😎😎😎😎😎 - App finished rendering...');
+  }
+
+  markup() {
+    return `
+    <div class="box-grow">
+      <div id="tab-container" class="tc-container"></div>
+      <div id="rapid-view"></div>
+      <div id="motion-view"></div>
+      <div id="io-view"></div>
+      <div id="tc-view"></div>
+      <div id="about-view"></div>
+    </div>
+    `;
   }
 
   async cbConfirmLoadModule(action) {
-    if (action === 'ok') {
-      let url = `${modulePath}/${moduleName}.sysx`;
-      const replace = true;
-      await API.RAPID.loadModule(url, replace);
+    try {
+      if (action === 'ok') {
+        let url = `${modulePath}/${moduleName}.sysx`;
+        const replace = true;
+        await API.RAPID.loadModule(url, replace);
+      }
+    } catch (e) {
+      console.error(e);
     }
-    await this.render();
+    TComponents.Popup_A.info('Please restart the WebApp...');
+
+    // await this.render();
+  }
+
+  async cbConfirmLoadConfiguration(action) {
+    if (action === 'ok') {
+      let url = `${configPath}/${configName}.cfg`;
+      console.log('💥', url);
+      const action = 'replace';
+      try {
+        await API.CONFIG.loadConfiguration(url, action);
+        await API.sleep(2000);
+        await API.CONTROLLER.restart();
+      } catch (e) {
+        TComponents.Popup_A.danger('Failed to restart controller', [e.message, e.description]);
+      }
+    }
   }
 }

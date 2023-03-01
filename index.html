@@ -39,107 +39,12 @@
 
     <script src="api/ecosystem-base.js"></script>
 
-    <script src="t-components/t-components-base.js"></script>
-    <script defer src="t-components/t-components-popup.js"></script>
-    <script src="t-components/t-components-button.js"></script>
-    <script defer src="t-components/t-components-dropdown.js"></script>
-    <script src="t-components/t-components-varinput.js"></script>
-    <script src="t-components/t-components-varindicator.js"></script>
-    <script src="t-components/t-components-varincrdecr.js"></script>
-    <script src="t-components/t-components-varbutton.js"></script>
-    <script src="t-components/t-components-varswitch.js"></script>
-    <script defer src="t-components/t-components-selectors.js"></script>
-    <script defer src="t-components/t-components-buttonreboot.js"></script>
-    <script defer src="t-components/t-components-buttonprocedure.js"></script>
-    <script defer src="t-components/t-components-buttonmoveto.js"></script>
-    <script defer src="t-components/t-components-buttonteach.js"></script>
-    <script defer src="t-components/t-components-buttonteachmove.js"></script>
-    <script defer src="t-components/t-components-signaledit.js"></script>
-    <script defer src="t-components/t-components-signalindicator.js"></script>
-    <script defer src="t-components/t-components-signalswitch.js"></script>
-    <script defer src="t-components/t-components-signalview.js"></script>
-    <script defer src="t-components/t-components-modalwindow.js"></script>
-    <script defer src="t-components/t-components-templateview.js"></script>
-    <script src="t-components/t-components-rapidstartstop.js"></script>
-    <script src="t-components/t-components-motorsonoff.js"></script>
-    <script src="t-components/t-components-opmode.js"></script>
-
-    <!-- Application specific modules -->
-    <script src="components/hamburger.js"></script>
-    <script src="views/settingsView.js"></script>
-    <script defer src="views/variables.js"></script>
-    <script defer src="views/module.js"></script>
-    <script defer src="views/procedures.js"></script>
-    <script defer src="views/trayView.js"></script>
-    <script defer src="views/signalComponents.js"></script>
-    <script defer src="views/signalExamples.js"></script>
-    <script defer src="views/signalContainer.js"></script>
-    <script defer src="views/signalConfigurator.js"></script>
-    <script defer src="views/tComponentsView.js"></script>
-
-    <script src="test.js"></script>
-    <script src="app.js"></script>
-
-    <script src="index.js"></script>
+    <script type="module" src="index.js"></script>
 
     <!-- <script data-main="index" src="lib/require.js"></script> -->
   </head>
   <body>
     <div id="test"></div>
-    <div id="app" class="tc-container">
-      <div class="box-grow">
-        <div id="tab-container" class="tc-container"></div>
-        <div id="rapid-view">
-          <div id="hamburger-container" class="tc-container"></div>
-          <div id="settings-view-container"></div>
-          <div id="variable-container"></div>
-          <div id="procedure-container"></div>
-        </div>
-        <div id="motion-view">
-          <div class="tc-row">
-            <div class="tray-setup"></div>
-          </div>
-        </div>
-        <div id="io-view">
-          <div class="tc-container">
-            <div class="signal-configurator"></div>
-            <div class="signal-components"></div>
-          </div>
-        </div>
-        <div id="tc-view"></div>
-        <!-- VIEW: VERSION ........................................................................................................................ -->
-
-        <div id="about-view" class="about-view" style="background-color: #ebebeb">
-          <div class="tc-container-box">
-            <div>
-              <div class="about-ecosystem-framework tc-infobox">
-                <div>
-                  <p>Version</p>
-                </div>
-                <div>
-                  <table class="about-table">
-                    <tr>
-                      <td></td>
-                    </tr>
-                    <tr>
-                      <td class="about-label">ECOSYSTEM API</td>
-                      <td id="about-api" class="label">--</td>
-                    </tr>
-                    <tr>
-                      <td class="about-label">ECOSYSTEM TCOMPONENTS</td>
-                      <td id="about-tcomponents" class="label">--</td>
-                    </tr>
-                    <tr>
-                      <td class="about-label">ECOSYSTEM WEBAPP</td>
-                      <td id="about-tcomponents-example" class="label">--</td>
-                    </tr>
-                  </table>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <div id="root" class="tc-container"></div>
   </body>
 </html>

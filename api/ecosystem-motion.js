@@ -1,16 +1,8 @@
 'use strict';
-
+// @ts-ignore
 var API = API || {};
 if (typeof API.constructedMotion === 'undefined') {
   (function (mot) {
-    /**
-     * @alias ECOSYSTEM_MOTION_LIB_VERSION
-     * @memberof API
-     * @constant
-     * @type {number}
-     */
-    mot.ECOSYSTEM_MOTION_LIB_VERSION = '0.1';
-
     /**
      * @alias API.MOTION
      * @namespace
@@ -18,7 +10,7 @@ if (typeof API.constructedMotion === 'undefined') {
     mot.MOTION = new (function () {
       let ccounter = null;
       let jogMonitor = null;
-      this.jogStop = false;
+      let jogStop = false;
 
       /**
        * @alias JOGMODE
@@ -33,6 +25,7 @@ if (typeof API.constructedMotion === 'undefined') {
         Cartesian: 'Cartesian',
         AxisGroup1: 'AxisGroup1',
         AxisGroup2: 'AxisGroup2',
+        Current: '',
       };
 
       /**
@@ -46,29 +39,91 @@ if (typeof API.constructedMotion === 'undefined') {
         Base: 'Base',
         Tool: 'Tool',
         World: 'World',
+        Current: '',
       };
+
+      // /**
+      //  * @typedef {number} JogDataIdx0
+      //  * @typedef {number} JogDataIdx1
+      //  * @typedef {number} JogDataIdx2
+      //  * @typedef {number} JogDataIdx3
+      //  * @typedef {number} JogDataIdx4
+      //  * @typedef {number} JogDataIdx5
+      //  * @type {[JogDataIdx0, JogDataIdx1, JogDataIdx2, JogDataIdx3, JogDataIdx4, JogDataIdx5]} JogData
+      //  */
+
+      /**
+       * @typedef Trans
+       * @prop {number} x
+       * @prop {number} y
+       * @prop {number} z
+       * @memberof API.MOTION
+       *
+       * @typedef Rot
+       * @prop {number} q1
+       * @prop {number} q2
+       * @prop {number} q3
+       * @prop {number} q4
+       * @memberof API.MOTION
+       *
+       * @typedef RobConf
+       * @prop {number} cf1
+       * @prop {number} cf4
+       * @prop {number} cf6
+       * @prop {number} cfx
+       * @memberof API.MOTION
+       *
+       * @typedef ExtAx
+       * @prop {number}  eax_a
+       * @prop {number}  eax_b
+       * @prop {number}  eax_c
+       * @prop {number}  eax_d
+       * @prop {number}  eax_e
+       * @prop {number}  eax_f
+       * @memberof API.MOTION
+       *
+       * @typedef RobTarget
+       * @prop {Trans} trans
+       * @prop {Rot} rot
+       * @prop {RobConf} robconf
+       * @prop {ExtAx} extax
+       * @memberof API.MOTION
+       */
+
+      /**
+       * @typedef executeJoggingProps
+       * @prop {string} [tool]
+       * @prop {string} [wobj]
+       * @prop {COORDS} [coords]
+       * @prop {JOGMODE} [jogMode]
+       * @prop {JogData} [jogData]
+       * @prop {RobTarget} [robtarget]
+       * @memberof API.MOTION
+       */
 
       /**
        * Jogs the robot
        * @alias executeJogging
        * @memberof API.MOTION
-       * @param {string} tool
-       * @param {string} wobj
-       * @param {string} coords
-       * @param {string} jog_mode
-       * @param {string} jogdata
-       * @param {string} robtarget
+       * @param {executeJoggingProps} props
        * @returns {undefined | Promise<{}>} - Promise rejected if failure
        */
-      this.executeJogging = async function (tool, wobj, coords, jog_mode, jogdata, robtarget = '') {
+      this.executeJogging = async function ({
+        tool = '',
+        wobj = '',
+        coords = this.COORDS.Current,
+        jogMode = this.JOGMODE.GoToPos,
+        jogData = [500, 500, 500, 500, 500, 500],
+        robtarget = null,
+      }) {
         let state = null;
         try {
-          this.jogStop = true;
+          jogStop = true;
           await API.RWS.requestMastership('motion');
           state = await API.RWS.getMastershipState('motion');
 
-          await prepareJogging(tool, wobj, coords, jog_mode);
-          await this.doJogging(jogdata, robtarget);
+          await prepareJogging(tool, wobj, coords, jogMode);
+          await doJogging(jogData, robtarget);
           await API.RWS.releaseMastership('motion');
         } catch (err) {
           if (
@@ -88,7 +143,7 @@ if (typeof API.constructedMotion === 'undefined') {
        * @param {string} tool
        * @param {string} wobj
        * @param {string} coords
-       * @param {string} jog_mode
+       * @param {string} jogMode
        * @returns {undefined |Promise<{}>} - Undefined or reject Promise if fails.
        * @private
        */
@@ -96,10 +151,10 @@ if (typeof API.constructedMotion === 'undefined') {
         tool = 'tool0',
         wobj = 'wobj0',
         coords = 'Base',
-        jog_mode
+        jogMode = ''
       ) {
         try {
-          await API.RWS.MOTIONSYSTEM.setMechunit(tool, wobj, '', '', '', jog_mode, coords);
+          await API.RWS.MOTIONSYSTEM.setMechunit({ tool, wobj, jogMode, coords });
 
           ccounter = await API.RWS.MOTIONSYSTEM.getChangeCount();
         } catch (err) {
@@ -112,35 +167,35 @@ if (typeof API.constructedMotion === 'undefined') {
        * @alias doJogging
        * @memberof API.MOTION
        * @private
-       * @param {string} jogdata
-       * @param {string} robtarget
+       * @param {API.MOTION.JogData} jogData
+       * @param {API.MOTION.RobTarget} robtarget
        * @param {boolean} once
        * @returns {undefined |Promise<{}>} - Undefined or reject Promise if fails.
        */
-      this.doJogging = async function (jogdata, robtarget = '', once = false) {
-        this.jogStop = false;
+      const doJogging = async function (jogData, robtarget = null, once = false) {
+        jogStop = false;
         let opMode = await API.CONTROLLER.getOperationMode();
         let ctrlState = await API.CONTROLLER.getControllerState();
         if (
           ctrlState === API.CONTROLLER.STATE.MotorsOn &&
           opMode === API.CONTROLLER.OPMODE.ManualR
         ) {
-          while (!this.jogStop) {
+          while (!jogStop) {
             try {
-              if (robtarget !== '') {
-                await API.RWS.MOTIONSYSTEM.setRobotPosition(robtarget);
+              if (robtarget !== null) {
+                await API.RWS.MOTIONSYSTEM.setRobotPositionTarget(robtarget);
               }
-              await API.RWS.MOTIONSYSTEM.jog(jogdata, ccounter);
+              await API.RWS.MOTIONSYSTEM.jog(jogData, ccounter);
 
               await API.sleep(200);
-              if (once) this.jogStop = true;
+              if (once) jogStop = true;
             } catch (err) {
-              this.jogStop = true;
+              jogStop = true;
               return API.rejectWithStatus('Do jogging failed.', err);
             }
           }
         } else {
-          this.jogStop = true;
+          jogStop = true;
           return API.rejectWithStatus(
             `Missing conditions to jog: CtrlState - ${ctrlState}, OpMode - ${opMode}`
           );
@@ -154,10 +209,10 @@ if (typeof API.constructedMotion === 'undefined') {
        * @returns {undefined |Promise<{}>} - Undefined or reject Promise if fails.
        */
       this.stopJogging = async function () {
-        const jogdata = [0, 0, 0, 0, 0, 0];
-        this.jogStop = true;
+        const jogData = [0, 0, 0, 0, 0, 0];
+        jogStop = true;
         try {
-          await API.RWS.MOTIONSYSTEM.jog(jogdata, ccounter);
+          await API.RWS.MOTIONSYSTEM.jog(jogData, ccounter);
         } catch (err) {
           return API.rejectWithStatus('Stop jogging failed.', err);
         }

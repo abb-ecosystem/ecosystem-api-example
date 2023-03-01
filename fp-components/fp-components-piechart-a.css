@@ -1,0 +1,59 @@
+
+/*
+
+(c) Copyright 2020-2023 ABB
+
+Any unauthorized use, reproduction, distribution,
+or disclosure to third parties is strictly forbidden.
+ABB reserves all rights regarding Intellectual Property Rights
+
+// OmniCore App SDK 1.2
+
+*/
+
+.fp-components-pie-chart {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    font-size: 16px;
+}
+
+.fp-components-pie-chart-labelscontainer {
+    display: flex;
+    flex-direction: column;
+    justify-content: left;
+    padding: 0 0 1px 0;
+    margin: 0 0 0 0;
+}
+
+.fp-components-pie-chart-labelwrapper {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin: 0 0 0 0;
+    padding: 8px 6px 8px 6px;
+}
+.fp-components-pie-chart-labelwrapper-selected {
+    border-style: none none solid none;
+    border-color: #000000;
+    border-width: 1px;
+    padding: 8px 6px 7px 6px;
+    background-color: var(--fp-color-GRAY-10);
+}
+.fp-components-pie-chart-labelwrapper > :nth-child(1) {
+    width: 15px;
+    flex-shrink: 0;
+    flex-grow: 0;
+    height: 15px;
+    margin: 0 8px 0 0;
+
+    border-radius: 3px;
+}
+.fp-components-pie-chart-labelwrapper > :nth-child(2) {
+    margin: 0 8px 0 0;
+    line-height: 14px;
+}
+.fp-components-pie-chart-labelwrapper > :nth-child(3) {
+    font-weight: bold;
+    white-space: nowrap;
+}

@@ -1,9 +1,10 @@
 'use strict';
 
 /**
- * TComponents Namespace
+ * API Namespace
  * @namespace API
  */
+// @ts-ignore
 var API = API || {};
 
 if (typeof API.constructedBase === 'undefined') {
@@ -14,7 +15,7 @@ if (typeof API.constructedBase === 'undefined') {
      * @constant
      * @type {number}
      */
-    es.ECOSYSTEM_LIB_VERSION = '0.4';
+    es.ECOSYSTEM_LIB_VERSION = '0.5';
 
     const TIMEOUT_SEC = 5;
     es.verbose = false;
@@ -26,6 +27,30 @@ if (typeof API.constructedBase === 'undefined') {
      */
     es.init = async () => {
       // await API.CONTROLLER._init();
+
+      function buildErrorArray(e) {
+        const errArr = [];
+        if (typeof e === 'string') {
+          errArr.push(e);
+        } else if (typeof e === 'object') {
+          errArr.push(e.message);
+          if (e.controllerStatus) {
+            errArr.push(`Code: ${e.controllerStatus.code} `);
+            errArr.push(e.controllerStatus.description);
+          }
+        }
+        return errArr;
+      }
+
+      window.addEventListener('error', (e) => {
+        console.error(e);
+        FPComponents.Popup_A.message(`Asynchronous error:`, buildErrorArray(e));
+      });
+
+      window.addEventListener('unhandledrejection', (evt) => {
+        console.error(evt.reason);
+        FPComponents.Popup_A.message(`Asynchronous error:`, buildErrorArray(evt.reason));
+      });
     };
     window.addEventListener('load', es.init, false);
 
@@ -136,7 +161,11 @@ if (typeof API.constructedBase === 'undefined') {
      * @private
      */
     es.log = (msg) => {
-      es.verbose && console.log(JSON.stringify(msg));
+      try {
+        es.verbose && console.log(JSON.stringify(msg));
+      } catch (e) {
+        console.log(msg);
+      }
     };
 
     /**
@@ -145,7 +174,11 @@ if (typeof API.constructedBase === 'undefined') {
      * @private
      */
     es.error = (e) => {
-      es.verbose && console.error(JSON.stringify(e, replaceErrors));
+      try {
+        es.verbose && console.error(JSON.stringify(e, replaceErrors));
+      } catch (e) {
+        console.error(e);
+      }
     };
 
     /**
@@ -172,6 +205,7 @@ if (typeof API.constructedBase === 'undefined') {
      * @memberof API
      * @returns {string} UUID
      */
+    // https://stackoverflow.com/questions/105034/how-do-i-create-a-guid-uuid/
     es.generateUUID = () => {
       // Public Domain/MIT
       var d = new Date().getTime(); //Timestamp
@@ -357,7 +391,7 @@ if (typeof API.constructedBase === 'undefined') {
           /**
            * @alias isManual
            * @memberof API.CONTROLLER
-           * @property {string} isManual true if operation mode is manual reduced, false otherwise
+           * @property {boolean} isManual true if operation mode is manual reduced, false otherwise
            * This property is available only after calling API.CONTROLLER.monitorController()
            */
           this.isManual = this.opMode === API.CONTROLLER.OPMODE.ManualR ? true : false;
@@ -365,7 +399,7 @@ if (typeof API.constructedBase === 'undefined') {
           /**
            * @alias isAuto
            * @memberof API.CONTROLLER
-           * @property {string} isAuto true if operation mode is manual reduced, false otherwise
+           * @property {boolean} isAuto true if operation mode is manual reduced, false otherwise
            * This property is available only after calling API.CONTROLLER.monitorController()
            */
           this.isAuto = this.opMode === API.CONTROLLER.OPMODE.Auto ? true : false;

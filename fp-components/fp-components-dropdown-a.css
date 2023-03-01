@@ -1,39 +1,48 @@
 
 /*
 
-(c) Copyright 2020-2021 ABB
+(c) Copyright 2020-2023 ABB
 
 Any unauthorized use, reproduction, distribution,
 or disclosure to third parties is strictly forbidden.
 ABB reserves all rights regarding Intellectual Property Rights
 
-// OmniCore App SDK 1.1
+// OmniCore App SDK 1.2
 
 */
 
 .fp-components-dropdown {
-    position: relative;
+    /* position: relative; */
     box-sizing: border-box;
     max-width: 100%;
+    min-height: 36px;
     display: flex;
     align-items: center;
     color: black;
-    background-color: white;
+    background-color: var(--fp-color-WHITE);
     border-style: solid;
     border-width: 2px;
-    border-color: rgb(153,153,153);
-    padding-top: 6px;
+    border-color: var(--fp-color-GRAY-20);
+    border-radius: 5px;
+    padding-top: 7px;
     padding-bottom: 6px;
-    padding-left: 8px;
-    padding-right: 8px;
+    padding-left: 14px;
+    padding-right: 14px;
+    font-size: 14px;
 }
 
 .fp-components-dropdown.fp-components-dropdown-disabled {
-    color: rgb(122,122,122);
+    color: var(--fp-color-TEXT-BLACK-DISABLED);
+    background-color: var(--fp-color-BLACK-OPACITY-4);
+    border-color: rgba(0,0,0,0);
 }
 
 .fp-components-dropdown:not(.fp-components-dropdown-disabled):hover {
-    border-color: black;
+    border-color: var(--fp-color-GRAY-30);
+}
+
+.fp-components-dropdown:not(.fp-components-dropdown-disabled):active {
+    border-color: var(--fp-color-GRAY-60);
 }
 
 .fp-components-dropdown > p {
@@ -65,41 +74,39 @@ ABB reserves all rights regarding Intellectual Property Rights
 
 .fp-components-dropdown-menu {
     display: none;
-    position: absolute;
+    position: fixed;
+    box-sizing: border-box;
     z-index: 2;
-    background-color: rgb(242,242,242);
+    background-color: var(--fp-color-WHITE);
     border-style: solid;
     border-width: 1px;
-    border-color: rgb(204,204,204);
-    min-width: calc(100% + 2px);
+    border-radius: 5px;
+    border-color: var(--fp-color-GRAY-30);
+    max-width: calc(100vw - 60px);
     min-height: 42px;
     max-height: 400px;
     overflow-y: auto;
-    padding-top: 8px;
-    padding-bottom: 8px;
-    left: -2px;
-    box-shadow:  5px 20px -10px black;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    /* padding-right: 17px; */
+    /* box-shadow: 1px 1px 2px 1px rgba(0, 0, 0, 0.2); */
 }
 
 .fp-components-dropdown-menu > p {
     padding-top: 12px;
     padding-bottom: 12px;
     padding-left: 4px;
-    padding-right: 4px;
+    padding-right: 14px;
+    margin: 0px; 
+    /* margin: 4px;  */
 }
 
 .fp-components-dropdown-menu > p:hover {
-    background-color: rgb(218,218,218);
+    background-color: var(--fp-color-GRAY-10);
 }
 
 .fp-components-dropdown-menu > p:active {
-    background-color: rgb(194,194,194);
-    transform: scale(0.97, 0.97);
-}
-
-.fp-components-dropdown-disabled {
-    background-color: rgb(204,204,204);
-    border-color: rgb(204,204,204);
+    background-color: var(--fp-color-GRAY-20);
 }
 
 .fp-components-dropdown-desc {

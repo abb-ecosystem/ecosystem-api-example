@@ -1,11 +1,11 @@
 
-// (c) Copyright 2020-2021 ABB
+// (c) Copyright 2020-2023 ABB
 //
 // Any unauthorized use, reproduction, distribution,
 // or disclosure to third parties is strictly forbidden.
 // ABB reserves all rights regarding Intellectual Property Rights
 
-// OmniCore App SDK 1.1
+// OmniCore App SDK 1.2
 
 'use strict';
 
@@ -82,8 +82,10 @@ var FPComponents = FPComponents || {};
                 }
 
                 if(!i) {
-                    this._root.removeChild(this._divIcon);
-                    this._divIcon = null;
+                    if (this._divIcon !== null) {
+                        this._root.removeChild(this._divIcon);
+                        this._divIcon = null;
+                    }
                     return;
                 }
                 
@@ -92,7 +94,7 @@ var FPComponents = FPComponents || {};
                     return;
                 }
 
-                this._divIcon.src = this._icon;
+                this._divIcon.style.backgroundImage = `url("${this._icon}")`;
             }
 
             _updateClassNames() {
@@ -158,7 +160,7 @@ var FPComponents = FPComponents || {};
             }
         }
 
-        o.Button_A.VERSION = "1.1";
+        o.Button_A.VERSION = "1.2";
 
     }
 

@@ -1,27 +1,20 @@
 'use strict';
 
+// @ts-ignore
 var API = API || {};
 if (typeof API.constructedFile === 'undefined') {
   (function (f) {
-    // VERSION INFO
-    f.ECOSYSTEM_FILESYSTEM_LIB_VERSION = '0.1';
-
-    function parseJSON(json) {
-      try {
-        return JSON.parse(json);
-      } catch (error) {
-        return undefined;
-      }
-    }
-
-    /**
-     * Extension of RWS not yet available at the omnicore.f SDK
-     */
     f.FILESYSTEM = new (function () {
       const fixPath = function (path) {
         return `${path.replace(/^HOME/, '$HOME').replace(/\:$/, '')}/`;
       };
 
+      /**
+       * Get the content of a file a a string
+       * @alias getDirectoryContents
+       * @memberof API.FILESYSTEM
+       * @param  {string} path Path to the file, including file name
+       */
       this.getDirectoryContents = async function (path = '$HOME') {
         try {
           var directory = await RWS.FileSystem.getDirectory(path);
@@ -41,6 +34,13 @@ if (typeof API.constructedFile === 'undefined') {
         }
       };
 
+      /**
+       * Get the content of a file a a string
+       * @alias getFileContents
+       * @memberof API.FILESYSTEM
+       * @param  {string} path Path to the file, including file name
+       * @param  {string} file Name of the file
+       */
       this.getFileContents = async function (path, file) {
         console.log(path);
         let location = `${path.replace(/\:$/, '').replace(/^HOME/, '$HOME')}/${file}`;

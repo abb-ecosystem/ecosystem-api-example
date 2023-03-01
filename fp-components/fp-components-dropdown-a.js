@@ -1,11 +1,11 @@
 
-// (c) Copyright 2020-2021 ABB
+// (c) Copyright 2020-2023 ABB
 //
 // Any unauthorized use, reproduction, distribution,
 // or disclosure to third parties is strictly forbidden.
 // ABB reserves all rights regarding Intellectual Property Rights
 
-// OmniCore App SDK 1.1
+// OmniCore App SDK 1.2
 
 'use strict';
 
@@ -22,6 +22,7 @@ var FPComponents = FPComponents || {};
                 this._root = null;
                 this._descDiv = null;
                 this._container = null;
+                this._canvasArrow = null;
 
                 this._onselection = null;
                 this._enabled = true;
@@ -49,9 +50,10 @@ var FPComponents = FPComponents || {};
             set enabled(e) {
                 this._enabled = e ? true : false;
                 this._updateClassNames();
-                if (!this._root._enabled && this._root !== null) {
+                if (this._root !== null && !this._root._enabled) {
                     this._root.getElementsByTagName("div")[0].style.display = "none";
                 }
+                this._drawArrow();
             }
 
             get model() {
@@ -110,9 +112,11 @@ var FPComponents = FPComponents || {};
                     
                     for (let i=0; i<items.length; i++) {
                         if (s===null || s != i) {
-                            items[i].style.background = null;
+                            items[i].style.backgroundColor = null;
+                            items[i].style.color = null;
                         } else {
-                            items[i].style.background = "rgb(145,193,231)";
+                            items[i].style.backgroundColor = "var(--fp-color-BLUE-60)";
+                            items[i].style.color = "var(--fp-color-WHITE)";
                         }
                     }
 
@@ -126,7 +130,7 @@ var FPComponents = FPComponents || {};
                         }
                     }
                 }
-                
+
 
             }
 
@@ -165,7 +169,21 @@ var FPComponents = FPComponents || {};
 
                 this._anchor = element;
                 return this.rebuild();
-            }               
+            }
+
+            _drawArrow() {
+                if (this._canvasArrow !== null) {
+                    let ctx = this._canvasArrow.getContext("2d");
+                    ctx.clearRect(0, 0, this._canvasArrow.width, this._canvasArrow.height);
+                    ctx.beginPath();
+                    ctx.moveTo(2, 3);
+                    ctx.lineTo(7, 8);
+                    ctx.lineTo(12,3);
+                    ctx.strokeStyle = this._enabled ? "#333333" : "#999999";
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                }
+            }
 
             rebuild() {
 
@@ -177,10 +195,11 @@ var FPComponents = FPComponents || {};
                     this._anchor.removeChild(this._anchor.firstChild);
                 }
 
+                this._canvasArrow   = document.createElement("canvas");
+
                 let divContainer    = document.createElement("div");
                 let divBox          = document.createElement("div");
                 let pBox            = document.createElement("p");
-                let canvasArrow     = document.createElement("canvas");
                 let divOverlay      = document.createElement("div");
                 let divMenu         = document.createElement("div");
                 
@@ -189,9 +208,15 @@ var FPComponents = FPComponents || {};
                         divOverlay.style.display = "block";
                         divMenu.style.display = "block";
 
-                        let top = 0 - (divMenu.offsetHeight/2) + (divBox.offsetHeight/2);
+                        divMenu.style.minWidth = `${divBox.offsetWidth}px`;
+
+                        let bcrBox = divBox.getBoundingClientRect();
+
+                        let top = bcrBox.top - (divMenu.offsetHeight/2) + (divBox.offsetHeight/2);
                         divMenu.style.top = top + "px";
-                        divMenu.style.maxHeight = null;
+
+                        let left = bcrBox.left;
+                        divMenu.style.left = left + "px";
 
                         let bcr = divMenu.getBoundingClientRect();
                         let distanceFromBottom = window.innerHeight - bcr.bottom;
@@ -212,26 +237,20 @@ var FPComponents = FPComponents || {};
                         if (distanceFromBottom < 30) {
                             divMenu.style.maxHeight = (window.innerHeight - 70) + "px";
                         }
-                        
+
+                        // Scroll to the selected item, when dropdown menu opens
+                        if(typeof this._selected === "number") {
+                            divMenu.scrollTop = divMenu.children[this._selected].offsetTop - ((divMenu.offsetHeight / 2) - (divMenu.children[this._selected].offsetHeight / 2));    
+                        }
                     }
                 };
 
                 divBox.appendChild(pBox);
-
-                canvasArrow.height = 12;
-                canvasArrow.width = 15;
-
-                let ctx = canvasArrow.getContext("2d");
-                ctx.clearRect(0, 0, canvasArrow.width, canvasArrow.height);
-                ctx.beginPath();
-                ctx.moveTo(0, 2);
-                ctx.lineTo(7, 9);
-                ctx.lineTo(14,2);
-                ctx.strokeStyle = "#999999";
-                ctx.lineWidth = 2;
-                ctx.stroke();
-
-                divBox.appendChild(canvasArrow);
+                
+                this._canvasArrow.height = 12;
+                this._canvasArrow.width = 15;
+                this._drawArrow();
+                divBox.appendChild(this._canvasArrow);
 
                 divMenu.className = "fp-components-dropdown-menu";
                 divOverlay.className = "fp-components-dropdown-overlay";
@@ -255,9 +274,9 @@ var FPComponents = FPComponents || {};
                             if (!this._enabled) {
                                 return;
                             }
-                            this.selected = i;
+                                this.selected = i;
                             
-                            if (this._onselection !== undefined) {
+                            if (typeof this._onselection === "function") {
                                 this._onselection(i, item);
                             }
                         }
@@ -291,7 +310,7 @@ var FPComponents = FPComponents || {};
             }         
         }
 
-        o.Dropdown_A.VERSION = "1.1";
+        o.Dropdown_A.VERSION = "1.2";
 
     }
 

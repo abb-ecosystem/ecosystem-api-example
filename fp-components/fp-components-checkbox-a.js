@@ -1,11 +1,11 @@
 
-// (c) Copyright 2020-2021 ABB
+// (c) Copyright 2020-2023 ABB
 //
 // Any unauthorized use, reproduction, distribution,
 // or disclosure to third parties is strictly forbidden.
 // ABB reserves all rights regarding Intellectual Property Rights
 
-// OmniCore App SDK 1.1
+// OmniCore App SDK 1.2
 
 'use strict';
 
@@ -20,6 +20,7 @@ var FPComponents = FPComponents || {};
             constructor() {
                 this._anchor = null;
                 this._root = null;
+                this._button = null;
 
                 this._scale = 1.0;
 
@@ -86,7 +87,7 @@ var FPComponents = FPComponents || {};
             }
 
             _createDesc(parent) {
-                let divdesc = document.createElement("span");
+                let divdesc = document.createElement("div");
 
                 divdesc.className = "fp-components-checkbox-desc";
                 divdesc.textContent = this._desc;
@@ -97,11 +98,11 @@ var FPComponents = FPComponents || {};
             }
 
             _updateClassNames() {
-                if (this._root !== null) {
+                if (this._button !== null) {
                     if (this._checked == true) {
-                        this._root.className = this._enabled === true ? "fp-components-checkbox-checked" : "fp-components-checkbox-checked fp-components-checkbox-disabled";
+                        this._button.className = this._enabled === true ? "fp-components-checkbox-checked" : "fp-components-checkbox-checked fp-components-checkbox-disabled";
                     } else {
-                        this._root.className = this._enabled === true ? "fp-components-checkbox" : "fp-components-checkbox fp-components-checkbox-disabled"
+                        this._button.className = this._enabled === true ? "fp-components-checkbox" : "fp-components-checkbox fp-components-checkbox-disabled"
                     }
                 }
             }
@@ -125,35 +126,38 @@ var FPComponents = FPComponents || {};
 
             _paintCanvas(canvas, color) {
                 let s = this._scale;
-                canvas.height = s * 16;
-                canvas.width = s * 16;
+                canvas.height = s * 20;
+                canvas.width = s * 20;
                 let ctx = canvas.getContext("2d");
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 ctx.beginPath();
-                ctx.moveTo(s * 1, s * 8);
-                ctx.lineTo(s * 5, s * 13);
-                ctx.lineTo(s * 15, s * 3);
+                ctx.translate(s * 10, s * 10);
+                ctx.translate(-s * 0.5,-s * 2.5);
+                ctx.rotate(45 * (Math.PI/180));
+                ctx.translate(-3*s,-6*s);
+                ctx.moveTo(0, s * 13);
+                ctx.lineTo(s * 7, s * 13);
+                ctx.lineTo(s * 7, 0);
+                // ctx.lineTo(0, 0);
                 ctx.strokeStyle = color;
-                ctx.lineCap = "round";
-                ctx.lineWidth = s * 1.5;
+                ctx.lineCap = "butt";
+                ctx.lineWidth = s * 2.5;
                 ctx.stroke();
             }
 
             rebuild() {
 
+                let checkBoxDiv = document.createElement("div");
+                checkBoxDiv.className = "fp-components-checkbox-root"
                 let divButton = document.createElement("div");
                 let canvas1 = document.createElement("canvas");
                 let canvas2 = document.createElement("canvas");
 
                 this._paintCanvas(canvas1, "white");
-                this._paintCanvas(canvas2, "rgb(153,153,153)");
+                this._paintCanvas(canvas2, "white");
 
                 divButton.appendChild(canvas1);
                 divButton.appendChild(canvas2);
-
-                if (this._desc) {
-                    this._createDesc(divButton);
-                }
 
                 divButton.onclick = () => {
 
@@ -167,28 +171,36 @@ var FPComponents = FPComponents || {};
 
                 };
 
-                this._root = divButton;
+                this._button = divButton;
+                checkBoxDiv.appendChild(divButton)
+
+                if (this._desc) {
+                    this._createDesc(checkBoxDiv);
+                }
+
+                this._root = checkBoxDiv;
                 this._updateClassNames();
 
                 if (this._scale !== 1.0) {
                     this.scale = this._scale;
                 }
 
-                this._anchor.appendChild(divButton);
+                this._anchor.appendChild(checkBoxDiv);
 
             }
 
             set scale(s) {
                 this._scale = s;
-                if (this._root !== null) {
+                if (this._button !== null) {
 
-                    this._root.style.borderWidth = (2 * s).toString() + "px";
-                    this._root.style.width = (16 * s).toString() + "px";
-                    this._root.style.height = (16 * s).toString() + "px";
+                    this._button.style.borderWidth = (2 * s).toString() + "px";
+                    this._button.style.borderRadius =  (3 * s).toString() + "px";
+                    this._button.style.width = (20 * s).toString() + "px";
+                    this._button.style.height = (20 * s).toString() + "px";
 
-                    let canvases = this._root.getElementsByTagName("canvas");
+                    let canvases = this._button.getElementsByTagName("canvas");
                     this._paintCanvas(canvases[0], "white");
-                    this._paintCanvas(canvases[1], "rgb(153,153,153)");
+                    this._paintCanvas(canvases[1], "white");
 
                 }
             }
@@ -198,7 +210,7 @@ var FPComponents = FPComponents || {};
             }
         }
 
-        o.Checkbox_A.VERSION = "1.1";
+        o.Checkbox_A.VERSION = "1.2";
     }
 
 })(FPComponents); 

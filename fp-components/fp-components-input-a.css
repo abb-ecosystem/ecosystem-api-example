@@ -1,13 +1,13 @@
 
 /*
 
-(c) Copyright 2020-2021 ABB
+(c) Copyright 2020-2023 ABB
 
 Any unauthorized use, reproduction, distribution,
 or disclosure to third parties is strictly forbidden.
 ABB reserves all rights regarding Intellectual Property Rights
 
-// OmniCore App SDK 1.1
+// OmniCore App SDK 1.2
 
 */
 
@@ -15,23 +15,26 @@ ABB reserves all rights regarding Intellectual Property Rights
     box-sizing: border-box;
     max-width: 100%;
     min-width: 100%;
-    min-height: 40px;
+    min-height: 36px;
     display: flex;
     color: black;
     background-color: white;
     border-style: solid;
     border-width: 2px;
-    border-color: rgb(153,153,153);
+    border-color: var(--fp-color-GRAY-20);
+    border-radius: 5px;
     padding-top: 6px;
     padding-bottom: 6px;
     padding-left: 6px;
     padding-right: 6px;
     transition: all 0.15s linear;
+    font-size: 14px;
 }
 
 .fp-components-input.fp-components-input-disabled {
-    color: rgb(122,122,122);
-    background-color: rgb(204,204,204);
+    color: var(--fp-color-TEXT-BLACK-DISABLED);
+    background-color: var(--fp-color-BLACK-OPACITY-4);
+    border-color: rgba(0,0,0,0);
 }
 
 .fp-components-input > p {

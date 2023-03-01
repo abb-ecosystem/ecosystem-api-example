@@ -59,3 +59,22 @@ body {
   font-weight: bold;
   text-align: start;
 }
+
+.mt-7 {
+  margin-top: 28px;
+}
+.mt-12 {
+  margin-top: 42px;
+}
+
+.dd-h-30 {
+  min-height: 120px;
+}
+
+.dd-w-40 {
+  min-width: 160px;
+}
+
+.dd-w-60 {
+  min-width: 240px;
+}

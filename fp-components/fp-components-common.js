@@ -1,11 +1,11 @@
 
-// (c) Copyright 2020-2021 ABB
+// (c) Copyright 2020-2023 ABB
 //
 // Any unauthorized use, reproduction, distribution,
 // or disclosure to third parties is strictly forbidden.
 // ABB reserves all rights regarding Intellectual Property Rights
 
-// OmniCore App SDK 1.1
+// OmniCore App SDK 1.2
 
 'use strict';
 
@@ -20,7 +20,7 @@ function fpComponentsLoadCSS(href) {
     head.appendChild(link);
 }
 
-const FP_COMPONENTS_COMMON_VERSION = "1.1";
+const FP_COMPONENTS_COMMON_VERSION = "1.2";
 
 fpComponentsLoadCSS("fp-components/fp-components-common.css");
 
@@ -219,6 +219,7 @@ function fpComponentsKeyboardShow(callback, initialText = null, label = null, va
 /******* DEBUG WINDOW *******/
 
 var __fpComponentsDebugWindowLock = false;
+var __fpComponentsDebugWindowCmd = null;
 
 function fpComponentsEnableLog() {
 
@@ -245,7 +246,7 @@ function fpComponentsEnableLog() {
 
             let now = new Date();
 
-            let newEntry = document.createElement("p");
+            let newEntry = document.createElement("pre");
             if (level === ERROR) {
                 newEntry.style.fontWeight = "bold";
                 newEntry.style.textDecoration = "underline";
@@ -306,6 +307,20 @@ function fpComponentsEnableLog() {
     divLock.textContent = "Lock scroll";
     divMenu.appendChild(divLock);
 
+    let divCmd = document.createElement("div");
+    divCmd.id = "fp-debugwindow-cmdbutton";
+    divCmd.className = "fp-debugwindow-button";
+    divCmd.onclick = cmdFPComponentsLog;
+    divCmd.textContent = "New command";
+    divMenu.appendChild(divCmd);
+
+    let divCmdReuse = document.createElement("div");
+    divCmdReuse.id = "fp-debugwindow-cmdbuttonreuse";
+    divCmdReuse.className = "fp-debugwindow-button";
+    divCmdReuse.onclick = ()=>cmdFPComponentsLog(true);
+    divCmdReuse.textContent = "Re-use command";
+    divMenu.appendChild(divCmdReuse);
+
     divGrid.appendChild(divMenu);
 
     let divContent = document.createElement("div");
@@ -326,30 +341,40 @@ function fpComponentsEnableLog() {
 
     updateClock();
 
-    let originalConsoleLog = console.log;
-    console.log = (message) => {
-        logToDebugWindow(message, NORMAL);
-        originalConsoleLog.apply(console, [message]);
+    if (typeof (window.external) !== 'undefined' && ('notify' in window.external)) {
+        function format(messages) {
+            return messages.map(message => {
+                if (typeof message === 'object') {
+                    return JSON.stringify(message);
+                } else {
+                    return message;
+                }
+            }).join(' ');
+        }
+        let originalConsoleLog = console.log;
+        console.log = (...messages) => {
+            logToDebugWindow(format(messages), NORMAL);
+            originalConsoleLog.apply(console, messages);
+        };
+        let originalConsoleInfo = console.info;
+        console.info = (...messages) => {
+            logToDebugWindow(format(messages), INFO);
+            originalConsoleInfo.apply(console, messages);
+        };
+        let originalConsoleWarn = console.warn;
+        console.warn = (...messages) => {
+            logToDebugWindow(format(messages), WARN);
+            originalConsoleWarn.apply(console, messages);
+        };
+        let originalConsoleError = console.error;
+        console.error = (...messages) => {
+            logToDebugWindow(format(messages), ERROR);
+            originalConsoleError.apply(console, messages);
+        };
+    } else {
+        logToDebugWindow("Not running in embedded browser. Please open the browser's JavaScript console to see log messages or to enter commmands.");
     }
-
-    let originalConsoleInfo = console.info;
-    console.info = (message) => {
-        logToDebugWindow(message, INFO);
-        originalConsoleInfo.apply(console, [message]);
-    }
-
-    let originalConsoleWarn = console.warn;
-    console.warn = (message) => {
-        logToDebugWindow(message, WARN);
-        originalConsoleWarn.apply(console, [message]);
-    }
-
-    let originalConsoleError = console.error;
-    console.error = (message) => {
-        logToDebugWindow(message, ERROR);
-        originalConsoleError.apply(console, [message]);
-    }
-
+    
     window.addEventListener("error", e => {
         console.error(e.filename + " (" + e.lineno + ":" + e.colno + "): " + e.message);
     });
@@ -430,4 +455,56 @@ function minimizeFPComponentsLog() {
 
     let debugWindowMinimized = document.getElementById("fp-debugwindow-minimized");
     if (debugWindowMinimized !== null) debugWindowMinimized.style.display = "block";
+}
+
+function cmdFPComponentsLog(reuse=false) {
+
+    minimizeFPComponentsLog();
+
+    fpComponentsKeyboardShow(async (cmd)=>{
+
+        function logErr(msg, msgJSON, e) {
+            console.error(`${msg} ${e}`);
+            if (typeof e !== "string" && typeof e !== "number"){
+                console.error(`${msgJSON} ${JSON.stringify(e)}`);
+            }
+        }
+
+        if (cmd) {
+            console.log(`Executing: ${cmd}`);
+            __fpComponentsDebugWindowCmd = cmd;
+            try {
+                let value = eval(cmd);
+
+                console.log(`Return value: ${value}`);
+                if (value && typeof value.then === "function") {
+                    value.then((asyncValue)=>{
+                        console.log(`Async return value: ${asyncValue}`);
+                        console.log(`Async return value type: ${typeof asyncValue}`);
+                        if (typeof asyncValue !== "string" && typeof asyncValue !== "number"){
+                            console.log(`Return value as JSON: ${JSON.stringify(asyncValue)}`);
+                        }
+                        window.r = asyncValue;
+                        console.log("Async response value saved in global variable 'r'");
+                    }).catch((e)=>{
+                        logErr("Async operation was rejected. Message:","Rejection message as JSON:",e);
+                    });
+
+                } else {
+                    console.log(`Return value type: ${typeof value}`);
+                    if (typeof value !== "string" && typeof value !== "number"){
+                        console.log(`Return value as JSON: ${JSON.stringify(value)}`);
+                    }
+                    window.r = value;
+                    console.log("Response value saved in global variable 'r'");
+                }
+            } catch (e) {
+                logErr("Exception:","Exception as JSON:",e);
+            }
+        }
+        
+        raiseFPComponentsLog();
+
+    },reuse===true?__fpComponentsDebugWindowCmd:null,"Enter a JavaScript expression, result will be stored in global variable 'r'");
+
 }

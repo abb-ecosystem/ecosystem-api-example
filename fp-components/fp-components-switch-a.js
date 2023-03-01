@@ -1,11 +1,11 @@
 
-// (c) Copyright 2020-2021 ABB
+// (c) Copyright 2020-2023 ABB
 //
 // Any unauthorized use, reproduction, distribution,
 // or disclosure to third parties is strictly forbidden.
 // ABB reserves all rights regarding Intellectual Property Rights
 
-// OmniCore App SDK 1.1
+// OmniCore App SDK 1.2
 
 'use strict';
 
@@ -65,12 +65,12 @@ var FPComponents = FPComponents || {};
                     if (active) {
                         this._root.className = "fp-components-switch-button fp-components-switch-button-active";
                         if (this._scale != 1.0) {
-                            this._root.getElementsByTagName("div")[0].style.marginLeft = (27 * this._scale).toString() + "px";
+                            this._root.getElementsByTagName("div")[0].style.marginLeft = (16 * this._scale).toString() + "px";
                         }
                     } else {
                         this._root.className = "fp-components-switch-button";
                         if (this._scale != 1.0) {
-                            this._root.getElementsByTagName("div")[0].style.marginLeft = (3 * this._scale).toString() + "px";
+                            this._root.getElementsByTagName("div")[0].style.marginLeft = "0";
                         }
                     }
                     if (!this._enabled) {
@@ -196,18 +196,17 @@ var FPComponents = FPComponents || {};
 
                     } else {
 
-                        this._root.style.borderWidth = (2 * s).toString() + "px";
-                        this._root.style.borderRadius = (10 * s).toString() + "px";
-                        this._root.style.height = (16 * s).toString() + "px";
+                        this._root.style.borderRadius = (12 * s).toString() + "px";
+                        this._root.style.height = (24 * s).toString() + "px";
                         this._root.style.width = (40 * s).toString() + "px";
-                        this._knob.style.borderRadius = (5 * s).toString() + "px";
-                        this._knob.style.height = (10 * s).toString() + "px";
-                        this._knob.style.width = (10 * s).toString() + "px";
-                        this._knob.style.marginTop = (3 * s).toString() + "px";
+                        this._knob.style.borderRadius = (12 * s).toString() + "px";
+                        this._knob.style.borderWidth = (3 * s).toString() + "px";
+                        this._knob.style.height = (24 * s).toString() + "px";
+                        this._knob.style.width = (24 * s).toString() + "px";
                         if (this._active) {
-                            this._knob.style.marginLeft = (27 * s).toString() + "px";
+                            this._knob.style.marginLeft = (16 * s).toString() + "px";
                         } else {
-                            this._knob.style.marginLeft = (3 * s).toString() + "px";
+                            this._knob.style.marginLeft = "0";
                         }
                     }
                 }
@@ -218,7 +217,7 @@ var FPComponents = FPComponents || {};
             }
         }
 
-        o.Switch_A.VERSION = "1.1";
+        o.Switch_A.VERSION = "1.2";
 
     }
 

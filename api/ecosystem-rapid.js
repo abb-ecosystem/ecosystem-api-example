@@ -1,37 +1,7 @@
+// @ts-ignore
 var API = API || {};
 if (typeof API.constructedRapid === 'undefined') {
   (function (r) {
-    /**
-     * @alias ECOSYSTEM_RAPID_LIB_VERSION
-     * @memberof API
-     * @constant
-     * @type {number}
-     */
-    r.ECOSYSTEM_RAPID_LIB_VERSION = '0.4';
-
-    /**
-     * Shallow compare does check for equality. When comparing scalar values (numbers, strings)
-     * it compares their values. When comparing objects, it does not compare their attributes -
-     * only their references are compared (e.g. "do they point to same object?").
-     * @param {object} object1
-     * @param {object} object2
-     * @returns {boolean} true if objects are shallow equal
-     * @private
-     */
-    const shallowEqual = function (object1, object2) {
-      const keys1 = Object.keys(object1);
-      const keys2 = Object.keys(object2);
-      if (keys1.length !== keys2.length) {
-        return false;
-      }
-      for (let key of keys1) {
-        if (object1[key] !== object2[key]) {
-          return false;
-        }
-      }
-      return true;
-    };
-
     /**
      * @alias API.RAPID
      * @namespace
@@ -40,15 +10,39 @@ if (typeof API.constructedRapid === 'undefined') {
       this.variables = [];
 
       /**
+       * Shallow compare does check for equality. When comparing scalar values (numbers, strings)
+       * it compares their values. When comparing objects, it does not compare their attributes -
+       * only their references are compared (e.g. "do they point to same object?").
+       * @param {object} object1
+       * @param {object} object2
+       * @returns {boolean} true if objects are shallow equal
+       * @private
+       */
+      const shallowEqual = function (object1, object2) {
+        const keys1 = Object.keys(object1);
+        const keys2 = Object.keys(object2);
+        if (keys1.length !== keys2.length) {
+          return false;
+        }
+        for (let key of keys1) {
+          if (object1[key] !== object2[key]) {
+            return false;
+          }
+        }
+        return true;
+      };
+
+      /**
        * @alias EXEC
        * @memberof API.RAPID
        * @readonly
        * @enum {string}
        */
-      this.EXEC = {
+      const EXEC = {
         Running: 'running',
         Stopped: 'stopped',
       };
+      this.EXEC = EXEC;
 
       /**
        * @alias MODULETYPE
@@ -56,10 +50,11 @@ if (typeof API.constructedRapid === 'undefined') {
        * @readonly
        * @enum {string}
        */
-      this.MODULETYPE = {
+      const MODULETYPE = {
         Program: 'program',
         System: 'system',
       };
+      this.MODULETYPE = MODULETYPE;
 
       /**
        * @memberof API
@@ -80,9 +75,84 @@ if (typeof API.constructedRapid === 'undefined') {
       };
 
       /**
-       * Subscribe to 'execution'. Current state is stored in
-       * {@link execMode}. Additionally, {@link isRunning}
-       * is updated with the corresponding value.
+       * @typedef searchSymbolProps
+       * @prop {string} [task] - task where the search takes place (default: 'T_ROB1')
+       * @prop {string} [module] - module where the search takes place
+       * @prop {boolean} [isInUse] only return symbols that are used in a Rapid program,
+       * i.e. a type declaration that has no declared variable will not be returned when this flag is set true.
+       * @prop {object} [dataType] - type of the data, e.g. 'num'(only one data type is supported)
+       * @prop {number} [symbolType] - options can be equal one of the following values:
+       *       <br>&emsp;undefined: 0
+       *       <br>&emsp;constant: 1
+       *       <br>&emsp;variable: 2
+       *       <br>&emsp;persistent: 4
+       *       <br>&emsp;function: 8
+       *       <br>&emsp;procedure: 16
+       *       <br>&emsp;trap: 32
+       *       <br>&emsp;module: 64
+       *       <br>&emsp;task: 128
+       *       <br>&emsp;routine: 8 + 16 + 32
+       *       <br>&emsp;rapidData: 1 + 2 + 4
+       *       <br>&emsp;any: 255
+       * @prop {string} [filter] name of the data symbol (not casesensitive)
+       * @memberof API.RAPID
+       */
+
+      /**
+       * @alias searchSymbol
+       * @memberof API.RAPID
+       * @param {searchSymbolProps} props
+       * @returns {Promise<object>}
+       * A Promise with list of objects. Each object contains:
+       *      <br>&emsp;(string) name name of the data symbol
+       *      <br>&emsp;([string]) scope symbol scope
+       *      <br>&emsp;(string) symbolType type of the symbol, e.g. 'pers'
+       *      <br>&emsp;(string) dataType type of the data, e.g. 'num'
+       * @private
+       * @todo not yet working properly
+       */
+      const searchSymbol = async function ({
+        task = 'T_ROB1',
+        module = null,
+        isInUse = false,
+        dataType = '',
+        symbolType = 255,
+        filter = '',
+      } = {}) {
+        let elements = [];
+        try {
+          var properties = RWS.Rapid.getDefaultSearchProperties();
+
+          let url = `RAPID/${task}`;
+          if (module !== null) url = url + `/${module}`;
+
+          properties.searchURL = url;
+          properties.types = symbolType;
+          properties.isInUse = isInUse;
+          const regexp = filter !== '' ? `^.*${filter}.*$` : '';
+
+          var hits = await RWS.Rapid.searchSymbols(properties, dataType, regexp);
+
+          if (hits.length > 0) {
+            for (let i = 0; i < hits.length; i++) {
+              // API.log(JSON.stringify(hits[i]));
+              elements.push(hits[i]);
+            }
+          }
+          return elements;
+        } catch (e) {
+          return API.rejectWithStatus(
+            `Failed to search variables -  module: ${module}, isInUse: ${isInUse}`,
+            e
+          );
+        }
+      };
+
+      /**
+       * Monitors changes to the Rapid program execution state. It is possible to provide
+       * a callback function that will be called every time the state changes.
+       * Current state is stored in{@link executionState} variable. Additionally, {@link isRunning}
+       * is updated correspondingly.
        * @alias monitorExecutionState
        * @memberof API.RAPID
        * @param {function} [callback] - Callback function called when operation mode changes
@@ -91,29 +161,30 @@ if (typeof API.constructedRapid === 'undefined') {
         try {
           if (typeof callback !== 'function' && callback !== null)
             throw new Error('callback is not a valid function');
-          this.execMode = await RWS.Rapid.getExecutionState();
-          this.isRunning = this.execMode === API.RAPID.EXEC.Running ? true : false;
-          const cbExecMode = function (data) {
-            this.execMode = data;
-            data === API.RAPID.EXEC.Running ? (this.isRunning = true) : (this.isRunning = false);
+          this.executionState = await RWS.Rapid.getExecutionState();
+          this.isRunning = this.executionState === EXEC.Running ? true : false;
+          const cbExecState = function (data) {
+            this.executionState = data;
+            data === EXEC.Running ? (this.isRunning = true) : (this.isRunning = false);
             callback && callback(data);
-            API.log(this.execMode);
+            API.log(this.executionState);
           };
-          subscribeRes('execution', cbExecMode.bind(this));
+          subscribeRes('execution', cbExecState.bind(this));
         } catch (e) {
           return API.rejectWithStatus('Failed to subscribe execution state', e);
         }
       };
 
       /**
-       * Get execution state
-       * @alias getExecutionState
-       * @memberof API.RAPID
-       * @returns {Promise<string>}
+       * @typedef startExecutionProps
+       * @prop {string} regainMode - valid values: 'continue', 'regain', 'clear' or 'enter_consume'
+       * @prop {string} execMode - valid values: 'continue', 'step_in', 'step_over', 'step_out', 'step_backwards', 'step_to_last' or 'step_to_motion'
+       * @prop {string} cycleMode - valid values: 'forever', 'as_is' or 'once'
+       * @prop {string} condition - valid values: 'none' or 'call_chain'
+       * @prop {boolean} stopAtBreakpoint - stop at breakpoint
+       * @prop {boolean} enableByTSP - all tasks according to task selection panel
+       * @private
        */
-      this.getExecutionState = async function () {
-        return await RWS.Rapid.getExecutionState();
-      };
 
       /**
        * Class representing a RAPID Task. It abstract usefull ready to use functionalities
@@ -133,69 +204,73 @@ if (typeof API.constructedRapid === 'undefined') {
           this._task = task;
           this.name = task.getName();
         }
+
         /**
-         *
-         * @param {string} regainMode - valid values: 'continue', 'regain', 'clear' or 'enter_consume'
-         * @param {string} execMode - valid values: 'continue', 'step_in', 'step_over', 'step_out', 'step_backwards', 'step_to_last' or 'step_to_motion'
-         * @param {string} cycleMode - valid values: 'forever', 'as_is' or 'once'
-         * @param {string} condition - valid values: 'none' or 'call_chain'
-         * @param {boolean} stopAtBreakpoint - stop at breakpoint
-         * @param {boolean} enableByTSP - all tasks according to task selection panel
-         * @private
+         * Load a module from the controller HOME files
+         * @alias loadModule
+         * @memberof API.RAPID.Task
+         * @param {string} path Path to the module file in
+         * the HOME directory (included extension of the module).
+         * @param {boolean} replace If true, it will replace an existing module in RAPID with the same name
+         * @example
+         * let url = `${this.path}/${this.name}${this.extension}`;
+         * await task.loadModule(url, true);
          */
-        static async _startExecution(
-          regainMode,
-          execMode,
-          cycleMode,
-          condition,
-          stopAtBreakpoint,
-          enableByTSP
-        ) {
-          await RWS.Rapid.startExecution({
-            regainMode: regainMode,
-            executionMode: execMode,
-            cycleMode: cycleMode,
-            condition: condition,
-            stopAtBreakpoint: stopAtBreakpoint,
-            enableByTSP: enableByTSP,
-          });
+        loadModule(path, replace = false) {
+          loadModule(path, replace, this.name);
         }
+
+        /**
+         * Unload a module from RAPID
+         * @alias unloadModule
+         * @memberof API.RAPID.Task
+         * @param {string} module Module's name
+         */
+        unloadModule(module) {
+          unloadModule(module, this.name);
+        }
+
+        /**
+         * @typedef executeProcedureProps
+         * @prop {boolean} [userLevel] If true, executes the procedure at user-leve,
+         * i.e. as a service routine (default: false).
+         * @prop {boolean} [resetPP] Resets the pointer to its previous position before execution
+         * @prop {string} [cycleMode] valid values: 'forever', 'as_is' or 'once'
+         * @memberof API.RAPID.Task
+         */
+
         /**
          * Execute a RAPID procedure
          * @alias executeProcedure
          * @memberof API.RAPID.Task
-         * @param {string} proc Procedure name
-         * @param {boolean} [userLevel] - if true, executes the procedure at user-leve,
-         * i.e. as a service routine (default: false).
-         * @param {boolean} [resetPP] - Resets the pointer to its previous position before execution
+         * @param {string} procedure Procedure name
+         * @param {executeProcedureProps}
          * @example
          * const task = await API.RAPID.getTask('T_ROB1');
-         * await task.executeProcedure('myProcedure', false);
+         * await task.executeProcedure('myProcedure', { userLevel: true, resetPP: false});
          */
-        async executeProcedure(proc, userLevel = false, resetPP = false) {
+        async executeProcedure(
+          procedure,
+          { userLevel = false, resetPP = false, cycleMode = 'once' } = {}
+        ) {
           console.log(`Task.executeProcedure called, (as Service Routine: ${userLevel})...`);
           let pp;
           let progress;
 
-          API.log(`proc: ${proc}, userLevel : ${userLevel}`);
+          API.log(`procedure: ${procedure}, userLevel : ${userLevel}`);
 
           try {
             ///////////////////////////////////////////////////////////////////////////
             progress = 'step0'; // check conditions (execution state, operation mode)
             //////////////////////////////////////////////////////////////////////////
-            let exeState = await API.RAPID.getExecutionState();
+            let exeState = await RWS.Rapid.getExecutionState();
 
-            if (exeState !== API.RAPID.EXEC.Running) {
+            if (exeState !== EXEC.Running) {
               let opMode = await RWS.Controller.getOperationMode();
               //////////////////////////////////////////////////////////////////////
               progress = 'step1'; // 1 - check controller state
               //////////////////////////////////////////////////////////////////////
               let state = await RWS.Controller.getControllerState();
-              // if (state === API.CONTROLLER.STATE.GuardStop) {
-              //   throw new Error(
-              //     'Controller state in Guard Stop - procedure execution not possible'
-              //   );
-              // }
               if (state !== API.CONTROLLER.STATE.MotorsOn && userLevel === false) {
                 throw new Error('Turn on the motors to execute procedure');
               }
@@ -213,11 +288,18 @@ if (typeof API.constructedRapid === 'undefined') {
               progress = 'step3'; // 3 - current pointer gotten
               //////////////////////////////////////////////////////////////////////
               // Move pointer to procedure
-              await this._task.movePPToRoutine(proc, userLevel);
+              await this._task.movePPToRoutine(procedure, userLevel);
               //////////////////////////////////////////////////////////////////////
               progress = 'step4'; // 4 - moved to routine pointer
               //////////////////////////////////////////////////////////////////////
-              await Task._startExecution('continue', 'continue', 'once', 'none', true, true);
+              await RWS.Rapid.startExecution({
+                regainMode: 'continue',
+                executionMode: 'continue',
+                cycleMode: cycleMode,
+                condition: 'none',
+                stopAtBreakpoint: true,
+                enableByTSP: true,
+              });
               //////////////////////////////////////////////////////////////////////
               progress = 'step5'; // 5 - execution started
               //////////////////////////////////////////////////////////////////////
@@ -261,8 +343,12 @@ if (typeof API.constructedRapid === 'undefined') {
                 API.log('10067: Program Pointer Reset');
                 return API.rejectWithStatus('Program Pointer Reset', {
                   message: 'Unable to reset the program pointer for task T_ROB1.',
-                  description: `The program will not start.&#13;&#10;Causes: &#13;&#10;
-                    • No program is loaded.&#13;&#10;• The main routine is missing.&#13;&#10;• There are errors in the program.`,
+                  description: `The program will not start.`,
+                  cause: [
+                    '• No program is loaded.',
+                    '• The main routine is missing.',
+                    '• There are errors in the program.',
+                  ],
                 });
               case 'step6':
               // await RWS.Rapid.resetPP();
@@ -285,235 +371,169 @@ if (typeof API.constructedRapid === 'undefined') {
         }
 
         /**
-         * Stop a running RAPID program execution
+         * @typedef stopExecutionProps
+         * @prop {string} [stopMode] stop mode, valid values: 'cycle', 'instruction', 'stop' or 'quick_stop'
+         * @prop {string} [useTSP] use task selection panel, valid values: 'normal' or 'all_tasks'
+         * @memberof API.RAPID.Task
+         */
+
+        /**
+         * Stops the Rapid execution with the settings given in the parameter object. All or any of the defined parameters can be supplied, if a value is omitted a default value will be used. The default values are:
+         * stopMode = 'stop'
+         * useTSP = 'normal'
          * @alias stopExecution
          * @memberof API.RAPID.Task
-         * @param {string} [stopMode] stop mode, valid values: 'cycle', 'instruction', 'stop' or 'quick_stop'
-         * @param {string} [useTSP] use task selection panel, valid values: 'normal' or 'all_tasks'
+         * @param {stopExecutionProps} props
          * @example
          * const task = await API.RAPID.getTask('T_ROB1');
          * await task.stopExecution();
          */
-        async stopExecution(stopMode = 'stop', useTSP = 'normal') {
+        async stopExecution({ stopMode = 'stop', useTSP = 'normal' } = {}) {
           var state = await RWS.Rapid.getExecutionState();
           if (state === 'running') {
             await RWS.Rapid.stopExecution({
-              stopMode: stopMode,
-              useTSP: 'normal',
+              stopMode,
+              useTSP,
             });
           }
         }
 
         /**
-         * @alias _searchSymbol
-         * @memberof API.RAPID.Task
-         * @param {string} module - module where the search takes place
-         * @param {string} symbolType - RWS.Rapid.SymbolTypes.<option>
-         * where options can be equal one of the following values:
-         *       <br>&emsp;constant
-         *       <br>&emsp;variable
-         *       <br>&emsp;persistent
-         *       <br>&emsp;function
-         *       <br>&emsp;procedure
-         *       <br>&emsp;trap
-         *       <br>&emsp;module
-         *       <br>&emsp;task
-         *       <br>&emsp;routine
-         *       <br>&emsp;rapidData
-         *       <br>&emsp;any
-         * @param {boolean} [isInUse] only return symbols that are used in a Rapid program,
-         * i.e. a type declaration that has no declared variable will not be returned when this flag is set true.
-         * @returns {Promise<object>}
-         * A Promise with list of objects. Each object contains:
-         *      <br>&emsp;(string) name name of the data symbol
-         *      <br>&emsp;([string]) scope symbol scope
-         *      <br>&emsp;(string) symbolType type of the symbol, e.g. 'pers'
-         *      <br>&emsp;(string) dataType type of the data, e.g. 'num'
-         * @private
-         * @todo not yet working properly
+         * @typedef { 'constant' | 'variable' | 'persistent'} VariableSymbolType ;
+         * @memberof API.RAPID
          */
-        static async _searchSymbol(module = null, symbolType, isInUse = false) {
-          let vars = [];
-          var properties = RWS.Rapid.getDefaultSearchProperties();
-          // properties.method = RWS.SearchMethods.block
-          properties.searchURL = `RAPID/${this.name}${module === null ? `` : `/${module}`}`;
-          properties.types = symbolType;
-          properties.isInUse = isInUse;
-          var hits = await RWS.Rapid.searchSymbols(properties);
-          if (hits.length > 0) {
-            for (let i = 0; i < hits.length; i++) {
-              // API.log(JSON.stringify(hits[i]));
-              vars.push(hits[i]);
-            }
-          }
-          return vars;
-        }
 
         /**
-         * @alias searchConstants
-         * @memberof API.RAPID.Task
-         * @param {string} module - module where the search takes place
-         * @param {boolean} [isInUse] only return symbols that are used in a Rapid program,
+         * @typedef filterVariables
+         * @prop {string} [name] Name of the data symbol (not casesensitive)
+         * @prop {VariableSymbolType} [symbolType] valid values: 'constant', 'variable', 'persistent' (array with multiple values is supported)
+         * @prop {string} [dataType] type of the data, e.g. 'num'(only one data type is supported)
          * i.e. a type declaration that has no declared variable will not be returned when this flag is set true.
-         * @returns {Promise<object>}
-         * @private
-         * @todo not yet working
+         * @memberof API.RAPID
          */
-        async searchConstants(module = null, isInUse = false) {
-          return Task._searchSymbol(module, RWS.Rapid.SymbolTypes.constant, isInUse);
-        }
-
-        /**
-         * @alias searchPersistents
-         * @memberof API.RAPID.Task
-         * @param {string} module - module where the search takes place
-         * @param {boolean} [isInUse] only return symbols that are used in a Rapid program,
-         * i.e. a type declaration that has no declared variable will not be returned when this flag is set true.
-         * @returns {Promise<object>}
-         * @private
-         * @todo not yet working
-         */
-        async searchPersistents(module = null, isInUse = false) {
-          return Task._searchSymbol(module, RWS.Rapid.SymbolTypes.persistent, isInUse);
-        }
 
         /**
          * Search for variable contained in a module
          * @alias searchVariables
          * @memberof API.RAPID.Task
-         * @param {string} module - module where the search takes place
-         * @param {boolean} [isInUse] only return symbols that are used in a Rapid program,
-         * @param {object} [filter] - The following filters can be applied:
-         * <br>&emsp;name - name of the data symbol (not casesensitive)
-         * <br>&emsp;symbolType - valid values: 'constant', 'variable', 'persistent' (array with multiple values is supported)
-         * <br>&emsp;dataType - type of the data, e.g. 'num'(only one data type is supported)
-         * i.e. a type declaration that has no declared variable will not be returned when this flag is set true.
+         * @param {string} module - Module where the search takes place
+         * @param {boolean} [isInUse] Only return symbols that are used in a Rapid program,
+         * @param {filterVariables} [filter] See {@link filterVariables}
          * @returns {Promise<object>}
          */
+
         async searchVariables(module = null, isInUse = false, filter = {}) {
-          let vars = [];
-          try {
-            var properties = RWS.Rapid.getDefaultSearchProperties();
-            properties.searchURL = `RAPID/${this.name}${module === null ? `` : `/${module}`}`;
-
-            let symbolType = 0;
-            if (filter.hasOwnProperty('symbolType')) {
-              const hasValue = (value) => {
-                if (value.toLowerCase() === 'constant')
-                  symbolType += RWS.Rapid.SymbolTypes.constant;
-                else if (value.toLowerCase() === 'variable')
-                  symbolType += RWS.Rapid.SymbolTypes.variable;
-                else if (value.toLowerCase() === 'persistent')
-                  symbolType += RWS.Rapid.SymbolTypes.persistent;
-              };
-              Array.isArray(filter.symbolType)
-                ? filter.symbolType.map((entry) => hasValue(entry))
-                : hasValue(filter.symbolType);
-            } else {
-              symbolType = RWS.Rapid.SymbolTypes.rapidData;
-            }
-            properties.types = symbolType;
-
-            properties.isInUse = isInUse;
-            const regexp = filter.hasOwnProperty('name') ? `^.*${filter.name}.*$` : '';
-            const dataType = filter.hasOwnProperty('dataType') ? filter.dataType : '';
-
-            var hits = await RWS.Rapid.searchSymbols(properties, dataType, regexp);
-
-            if (hits.length > 0) {
-              for (let i = 0; i < hits.length; i++) {
-                vars.push(hits[i]);
-              }
-            }
-            return vars;
-          } catch (e) {
-            return API.rejectWithStatus(
-              `Failed to search variables -  module: ${module}, isInUse: ${isInUse}`,
-              e
-            );
+          let searchFilter = { module, isInUse };
+          let types;
+          if (filter.hasOwnProperty('symbolType')) {
+            types = Array.isArray(filter.symbolType)
+              ? filter.symbolType.reduce((all, entry, idx, arr) => {
+                  if (entry === 'rapidData') {
+                    arr.splice(1); // eject early
+                    return RWS.Rapid.SymbolTypes[entry];
+                  }
+                  return entry === 'constant' || entry === 'variable' || entry === 'persistent'
+                    ? all + RWS.Rapid.SymbolTypes[entry]
+                    : all;
+                }, 0)
+              : RWS.Rapid.SymbolTypes[filter.symbolType];
+          } else {
+            types = RWS.Rapid.SymbolTypes['rapidData:'];
           }
-        }
+          searchFilter.symbolType = types;
 
-        /**
-         * Search for procedures contained in a module
-         * @alias searchProcedures
-         * @memberof API.RAPID.Task
-         * @param {string} module - module where the search takes place
-         * @param {boolean} [isInUse] only return symbols that are used in a Rapid program,
-         * i.e. a type declaration that has no declared variable will not be returned when this flag is set true.
-         * @param {string} [filter] - only symbols containing the string patern (not casesensitive)
-         * @returns {Promise<object>}
-         */
-        async searchProcedures(module = null, isInUse = false, filter = '') {
-          try {
-            let items = [];
-            var properties = await RWS.Rapid.getDefaultSearchProperties();
-            properties.searchURL = `RAPID/${this.name}${module === null ? `` : `/${module}`}`;
-            properties.types = RWS.Rapid.SymbolTypes.procedure;
-            properties.isInUse = isInUse;
-            const regexp = filter !== '' ? `^.*${filter}.*$` : '';
-            var hits = await RWS.Rapid.searchSymbols(properties, '', regexp);
-            if (hits.length > 0) {
-              for (let i = 0; i < hits.length; i++) {
-                items.push(hits[i]);
-              }
-            }
-            return items;
-          } catch (e) {
-            return API.rejectWithStatus(
-              `Failed to search procedures -  module: ${module}, isInUse: ${isInUse}`,
-              e
-            );
-          }
+          searchFilter.task = this.name;
+          if (filter.hasOwnProperty('name')) searchFilter.filter = filter.name;
+          if (filter.hasOwnProperty('dataType')) searchFilter.dataType = filter.dataType;
+
+          return searchSymbol(searchFilter);
         }
 
         /**
          * Search for available module
          * @alias searchModules
          * @memberof API.RAPID.Task
-         * @param {boolean} [isInUse] only return symbols that are used in a Rapid program,
+         * @param {boolean} [isInUse] Only return symbols that are used in a Rapid program,
          * i.e. a type declaration that has no declared variable will not be returned when this flag is set true.
-         * @param {string} [filter] - only symbols containing the string patern (not casesensitive)
+         * @param {string} [filter] Only symbols containing the string patern (not casesensitive)
          * @returns {Promise<object>}
          */
         async searchModules(isInUse = false, filter = '') {
-          let items = [];
+          return searchSymbol({
+            task: this.name,
+            isInUse: isInUse,
+            symbolType: RWS.Rapid.SymbolTypes.module,
+            filter: filter,
+          });
+        }
 
-          try {
-            var properties = await RWS.Rapid.getDefaultSearchProperties();
-            properties.searchURL = `RAPID/${this.name}`;
-            properties.types = RWS.Rapid.SymbolTypes.module;
-            properties.isInUse = isInUse;
-            const regexp = filter !== '' ? `^.*${filter}.*$` : '';
-            var hits = await RWS.Rapid.searchSymbols(properties, '', regexp);
-            if (hits.length > 0) {
-              for (let i = 0; i < hits.length; i++) {
-                // API.log(JSON.stringify(hits[i]));
-                items.push(hits[i]);
-              }
-            }
-            return items;
-          } catch (e) {
-            return API.rejectWithStatus(`Failed to search modules -  isInUse: ${isInUse}`, e);
+        /**
+         * Search for procedures contained in a module
+         * @alias searchProcedures
+         * @memberof API.RAPID.Task
+         * @param {string} module Module where the search takes place
+         * @param {boolean} [isInUse] Only return symbols that are used in a Rapid program,
+         * i.e. a type declaration that has no declared variable will not be returned when this flag is set true.
+         * @param {string} [filter] Only symbols containing the string patern (not casesensitive)
+         * @returns {Promise<object>}
+         */
+        async searchProcedures(module = null, isInUse = false, filter = '') {
+          return searchSymbol({
+            task: this.name,
+            module: module,
+            isInUse: isInUse,
+            symbolType: RWS.Rapid.SymbolTypes.procedure,
+            filter: filter,
+          });
+        }
+
+        /**
+         * @typedef { 'procedure' | 'function' | 'trap'} RoutineSymbolType ;
+         * @memberof API.RAPID
+         */
+
+        /**
+         * @typedef filterRoutines
+         * @prop {string} [name] Name of the data symbol (not casesensitive)
+         * @prop {RoutineSymbolType} [symbolType] Valid values: 'procedure', 'function', 'trap' , 'routine'(array with multiple values is supported)
+         * @memberof API.RAPID
+         */
+
+        /**
+         * Search for routines contained in a module
+         * @alias searchRoutines
+         * @memberof API.RAPID.Task
+         * @param {string} module Module where the search takes place
+         * @param {boolean} [isInUse] Only return symbols that are used in a Rapid program,
+         * @param {filterRoutines} [filter] See {@link filterRoutines}
+         *
+         * @returns {Promise<searchSymbolProps>}
+         */
+        async searchRoutines(module = null, isInUse = false, filter = {}) {
+          let types;
+          if (filter.hasOwnProperty('symbolType')) {
+            types = Array.isArray(filter.symbolType)
+              ? filter.symbolType.reduce((all, entry, idx, arr) => {
+                  if (entry === 'routine') {
+                    arr.splice(1); // eject early
+                    return RWS.Rapid.SymbolTypes[entry];
+                  }
+                  return entry === 'procedure' || entry === 'function' || entry === 'trap'
+                    ? all + RWS.Rapid.SymbolTypes[entry]
+                    : all;
+                }, 0)
+              : RWS.Rapid.SymbolTypes[filter.symbolType];
+          } else {
+            types = RWS.Rapid.SymbolTypes['routine'];
           }
 
-          // return Task._searchSymbol('', RWS.Rapid.SymbolTypes.module, isInUse)
-        }
-
-        async searchFunctions(module = null, isInUse = false) {
-          return Task._searchSymbol(module, RWS.Rapid.SymbolTypes.function, isInUse);
-        }
-
-        async searchRoutines(module = null, isInUse = false) {
-          return Task._searchSymbol(module, RWS.Rapid.SymbolTypes.routine, isInUse);
-        }
-
-        async searchTraps(module = null, isInUse = false) {
-          return Task._searchSymbol(module, RWS.Rapid.SymbolTypes.trap, isInUse);
-        }
-
-        async searchRapidData(module = null, isInUse = false) {
-          return Task._searchSymbol(module, RWS.Rapid.SymbolTypes.rapidData, isInUse);
+          return searchSymbol({
+            task: this.name,
+            module: module,
+            isInUse: isInUse,
+            symbolType: types,
+            filter: filter.name,
+          });
         }
 
         /**
@@ -544,6 +564,7 @@ if (typeof API.constructedRapid === 'undefined') {
          * @param {string} variable - variable name
          * @param {object} value - value of the variable
          * @returns {Promise<object>}
+         * @todo Valiation of value not yet applied
          */
         async setValue(module, variable, value) {
           try {
@@ -555,71 +576,86 @@ if (typeof API.constructedRapid === 'undefined') {
         }
 
         /**
-         * Gets and subscribe to a RAPID variable
+         * Gets and a an RWS Data object variable
          * @alias getVariable
          * @memberof API.RAPID.Task
-         * @param {*} module - module containing the variable
-         * @param {*} variable - variable name
+         * @param {string} module - module containing the variable
+         * @param {string} variable - variable name
          * @returns {Promise<object>} API.RAPID.Variable object
+         * @see {@link https://developercenter.robotstudio.com/omnicore-sdk|Omnicore-SDK}
          */
         async getVariable(module, variable) {
-          return await API.RAPID.getVariable(this.name, module, variable);
+          return await getVariableInstance(this.name, module, variable);
         }
 
         /**
-         * Gets a RWS.Rapid Module Object
+         * Gets a module. This will retrieve the properties for the module from the controller and initialize the object.
          * @alias getModule
          * @memberof API.RAPID.Task
-         * @param {*} module - module containing the variable
-         * @returns {Promise<object>} API.RAPID.Variable object
+         * @param {object} module - The name of the module
+         * @returns {Promise<object>} a RWS Module object
          * @see {@link https://developercenter.robotstudio.com/omnicore-sdk|Omnicore-SDK}
          */
         async getModule(module) {
           return await this._task.getModule(module);
         }
 
-        /**
-         * Get the name of modules available within the task
-         * @alias getModuleNames
-         * @memberof API.RAPID.Task
-         * @param {string} type - it can be 'program' or 'system', otherwise all modules are returned
-         * @returns {Promise<array>} - List of found modules
-         * @private
-         */
-        async getModuleNames(type = '') {
-          let ret = [];
-          try {
-            const modules = await RWS.Rapid.getModuleNames(this.name);
-            if (
-              modules.hasOwnProperty('programModules') === true &&
-              type !== API.RAPID.MODULETYPE.System
-            ) {
-              for (let i = 0; i < modules['programModules'].length; i++) {
-                ret.push(modules['programModules'][i]);
-              }
-            }
-            if (
-              modules.hasOwnProperty('systemModules') === true &&
-              type !== API.RAPID.MODULETYPE.Program
-            ) {
-              for (let i = 0; i < modules['systemModules'].length; i++) {
-                ret.push(modules['systemModules'][i]);
-              }
-            }
-            return ret;
-          } catch (e) {
-            return API.rejectWithStatus('Failed to get modules', e);
-          }
-        }
+        // /**
+        //  * Get the name of modules available within the task
+        //  * @alias getModuleNames
+        //  * @memberof API.RAPID.Task
+        //  * @param {string} type - it can be 'program' or 'system', otherwise all modules are returned
+        //  * @returns {Promise<array>} - List of found modules
+        //  * @private
+        //  */
+        // async getModuleNames(type = '') {
+        //   let ret = [];
+        //   try {
+        //     const modules = await RWS.Rapid.getModuleNames(this.name);
+        //     if (modules.hasOwnProperty('programModules') === true && type !== MODULETYPE.System) {
+        //       for (let i = 0; i < modules['programModules'].length; i++) {
+        //         ret.push(modules['programModules'][i]);
+        //       }
+        //     }
+        //     if (modules.hasOwnProperty('systemModules') === true && type !== MODULETYPE.Program) {
+        //       for (let i = 0; i < modules['systemModules'].length; i++) {
+        //         ret.push(modules['systemModules'][i]);
+        //       }
+        //     }
+        //     return ret;
+        //   } catch (e) {
+        //     return API.rejectWithStatus('Failed to get modules', e);
+        //   }
+        // }
       }
+
+      /**
+       * @typedef VariableProps
+       * @prop {string} [taskName] task's name
+       * @prop {string} [moduleName] module's name
+       * @prop {string} [symbolName] symbol's name
+       * @prop {string} [dataType] symbol's data type
+       * @prop {string} [symbolType] the declaration type of the data, valid values:
+       *     'constant'
+       *     'variable'
+       *     'persistent'
+       * @prop {number[]} dimensions list of dimensions for arrays
+       * @prop {string} [scope] the data's scope, valid values:
+       *     'local'
+       *     'task'
+       *     'global'
+       * @prop {string} [dataTypeURL] RWS URL to the data’s type symbol
+       * @memberof API.RAPID
+       */
 
       /**
        * Class representing a RAPID Variable.
        * @class Variable
        * @memberof API.RAPID
-       * @param {object} task - RWS.RAPID Task Object
+       * @param {string} variable
+       * @param {VariableProps} props See {@link VariableProps}
+       * @property {object} var Object returned by RWS.Rapid.getData().
        * @see {@link https://developercenter.robotstudio.com/omnicore-sdk|Omnicore-SDK}
-       * @todo not fully implemented
        */
       class Variable extends API.Events {
         constructor(variable, props) {
@@ -703,7 +739,14 @@ if (typeof API.constructedRapid === 'undefined') {
         }
 
         async unsubscribe() {
-          if (this._subscrided) return this.var.unsubscribe();
+          if (this._subscrided) {
+            try {
+              this._subscribed = false;
+              return this.var.unsubscribe();
+            } catch (e) {
+              return API.rejectWithStatus(`Failed to unsubscribe variable "${this.name}"`, e);
+            }
+          }
         }
 
         /**
@@ -717,7 +760,7 @@ if (typeof API.constructedRapid === 'undefined') {
               if (value === undefined) {
                 value = await this.var.getValue();
               }
-              this.trigger('changed', value);
+              this.trigger('changed', this._adapter(value));
             };
 
             this.var.addCallbackOnChanged(cb.bind(this));
@@ -726,11 +769,24 @@ if (typeof API.constructedRapid === 'undefined') {
           }
         }
 
+        _adapter(value) {
+          return value;
+        }
+
         onChanged(callback) {
           this.on('changed', callback);
         }
       }
 
+      /**
+       * Class representing a RAPID Variable of type 'string'.
+       * @class VariableString
+       * @extends API.RAPID.Variable
+       * @memberof API.RAPID
+       * @param {string} variable
+       * @param {VariableProps} props See {@link VariableProps}
+       * @see {@link https://developercenter.robotstudio.com/omnicore-sdk|Omnicore-SDK}
+       */
       class VariableString extends Variable {
         async getValue() {
           const value = await super.getValue();
@@ -741,28 +797,20 @@ if (typeof API.constructedRapid === 'undefined') {
           super.setValue(value);
         }
 
-        /**
-         * Internal callback for variable specific handling. This method is called inside the subscribe method
-         * @returns {undefined | Promise<{}>} undefined at success, reject Promise at fail.
-         * @protected
-         */
-        async _onChanged() {
-          try {
-            const cb = async (value) => {
-              if (value === undefined) {
-                value = await this.var.getValue();
-              }
-              value = value.replace(/"$/, '').replace(/^"/, '');
-              this.trigger('changed', value);
-            };
-
-            this.var.addCallbackOnChanged(cb.bind(this));
-          } catch (e) {
-            return API.rejectWithStatus(`Failed to add callback on changed for "${this.name}"`);
-          }
+        _adapter(value) {
+          return value.replace(/"$/, '').replace(/^"/, '');
         }
       }
 
+      /**
+       * Class representing a RAPID Variable of type 'bool'.
+       * @class VariableBool
+       * @extends API.RAPID.Variable
+       * @memberof API.RAPID
+       * @param {string} variable
+       * @param {VariableProps} props See {@link VariableProps}
+       * @see {@link https://developercenter.robotstudio.com/omnicore-sdk|Omnicore-SDK}
+       */
       class VariableBool extends Variable {
         async getValue() {
           const value = (await super.getValue()) ? true : false;
@@ -773,29 +821,20 @@ if (typeof API.constructedRapid === 'undefined') {
           super.setValue(value);
         }
 
-        /**
-         * Internal callback for variable specific handling. This method is called inside the subscribe method
-         * @returns {undefined | Promise<{}>} undefined at success, reject Promise at fail.
-         * @protected
-         */
-        async _onChanged() {
-          try {
-            const cb = async (value) => {
-              if (value === undefined) {
-                value = await this.var.getValue();
-              }
-
-              // this.trigger('changed', value.toLowerCase());
-              this.trigger('changed', value === 'TRUE' || value === 'true' ? true : false);
-            };
-
-            this.var.addCallbackOnChanged(cb.bind(this));
-          } catch (e) {
-            return API.rejectWithStatus(`Failed to add callback on changed for "${this.name}"`);
-          }
+        _adapter(value) {
+          return value === 'TRUE' || value === 'true' ? true : false;
         }
       }
 
+      /**
+       * Class representing a RAPID Variable of type 'num' and 'dnum'.
+       * @class VariableNum
+       * @extends API.RAPID.Variable
+       * @memberof API.RAPID
+       * @param {string} variable
+       * @param {VariableProps} props See {@link VariableProps}
+       * @see {@link https://developercenter.robotstudio.com/omnicore-sdk|Omnicore-SDK}
+       */
       class VariableNum extends Variable {
         async getValue() {
           const value = Number(await super.getValue());
@@ -806,39 +845,22 @@ if (typeof API.constructedRapid === 'undefined') {
           super.setValue(Number(value));
         }
 
-        /**
-         * Internal callback for variable specific handling. This method is called inside the subscribe method
-         * @returns {undefined | Promise<{}>} undefined at success, reject Promise at fail.
-         * @protected
-         */
-        async _onChanged() {
-          try {
-            const cb = async (value) => {
-              if (value === undefined) {
-                value = await this.var.getValue();
-              }
-
-              this.trigger('changed', Number(value));
-            };
-
-            this.var.addCallbackOnChanged(cb.bind(this));
-          } catch (e) {
-            return API.rejectWithStatus(`Failed to add callback on changed for "${this.name}"`);
-          }
+        _adapter(value) {
+          return Number(value);
         }
       }
 
       /**
        * Subscribe to a existing RAPID variable.
-       * @alias getVariable
+       * @alias getVariableInstance
        * @memberof API.RAPID
        * @param {string} task  - RAPID Task in which the variable is contained
        * @param {string} module -RAPID module where the variable is contained
        * @param {string} name - name of RAPID variable
-       * @param {string} id  (optional) - DOM element id in which "textContent" will get the value of  the variable
        * @returns RWS.RAPID Data object
+       * @private
        */
-      this.getVariable = async (task, module, name, id = null) => {
+      const getVariableInstance = async (task, module, name) => {
         if (task && module && name) {
           let found = this.variables.find((v) => v.name === name);
           try {
@@ -877,6 +899,17 @@ if (typeof API.constructedRapid === 'undefined') {
       };
 
       /**
+       * Subscribe to a existing RAPID variable.
+       * @alias getVariable
+       * @memberof API.RAPID
+       * @param {string} task  - RAPID Task in which the variable is contained
+       * @param {string} module -RAPID module where the variable is contained
+       * @param {string} name - name of RAPID variable
+       * @returns {API.RAPID.Variable}
+       */
+      this.getVariable = getVariableInstance;
+
+      /**
        * Gets an instance of a API.RAPID.Task class
        * @alias getTask
        * @memberof API.RAPID
@@ -889,21 +922,21 @@ if (typeof API.constructedRapid === 'undefined') {
       };
 
       /**
-       * Load a RAPID module from a file
+       * Load a module from the controller HOME files
        * @alias loadModule
        * @memberof API.RAPID
-       * @param {string} path - path of the module file
-       * @param {boolean} replace - if true, replace an existing module with the same name
-       * @param {string} [taskName]
+       * @param {string} path Path to the module file in
+       * the HOME directory (included extension of the module).
+       * @param {boolean} replace If true, it will replace an existing module in RAPID with the same name
+       * @param {string} taskName Task's name where the module belongs to
+       * @example
+       * let url = `${this.path}/${this.name}${this.extension}`;
+       * await task.loadModule(url, true);
        */
-      this.loadModule = async function (path, replace = false, taskName = 'T_ROB1') {
-        const opmode = API.CONTROLLER.opMode;
-        if (API.CONTROLLER.opMode !== API.CONTROLLER.OPMODE.ManualR) {
-          await API.CONTROLLER.setOpModeManual();
-          await API.sleep(1000);
-        }
+      const loadModule = async function (path, replace = false, taskName = 'T_ROB1') {
         await API.RWS.RAPID.loadModule.apply(null, arguments);
       };
+      this.loadModule = loadModule;
 
       /**
        * Unload a RAPI module
@@ -912,9 +945,12 @@ if (typeof API.constructedRapid === 'undefined') {
        * @param {string} moduleName
        * @param {string} [taskName]
        */
-      this.unloadModule = async function (moduleName, taskName = 'T_ROB1') {
+      const unloadModule = async function (moduleName, taskName = 'T_ROB1') {
+        // await API.RWS.requestMastership('edit');
         await API.RWS.RAPID.unloadModule.apply(null, arguments);
+        // await API.RWS.releaseMastership('edit');
       };
+      this.unloadModule = unloadModule;
     })();
 
     r.constructedRapid = true;

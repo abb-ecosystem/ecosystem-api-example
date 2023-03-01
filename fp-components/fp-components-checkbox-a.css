@@ -1,26 +1,32 @@
 
 /*
 
-(c) Copyright 2020-2021 ABB
+(c) Copyright 2020-2023 ABB
 
 Any unauthorized use, reproduction, distribution,
 or disclosure to third parties is strictly forbidden.
 ABB reserves all rights regarding Intellectual Property Rights
 
-// OmniCore App SDK 1.1
+// OmniCore App SDK 1.2
 
 */
+
+.fp-components-checkbox-root {
+    display: flex;
+    flex-direction: row;
+}
 
 .fp-components-checkbox, .fp-components-checkbox-checked {
     display: flex;
     border-style: solid;
     border-width: 2px;
-    width: 16px;
-    height: 16px;
+    border-radius: 3px;
+    width: 20px;
+    height: 20px;
     margin: 0px;
     padding: 0px;
     align-items: center;
-    transition: all 0.15s linear;
+    transition: all 0.07s linear;
 }
 
 .fp-components-checkbox canvas, .fp-components-checkbox-checked canvas {
@@ -36,8 +42,13 @@ ABB reserves all rights regarding Intellectual Property Rights
 }
 
 .fp-components-checkbox {
-    background-color: white;
-    border-color: black;
+    background-color: var(--fp-color-BLACK-OPACITY-2);
+    border-color: var(--fp-color-BLACK-OPACITY-30);
+}
+
+.fp-components-checkbox:hover {
+    background-color: var(--fp-color-BLACK-WHITE-20);
+    border-color: var(--fp-color-BLACK-OPACITY-50);
 }
 
 .fp-components-checkbox-checked {
@@ -46,28 +57,33 @@ ABB reserves all rights regarding Intellectual Property Rights
 }
 
 .fp-components-checkbox-checked:hover:not(.fp-components-checkbox-disabled) {
-    border-color: black;
+    background-color: var(--fp-color-BLUE-OPACITY-90);
+    border-color: rgba(0,0,0,0);
 }
 
 .fp-components-checkbox.fp-components-checkbox-disabled {
-    border-color:  rgb(153,153,153);
+    background-color: var(--fp-color-BLACK-OPACITY-8);
+    border-color:  rgba(0,0,0,0);
 }
 
 .fp-components-checkbox-checked.fp-components-checkbox-disabled {
-    background-color: white;
-    border-color: rgb(153,153,153);
+    background-color: var(--fp-color-BLACK-OPACITY-8);
+    border-color:  rgba(0,0,0,0);
 }
 
-.fp-components-checkbox:active:not(.fp-components-checkbox-disabled), .fp-components-checkbox-checked:active:not(.fp-components-checkbox-disabled) {
-    background-color: rgb(102,102,102);
-    border-color: rgb(102,102,102);
+.fp-components-checkbox-checked:active:not(.fp-components-checkbox-disabled) {
+    background-color: var(--fp-color-BLUE-OPACITY-70);
+    border-color: rgba(0,0,0,0);
 }
 
 .fp-components-checkbox-desc {
-    font-size: inherit;
+    display: flex;
+    font-size: 14px;
     color: inherit;
     white-space: nowrap;
-    margin-left: 26px;
+    margin-left: 5px;
+    align-items: center;
+    justify-content: center;
 }
 
 .fp-components-checkbox-checked .fp-components-checkbox-desc {

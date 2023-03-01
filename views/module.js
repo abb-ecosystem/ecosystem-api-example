@@ -1,6 +1,8 @@
-class Module extends TComponents.Component_A {
+import TComponents from '../t-components/index.js';
+
+export default class Module extends TComponents.Component_A {
   constructor(parent, path, name, isSysmodule = true) {
-    super(parent);
+    super(parent, { options: { async: true } });
     this.path = path.replace(/\:$/, '');
     this.name = name;
     this.extension = isSysmodule ? '.sysx' : '.modx';
@@ -56,7 +58,7 @@ class Module extends TComponents.Component_A {
     try {
       await API.RAPID.unloadModule(this.name);
     } catch (e) {
-      console.error('Uncaught exception in cbOnClickUnload: ' + JSON.stringify(e));
+      TComponents.Popup_A.error(e, 'Excpetion in Module.unload(): ');
       console.error(e);
     }
   }

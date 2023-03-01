@@ -1,18 +1,20 @@
 
 /*
 
-(c) Copyright 2020-2021 ABB
+(c) Copyright 2020-2023 ABB
 
 Any unauthorized use, reproduction, distribution,
 or disclosure to third parties is strictly forbidden.
 ABB reserves all rights regarding Intellectual Property Rights
 
-// OmniCore App SDK 1.1
+// OmniCore App SDK 1.2
 
 */
 
 :root {
-    --menu-width: 320px;
+    /* --menu-width: 320px; */
+    --menu-width: auto;
+    --menu-min-width: 300px;
     --menu-visible-width: 48px;
     --menu-item-height: 70px;
     --menu-title-height: 48px;
@@ -121,7 +123,7 @@ ABB reserves all rights regarding Intellectual Property Rights
     overflow-y: auto;
     height: calc(100% - var(--menu-title-height));
     width: 0px;
-    padding-right: 18px;
+    /* padding-right: 18px; */
     background:
         /* Shadow covers, hide shadows when scrolled to top or bottom*/
         linear-gradient(var(--fp-color-GRAY-10) 30%, rgba(34,34,34,0)),
@@ -152,6 +154,7 @@ ABB reserves all rights regarding Intellectual Property Rights
     top: -2px;
     left: 0;
     width: 0;
+    margin-right: 18px;
     padding-left: 55px;
     overflow: hidden;
     position: sticky;
@@ -171,11 +174,14 @@ ABB reserves all rights regarding Intellectual Property Rights
 
 .fp-components-hamburgermenu-a-menu__container--open .fp-components-hamburgermenu-a-menu__title-container {
     width: var(--menu-width);
+    min-width: var(--menu-min-width);
 }
 
 .fp-components-hamburgermenu-a-menu__button {
     display: flex;
-    width: var(--menu-width);
+    /* width: var(--menu-width); */
+    width: 100%;
+    min-width: var(--menu-min-width);
     max-height: var(--menu-item-height);
     min-height: 48px;
     flex-direction: row;

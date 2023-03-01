@@ -1,13 +1,13 @@
 
 /*
 
-(c) Copyright 2020-2021 ABB
+(c) Copyright 2020-2023 ABB
 
 Any unauthorized use, reproduction, distribution,
 or disclosure to third parties is strictly forbidden.
 ABB reserves all rights regarding Intellectual Property Rights
 
-// OmniCore App SDK 1.1
+// OmniCore App SDK 1.2
 
 */
 
@@ -17,7 +17,7 @@ ABB reserves all rights regarding Intellectual Property Rights
     flex-direction: row;
 
     font-family: "Segoe UI", "Verdana", "sans-serif";
-    font-size: 16px;
+    font-size: 14px;
     background-color: inherit;
 }
 
@@ -32,15 +32,16 @@ ABB reserves all rights regarding Intellectual Property Rights
     flex-direction: row;
     
     justify-content: center;
+    align-items: center;
     white-space: nowrap;
-    padding: 12px 32px 12px 8px;
+    /* padding: 12px 32px 12px 8px; */
 
-    color: var(--fp-color-PRIMARY-TEXT);
-    background-color: var(--fp-color-STD-BACKGROUND);
+    color: var(--fp-color-TEXT-BLACK-PRIMARY);
+    background-color: var(--fp-color-WHITE);
 
     border-style: solid none solid solid;
-    border-width: 1px;
-    border-color: var(--fp-color-GRAY-40);
+    border-width: 2px;
+    border-color: var(--fp-color-GRAY-10);
 }
 
 .fp-components-toggle > * > *:not(:last-child){
@@ -63,9 +64,9 @@ ABB reserves all rights regarding Intellectual Property Rights
 }
 
 .fp-components-toggle > .fp-components-toggle-on {
-    background-color: var(--fp-color-BLUE-PRIMARY-HIGHLIGHT);
-    border-color: var(--fp-color-BLUE-PRIMARY-HIGHLIGHT);
-    color: #FFFFFF;
+    background-color: var(--fp-color-BLUE-60);
+    border-color: var(--fp-color-BLUE-60);
+    color: var(--fp-color-WHITE);
 }
 
 
@@ -73,27 +74,27 @@ ABB reserves all rights regarding Intellectual Property Rights
 /* Hover */
 
 .fp-components-toggle > *:hover {
-    background-color: var(--fp-color-GRAY-10);
-    border-color: var(--fp-color-GRAY-50);                
+    background-color: var(--fp-color-BLACK-OPACITY-4);
+    border-color: rgba(0,0,0,0);                
 }
 
 .fp-components-toggle > *:hover:not(.fp-components-toggle-on) + *:not(.fp-components-toggle-on) {
-    border-left-color: var(--fp-color-GRAY-50);                
+    border-left-color: --fp-color-BLACK-OPACITY-4;                
 }
 
 .fp-components-toggle > .fp-components-toggle-on + *:hover {
-    background-color: var(--fp-color-GRAY-10);
-    border-left-color: var(--fp-color-BLUE-PRIMARY-HIGHLIGHT);
+    /* background-color: var(--fp-color-GRAY-10); */
+    border-left-color: var(--fp-color-BLUE-60);
 }
 
 
 .fp-components-toggle > .fp-components-toggle-on:hover {
-    background-color: var(--fp-color-BLUE-70);
-    border-color:  var(--fp-color-BLUE-70);                
+    background-color: var(--fp-color-BLUE-OPACITY-90);
+    border-color:  rgba(0,0,0,0);                
 }
 
 .fp-components-toggle > .fp-components-toggle-on:hover + *:not(.fp-components-toggle-on) {
-    border-left-color:  var(--fp-color-BLUE-70);
+    border-left-color:  var(--fp-color-BLUE-OPACITY-90);
 }            
 
 
@@ -101,34 +102,33 @@ ABB reserves all rights regarding Intellectual Property Rights
 /* Active (press)  */
 
 .fp-components-toggle > *:active {
-    background-color: var(--fp-color-GRAY-20);
-    border-color: var(--fp-color-GRAY-50);
-    /* transform: scale(1, 0.95); */
+    background-color: var(--fp-color-BLACK-OPACITY-6);
+    border-color: rgba(0,0,0,0);
 }
 
 .fp-components-toggle > *:active:not(.fp-components-toggle-on) + *:not(.fp-components-toggle-on) {
-    border-left-color: var(--fp-color-GRAY-50);                
+    border-left-color: var(--fp-color-BLACK-OPACITY-6);                
 }
 
 .fp-components-toggle > .fp-components-toggle-on + *:active {
-    background-color: var(--fp-color-GRAY-20);
-    border-left-color: var(--fp-color-BLUE-PRIMARY-HIGHLIGHT);
+    /* background-color: var(--fp-color-GRAY-20); */
+    border-left-color: var(--fp-color-BLUE-60);
 }
 
 .fp-components-toggle > .fp-components-toggle-on:active {
-    background-color:  var(--fp-color-BLUE-80);
-    border-color:  var(--fp-color-BLUE-80);                
+    background-color:  var(--fp-color-BLUE-OPACITY-70);
+    border-color:  rgba(0,0,0,0);
 }
 
 .fp-components-toggle > .fp-components-toggle-on:active + *:not(.fp-components-toggle-on) {
-    border-left-color: var(--fp-color-BLUE-80);
+    border-left-color: var(--fp-color-BLUE-OPACITY-70);
 } 
 
 
 /* Border between two "on" buttons */
 
 .fp-components-toggle > .fp-components-toggle-on + .fp-components-toggle-on {
-    border-left-color: #FFFFFF !important;
+    border-left-color: var(--fp-color-GRAY-10) !important;
 }
 
 .fp-components-toggle-icon {

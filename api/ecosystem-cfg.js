@@ -1,60 +1,203 @@
 'use strict';
 
+// @ts-ignore
 var API = API || {};
 if (typeof API.constructedCfg === 'undefined') {
   (function (cfg) {
-    /**
-     * @alias ECOSYSTEM_CFG_LIB_VERSION
-     * @memberof API
-     * @constant
-     * @type {number}
-     */
-    cfg.ECOSYSTEM_CFG_LIB_VERSION = '0.2';
-
     /**
      * @alias API.CONFIG
      * @namespace
      * @property {enum} DOMAIN
      * @property {enum} TYPE
      */
-    cfg.CONFIG = {
-      DOMAIN: {
+    cfg.CONFIG = new (function () {
+      /**
+       * Enum for configuration domains
+       * @readonly
+       * @enum {string}
+       */
+      this.DOMAIN = {
         EIO: 'EIO',
         SYS: 'SYS',
         MOC: 'MOC',
-      },
-      TYPE: {
+      };
+
+      this.TYPE = {
         SIGNAL: 'EIO_SIGNAL',
         CROSS: 'EIO_CROSS',
         ETHERNETIP: 'ETHERNETIP_DEVICE',
-      },
-    };
+      };
+      /**
+       * Loads a configuration file on the controller configuration data base.
+       * A controller restart is required after loading a new configuration to make this configuration effective.
+       * @alias loadConfiguration
+       * @memberof API.CONFIG
+       * @param  {string} filepath : the path to the file, including file name
+       * @param  {string} action="replace" :the validation method, valid values: 'add', 'replace' and 'add-with-reset'.
+       */
+      this.loadConfiguration = async function (filepath, action = 'add') {
+        try {
+          const answer = await RWS.CFG.loadConfiguration(filepath, action);
+        } catch (e) {
+          console.error(e);
+          API.rejectWithStatus(`Failed to load ${filepath} `, e);
+        }
+      };
+
+      /**
+       * Get the attributes of a signal
+       * @alias getSignalAttributes
+       * @memberof API.CONFIG
+       * @return {object} The attributes of a signal
+       */
+      this.getSignalAttributes = async function (name) {
+        try {
+          // Check if instance is configured (which does not necesarily means that the signal is already availabe),
+          // after creating an instance, a Reboot is reqiured
+          let config = await RWS.CFG.getInstanceByName(
+            API.CONFIG.DOMAIN.EIO,
+            API.CONFIG.TYPE.SIGNAL,
+            name
+          );
+
+          let attr = null;
+          if (config !== null) attr = config.getAttributes();
+          return attr;
+        } catch (e) {
+          // if singal not available, then an exception will occur
+          console.error(`Error while getting attributes of a signal ${name} `);
+          return null;
+        }
+      };
+
+      /**
+       * Get the attributes of a signal
+       * @alias getCrossConnectionAttributes
+       * @memberof API.CONFIG
+       * @return {object} The attributes of a signal
+       */
+      this.getCrossConnectionAttributes = async function (name) {
+        try {
+          // Check if instance is configured (which does not necesarily means that the signal is already availabe),
+          // after creating an instance, a Reboot is reqiured
+          let config = await RWS.CFG.getInstanceByName(
+            API.CONFIG.DOMAIN.EIO,
+            API.CONFIG.TYPE.CROSS,
+            name
+          );
+          let attr = null;
+          if (config !== null) attr = config.getAttributes();
+          return attr;
+        } catch (e) {
+          // if singal not available, then an exception will occur
+          console.error(`Error while getting attributes of the cross-conneciton ${name} `);
+          return null;
+        }
+      };
+
+      /**
+       * Create a SIGNAL configuraiton instance with attributes
+       * @alias createSignalInstance
+       * @memberof API.CONFIG
+       */
+      this.createSignalInstance = async function (attr) {
+        try {
+          await RWS.CFG.createInstance(API.CONFIG.DOMAIN.EIO, API.CONFIG.TYPE.SIGNAL, attr.Name);
+          await this.updateSignalAttributes(attr);
+        } catch (e) {
+          throw e;
+        }
+      };
+
+      this.createCrossConnectionInstance = async function (attr) {
+        try {
+          await RWS.CFG.createInstance(API.CONFIG.DOMAIN.EIO, API.CONFIG.TYPE.CROSS, attr.Name);
+          this.updateCrossConnectionAttributes(attr);
+        } catch (e) {
+          throw e;
+        }
+      };
+
+      this.updateSignalAttributes = async function (attr) {
+        if (attr.Device === '') {
+          console.log('Device is a empty string...');
+          delete attr.Device;
+          await this.deleteSignal(attr.Name);
+          await RWS.CFG.createInstance(API.CONFIG.DOMAIN.EIO, API.CONFIG.TYPE.SIGNAL, attr.Name);
+        }
+
+        await RWS.CFG.updateAttributesByName(
+          API.CONFIG.DOMAIN.EIO,
+          API.CONFIG.TYPE.SIGNAL,
+          attr.Name,
+          attr
+        );
+      };
+
+      this.updateCrossConnectionAttributes = async function (attr) {
+        await RWS.CFG.updateAttributesByName(
+          API.CONFIG.DOMAIN.EIO,
+          API.CONFIG.TYPE.CROSS,
+          attr.Name,
+          attr
+        );
+      };
+
+      this.fetchAllInstancesOfType = async function (type) {
+        try {
+          const instances = await RWS.CFG.getInstances(API.CONFIG.DOMAIN.EIO, type);
+          return instances;
+        } catch (err) {
+          console.error(err);
+          return undefined;
+        }
+      };
+
+      this.fetchAllCrossConnections = async function () {
+        try {
+          return await this.fetchAllInstancesOfType(API.CONFIG.TYPE.CROSS);
+        } catch (err) {
+          console.error(err);
+          throw err;
+        }
+      };
+
+      this.fetchAllSignals = async function () {
+        try {
+          return await this.fetchAllInstancesOfType(API.CONFIG.TYPE.SIGNAL);
+        } catch (err) {
+          console.error(err);
+          throw err;
+        }
+      };
+
+      // ToDo: handle reject
+      this.deleteCrossConnection = async function (name) {
+        return await API.RWS.CFG.deleteConfigInstance(
+          name,
+          API.CONFIG.TYPE.CROSS,
+          API.CONFIG.DOMAIN.EIO
+        );
+      };
+
+      // ToDo: handle reject
+      this.deleteSignal = async function (name) {
+        return await API.RWS.CFG.deleteConfigInstance(
+          name,
+          API.CONFIG.TYPE.SIGNAL,
+          API.CONFIG.DOMAIN.EIO
+        );
+      };
+    })();
 
     /**
-     * Loads a configuration file on the controller configuration data base.
-     * A controller restart is required after loading a new configuration to make this configuration effective.
-     * @alias loadConfiguration
-     * @memberof API.CONFIG
-     * @param  {string} filepath : the path to the file, including file name
-     * @param  {string} action="replace" :the validation method, valid values: 'add', 'replace' and 'add-with-reset'.
-     */
-    cfg.loadConfiguration = async function (filepath, action = 'add') {
-      try {
-        const answer = await RWS.CFG.loadConfiguration(filepath, action);
-      } catch (e) {
-        console.error(e);
-        API.rejectWithStatus(`Failed to load ${filepath} `, e);
-      }
-    };
-
-    /**
-     * @alias API.CONFIG.DEVICE
+     * @alias API.DEVICE
      * @namespace
      */
     cfg.DEVICE = new (function () {
       /**
        * @alias fetchEthernetIPDevices
-       * @memberof API.CONFIG
+       * @memberof API
        * @returns {Promise<object[]>} - List of device objects including containing signals
        * @private
        */
@@ -100,7 +243,7 @@ if (typeof API.constructedCfg === 'undefined') {
        * Search for avalable Ethernet/IP devices
        * @alias searchEthernetIPDevices
        * @memberof API.CONFIG.DEVICE
-       * @returns {Promise<object[]>} - List of device names
+       * @returns {Promise<string[]>} - List of device names
        */
       this.searchEthernetIPDevices = async function () {
         const devices = [];
@@ -112,39 +255,23 @@ if (typeof API.constructedCfg === 'undefined') {
 
         return devices;
       };
-
-      // /**
-      //  *
-      //  * @alias isAnySignalMappedTo
-      //  * @memberof API.CONFIG
-      //  * @param {object} attr
-      //  * @returns {Promise<object[]>} - List of device names
-      //  * @private
-      //  */
-      // const isAnySignalMappedTo = async function (attr) {
-      //   const ethIPDevices = await fetchEthernetIPDevices();
-      //   const device = ethIPDevices.find((dev) => dev.name === attr.device);
-      //   console.log(device);
-      //   const found =
-      //     device &&
-      //     device.signals.some(
-      //       (signal) =>
-      //         signal.attributes.DeviceMap === attr.map &&
-      //         signal.attributes.SignalType === attr.type &&
-      //         signal.attributes.Name !== attr.name
-      //     );
-      //   console.log(found);
-      //   return found;
-      // };
+      /**
+       * @typedef API.DEVICE.SignalAttributesProp
+       * @prop {string} [name] Name of the signal
+       * @prop {string} [device] Device to which the signal is assigned
+       * @prop {string} [map] Mapping number
+       * @prop {string} [type] Type of signal: 'DI' | 'DO' | 'AI' | 'AO' | 'GI' | 'GO'
+       */
 
       /**
        * @alias find
-       * @memberof API.CONFIG.DEVICE
-       * @param {object} attr An object with the following information:
+       * @memberof API.DEVICE
+       * @param {API.DEVICE.SignalAttributesProp} attr An object with the following information:
        * <br>&emsp;(string) name signal name
        * <br>&emsp;(string) device device name
        * <br>&emsp;(string) map device map name
-       * @returns {Promise<object | undefined>} API.CONFIG.Signal instance if found, otherwise undefined
+       * <br>&emsp;(string) type signal type: : 'DI' | 'DO' | 'AI' | 'AO' | 'GI' | 'GO'
+       * @returns {Promise<object | undefined>} API.Signal instance if found, otherwise undefined
        */
       this.find = async function (attr) {
         const ethIPDevices = await fetchEthernetIPDevices();
@@ -176,62 +303,28 @@ if (typeof API.constructedCfg === 'undefined') {
     })();
 
     /**
-     * @alias API.CONFIG.SIGNAL
+     * @alias API.SIGNAL
      * @namespace
+     * @property {API.SIGNAL.Signal} Signal
      */
     cfg.SIGNAL = new (function () {
       this.signals = [];
-      this.crossConns = [];
-
-      // class Instance {
-      //   constructor(attr) {
-      //     this._attr = attr;
-      //     this.modified = false;
-      //     this.InstanceType = undefined;
-      //   }
-
-      //   /**
-      //    *
-      //    */
-      //   async updateAttributes(attr) {
-      //     const f = function (key) {
-      //       this._attr[key] = attr[key];
-      //     };
-      //     Object.keys(attr).forEach(f.bind(this));
-
-      //     if (!this.InstanceType) {
-      //       console.error('Instance type is not defined');
-      //       return;
-      //     }
-
-      //     await API.SIGNAL.updateInstanceAttributes(attr, this.InstanceType);
-      //     this.modified = true;
-      //   }
-      // }
-
-      // class crossConnection extends Instance {
-      //   constructor() {
-      //     super(attr);
-      //     this.InstanceType = API.CONFIG.TYPE.CROSS;
-      //   }
-      //   set attr(a) {
-      //     this.updateAttributes(a);
-      //   }
-      // }
 
       /**
        * Signal class containing all relevant elements to access the signal
        * and its configuration.
-       * Instance of this class can be created by {@link API.CONFIG.createSignal()} when creating a new signal
-       * or {@link API.CONFIG.getSignal()} when looking for an existing one.
+       * Instance of this class can be created by {@link API.SIGNAL.createSignal()} when creating a new signal
+       * or {@link API.SIGNAL.getSignal()} when looking for an existing one.
        * @class Signal
-       * @memberof API.CONFIG.SIGNAL
+       * @memberof API.SIGNAL
        * @param {string} name - Name of the signal
        * @param {string|object} signal - Instance of a RWS.IO.getSignal(name)
-       * @param {object} config - Object from signal.getConfigInstance(name, API.CONFIG.TYPE.SIGNAL)
+       * @param {object} config - Object from RWS.CFG.getInstanceByName(
+       *     API.CONFIG.DOMAIN.EIO, API.CONFIG.TYPE.SIGNAL, name);
        * @param {Object} attr - Attribute properties comming out of config.getAttributes();
        * @example
        *  const mySignal = await API.SIGNAL.getSignal('signal_name');
+       * @todo define the config object returne from RWS
        */
       class Signal {
         constructor(name, signal, attr) {
@@ -252,7 +345,8 @@ if (typeof API.constructedCfg === 'undefined') {
           }
         }
 
-        async setValue(v) {
+        async setValue(value) {
+          const v = value ? 1 : 0;
           try {
             if (!this.signal)
               return API.rejectWithStatus(
@@ -262,8 +356,6 @@ if (typeof API.constructedCfg === 'undefined') {
           } catch (e) {
             return API.rejectWithStatus(`Failed to set value of signal ${this.name}`, e);
           }
-
-          // this.signal && this.signal.setValue(v)
         }
 
         get type() {
@@ -292,27 +384,27 @@ if (typeof API.constructedCfg === 'undefined') {
         //   this.modified = true;
         // }
 
-        async setAttr(a) {
+        async updateSignalAttributes(a) {
           const f = function (key) {
             this._attr[key] = a[key];
           };
           Object.keys(a).forEach(f.bind(this));
 
-          await API.SIGNAL.updateSignalAttributes(a);
+          await API.CONFIG.updateSignalAttributes(a);
           this.modified = true;
         }
 
         /**
          * Subscribe to the signal and set the callback function
-         * @param {function} callback function to be called on change
-         * @returns {undefined | Promise<{}>} - undefine if success, otherwise a reject Promise
+         * @param {boolean} [raiseInitial] flag indicating whether an initial event is raised when subscription is registered
+         * @returns {undefined | Promise<any>} - undefine if success, otherwise a reject Promise
          */
-        async subscribe(callback) {
+        async subscribe(raiseInitial = false) {
           try {
             if (!this.signal)
               return API.rejectWithStatus(`Signal ${this.name} not available for subscription`);
 
-            return await this.signal.subscribe(true);
+            return await this.signal.subscribe(raiseInitial);
           } catch (e) {
             return API.rejectWithStatus(`Failed to subscribe to signal ${this.name}`, e);
           }
@@ -336,8 +428,6 @@ if (typeof API.constructedCfg === 'undefined') {
               callback(value);
             };
             this.signal.addCallbackOnChanged(cb.bind(this));
-            // force the callback to update to current value
-            cb();
           } catch (e) {
             return API.rejectWithStatus(`Failed to add callback to signal ${this.name}`, e);
           }
@@ -348,10 +438,10 @@ if (typeof API.constructedCfg === 'undefined') {
        * Creates a new signal in the config databes in case this is not already existing.
        * If exists, then the attributes are taken from the existing one
        * @alias createSignal
-       * @memberof API.CONFIG.SIGNAL
-       * @param {*} name
+       * @memberof API.SIGNAL
+       * @param {string} name
        * @param {*} attr
-       * @returns {Promise<object>}
+       * @returns {Promise<API.SIGNAL.Signal>}
        */
       this.createSignal = async (name, attr = {}) => {
         const found = this.signals.find((s) => s.name === name);
@@ -363,11 +453,19 @@ if (typeof API.constructedCfg === 'undefined') {
 
         try {
           signal = await RWS.IO.getSignal(name);
-          let config = await this.getConfigInstance(name, API.CONFIG.TYPE.SIGNAL);
+          let config = await RWS.CFG.getInstanceByName(
+            API.CONFIG.DOMAIN.EIO,
+            API.CONFIG.TYPE.SIGNAL,
+            name
+          );
           attr = await config.getAttributes();
         } catch (e) {
           try {
-            let config = await this.getConfigInstance(name, API.CONFIG.TYPE.SIGNAL);
+            let config = await RWS.CFG.getInstanceByName(
+              API.CONFIG.DOMAIN.EIO,
+              API.CONFIG.TYPE.SIGNAL,
+              name
+            );
             attr = await config.getAttributes();
           } catch (e) {
             // Signal instance NOT found, create a config instance
@@ -377,8 +475,12 @@ if (typeof API.constructedCfg === 'undefined') {
                   !attr.SignalType ? 'SignalType ' : ''
                 }${!attr.Access ? 'Access ' : ''} `
               );
-            this.createSignalInstance(attr);
-            let config = await this.getConfigInstance(attr.Name, API.CONFIG.TYPE.SIGNAL);
+            API.CONFIG.createSignalInstance(attr);
+            let config = await RWS.CFG.getInstanceByName(
+              API.CONFIG.DOMAIN.EIO,
+              API.CONFIG.TYPE.SIGNAL,
+              attr.Name
+            );
           }
         }
         const s = new Signal(name, signal, attr);
@@ -404,7 +506,12 @@ if (typeof API.constructedCfg === 'undefined') {
           if (found) return found;
           try {
             const signal = await RWS.IO.getSignal(name);
-            let config = await this.getConfigInstance(name, API.CONFIG.TYPE.SIGNAL);
+            let config = await RWS.CFG.getInstanceByName(
+              API.CONFIG.DOMAIN.EIO,
+              API.CONFIG.TYPE.SIGNAL,
+              name
+            );
+
             let attr = await config.getAttributes();
             const s = new Signal(name, signal, attr);
             //check again before pushing
@@ -420,148 +527,22 @@ if (typeof API.constructedCfg === 'undefined') {
       };
 
       /**
-       * Get a configuration instace from RWS.CFG Namespace
-       * @param {string} name -- name of the insance
-       * @param {string} type -- supported types: EIO_SIGNAL, EIO_CROSS
-       * @returns {object}The cofiguration instace
+       * @typedef filterSignalSearch
+       * @prop {string} [name]
+       * @prop {string} [device]
+       * @prop {string} [network]
+       * @prop {string} [category]
+       * @prop {'DI' | 'DO' | 'AI' | 'AO' | 'GI' | 'GO'} [type]
+       * @prop {string} [invert]
+       * @prop {string} [blocked]
+       * @memberof API.CONFIG.SIGNAL
        */
-      this.getConfigInstance = async function (name, type) {
-        try {
-          const instance = await RWS.CFG.getInstanceByName(API.CONFIG.DOMAIN.EIO, type, name);
-          return instance;
-        } catch (e) {
-          return API.rejectWithStatus(
-            `Configuration instance ${name} not found in current configuration...`,
-            e
-          );
-          // return null
-        }
-      };
-
-      /**
-       * Get the attributes of a signal
-       * @return {object} The attributes of a signal
-       */
-      this.getSignalAttributes = async function (name) {
-        try {
-          // Check if instance is configured (which does not necesarily means that the signal is already availabe),
-          // after creating an instance, a Reboot is reqiured
-          let config = await this.getConfigInstance(name, API.CONFIG.TYPE.SIGNAL);
-          let attr = null;
-          if (config !== null) attr = config.getAttributes();
-          return attr;
-        } catch (e) {
-          // if singal not available, then an exception will occur
-          console.error(`Error while getting attributes of a signal ${name} `);
-          return null;
-        }
-      };
-
-      /**
-       * Get the attributes of a signal
-       * @return {object} The attributes of a signal
-       */
-      this.getCrossConnectionAttributes = async function (name) {
-        try {
-          // Check if instance is configured (which does not necesarily means that the signal is already availabe),
-          // after creating an instance, a Reboot is reqiured
-          let config = await this.getConfigInstance(name, API.CONFIG.TYPE.CROSS);
-          let attr = null;
-          if (config !== null) attr = config.getAttributes();
-          return attr;
-        } catch (e) {
-          // if singal not available, then an exception will occur
-          console.error(`Error while getting attributes of the cross-conneciton ${name} `);
-          return null;
-        }
-      };
-
-      /**
-       * Create signal configuraiton instance with attributes
-       */
-      this.createConfigInstance = async function (name, type) {
-        try {
-          await RWS.CFG.createInstance(API.CONFIG.DOMAIN.EIO, type, name);
-        } catch (e) {
-          return API.rejectWithStatus(`Failed to create configuration instance of ${name}`, e);
-        }
-      };
-
-      this.createSignalInstance = async function (attr) {
-        try {
-          await this.createConfigInstance(attr.Name, API.CONFIG.TYPE.SIGNAL);
-          await this.updateSignalAttributes(attr);
-        } catch (e) {
-          throw e;
-        }
-      };
-
-      this.createCrossConnectionInstance = async function (attr) {
-        try {
-          this.createConfigInstance(attr.Name, API.CONFIG.TYPE.CROSS);
-          this.updateCrossConnectionAttributes(attr);
-        } catch (e) {
-          throw e;
-        }
-      };
-
-      /**
-       * Modify the attributes of a signal present in the configuration database
-       * If the signal does not exist, no action is taken
-       * @param {*} attr
-       */
-
-      this.updateInstanceAttributes = async function (attr, type) {
-        try {
-          await RWS.CFG.updateAttributesByName(API.CONFIG.DOMAIN.EIO, type, attr.Name, attr);
-        } catch (err) {
-          console.error(err);
-        }
-      };
-
-      this.updateSignalAttributes = async function (attr) {
-        if (attr.Device === '') {
-          console.log('Device is a empty string...');
-          delete attr.Device;
-          await API.SIGNAL.deleteSignal(attr.Name);
-          await API.SIGNAL.createConfigInstance(attr.Name, API.CONFIG.TYPE.SIGNAL);
-        }
-
-        await this.updateInstanceAttributes(attr, API.CONFIG.TYPE.SIGNAL);
-      };
-
-      this.updateCrossConnectionAttributes = async function (attr) {
-        await this.updateInstanceAttributes(attr, API.CONFIG.TYPE.CROSS);
-      };
-
-      this.fetchAllInstancesFromType = async function (type) {
-        try {
-          const instances = await RWS.CFG.getInstances(API.CONFIG.DOMAIN.EIO, type);
-          return instances;
-        } catch (err) {
-          console.error(err);
-          return undefined;
-        }
-      };
-
-      this.fetchAllCrossConnections = async function () {
-        try {
-          const ccs = await this.fetchAllInstancesFromType(API.CONFIG.TYPE.CROSS);
-          if (!ccs) return;
-          this.crossConns.length = 0;
-          this.crossConns.push(...ccs);
-          return this.crossConns;
-        } catch (err) {
-          console.error(err);
-          throw err;
-        }
-      };
 
       /**
        * Search for available signals in the controller.
        * @alias search
        * @memberof API.CONFIG.SIGNAL
-       * @param {Object} filter - The result can be filtered by using
+       * @param {API.SIGNAL.filterSignalSearch} filter - The result can be filtered by using
        * an object with the following possible elements:
        *     <br>&emsp;(string) name signal name
        *     <br>&emsp;(string) device device name
@@ -581,7 +562,7 @@ if (typeof API.constructedCfg === 'undefined') {
        *       var filter = {
        *             name: 'TestDI',
        *       }
-       * @returns {Promise<object[]>} - List of API.CONFIG.SIGNAL.Signal instances
+       * @returns {Promise<object[] | string[]> } - List of API.CONFIG.SIGNAL.Signal instances
        */
       this.search = async function (filter = {}, onlyName = false) {
         try {
@@ -600,40 +581,34 @@ if (typeof API.constructedCfg === 'undefined') {
         }
       };
 
-      const fetchAllSignals = async () => {
-        console.log('🤷‍♂️');
-        this.fetchAllSignalsCalled = true;
-        try {
-          const ss = await this.search({});
-          this.fetchAllSignalsDone = true;
-          return ss;
-        } catch (err) {
-          console.error(err);
-          throw err;
-        }
-      };
+      // const fetchAllActiveSignals = async () => {
+      //   this.fetchAllSignalsCalled = true;
+      //   try {
+      //     const ss = await this.search({});
+      //     this.fetchAllSignalsDone = true;
+      //     return ss;
+      //   } catch (err) {
+      //     console.error(err);
+      //     throw err;
+      //   }
+      // };
 
-      const getAllSignals = async () => {
-        if (this.fetchAllSignalsCalled) {
-          try {
-            const ret = await Promise.race([
-              API.waitForCondition(() => {
-                return this.fetchAllSignalsDone === true;
-              }),
-              API.timeout(5), // secs
-            ]);
-            return this.signals;
-          } catch (e) {
-            return API.rejectWithStatus(`Faile while getting all signals`, e);
-          }
-        } else {
-          return await fetchAllSignals();
-        }
-      };
-
-      // this.getSignalByName = async (name) => {
-      //   const signals = await getAllSignals();
-      //   return signals.find((signal) => signal.name === name);
+      // const getAllSignals = async () => {
+      //   if (this.fetchAllSignalsCalled) {
+      //     try {
+      //       const ret = await Promise.race([
+      //         API.waitForCondition(() => {
+      //           return this.fetchAllSignalsDone === true;
+      //         }),
+      //         API.timeout(5), // secs
+      //       ]);
+      //       return this.signals;
+      //     } catch (e) {
+      //       return API.rejectWithStatus(`Faile while getting all signals`, e);
+      //     }
+      //   } else {
+      //     return await fetchAllActiveSignals();
+      //   }
       // };
 
       this.searchByName = async (name) => {
@@ -646,15 +621,6 @@ if (typeof API.constructedCfg === 'undefined') {
         return signals.length === 1 ? signals[0] : signals;
       };
 
-      // this.getSignalsOfType = async (type, device = null) => {
-      //   const signals = await getAllSignals();
-      //   const sot = signals.filter((s) => {
-      //     const ret = device === null ? s.type === type : s.type === type && s.device === device;
-      //     return ret;
-      //   });
-      //   return sot;
-      // };
-
       this.searchByType = async (type, device = null) => {
         if (Array.isArray(type)) {
           const t = type.join(',');
@@ -666,42 +632,7 @@ if (typeof API.constructedCfg === 'undefined') {
       };
 
       this.isAnySignalModified = async () => {
-        // const signals = await getAllSignals();
         return this.signals.some((signal) => signal.modified === true);
-      };
-
-      this.isAnyInputMappedTo = (attr) => {
-        const device = API.DEVICE.ethernetIP.find((dev) => dev.device === attr.Device);
-        const found =
-          device &&
-          device.signals.some(
-            (signal) =>
-              signal.map === attr.Map &&
-              signal.type === attr.SignalType &&
-              signal.name !== attr.Name
-          );
-        return found;
-      };
-
-      this.deleteConfigInstance = async function (name, type) {
-        try {
-          await API.RWS.deleteConfigInstance(name, type, API.CONFIG.DOMAIN.EIO);
-        } catch (e) {
-          console.error(`Error while deleting configuration instance ${name}`);
-          return null;
-        }
-      };
-
-      // ToDo: remove from this.crossConns
-      // ToDo: handle reject
-      this.deleteCrossConnection = async function (name) {
-        return await this.deleteConfigInstance(name, API.CONFIG.TYPE.CROSS);
-      };
-
-      // ToDo: remove from this.signals
-      // ToDo: handle reject
-      this.deleteSignal = async function (name) {
-        return await this.deleteConfigInstance(name, API.CONFIG.TYPE.SIGNAL);
       };
     })();
 

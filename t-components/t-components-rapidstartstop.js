@@ -1,73 +1,71 @@
 'use strict';
-// @ts-ignore
-var TComponents = TComponents || {};
-(function (o) {
-  const imgStop = 't-components/img/png/stop.png';
 
-  if (!o.hasOwnProperty('RapidStartStop_A')) {
-    /**
-     * Called when an instance of this component is created.
-     * @class TComponents.RapidStartStop_A
-     * @extends TComponents.Component_A
-     * @param {HTMLElement} parent - DOM element in which this component is to be inserted
-     * @example
-     * const btnStart = new TComponents.RapidStartStop_A(document.querySelector('.btn-start')),
-     */
-    o.RapidStartStop_A = class RapidStartStop extends TComponents.Component_A {
-      constructor(parent) {
-        super(parent);
-        this.imgStop = 't-components/img/png/stop.png';
-        this.imgStart = 't-components/img/png/start.png';
-      }
+import { Component_A } from './t-components-component.js';
+import { Popup_A } from './t-components-popup.js';
 
-      /**
-       * Contains component specific asynchronous implementation (like access to controller).
-       * This method is called internally during initialization process orchestrated by {@link init() init}.
-       * @private
-       * @async
-       */
-      async onInit() {
-        // subscribe to executionState
-        try {
-          var executionState = RWS.Rapid.getMonitor('execution');
-          executionState.addCallbackOnChanged((eventData) => {
-            if (eventData == 'stopped') {
-              this.find('.tc-rapid-feedback').src = this.imgStop;
-              this.child.btnStart.enabled = true;
-              this.child.btnStop.enabled = false;
-            } else if (eventData == 'running') {
-              this.find('.tc-rapid-feedback').src = this.imgStart;
-              this.child.btnStart.enabled = false;
-              this.child.btnStop.enabled = true;
-            }
-          });
-          var rapidstate = await RWS.Rapid.getExecutionState();
-          console.log(rapidstate);
-          executionState.subscribe(true);
-        } catch (e) {
-          TComponents.Popup_A.danger('Subscribe to failed. >>>', [e.message, e.description]);
+import { Button_A } from './t-components-buttons.js';
+import { imgStart, imgStop } from './img/images.js';
+
+/**
+ * Called when an instance of this component is created.
+ * @class TComponents.RapidStartStop_A
+ * @extends TComponents.Component_A
+ * @param {HTMLElement} parent - DOM element in which this component is to be inserted
+ * @example
+ * // index.html
+ * ...
+ * &lt;div class="btn-start"&gt;&lt;/div&gt;
+ * ...
+ *
+ * // index.js
+ * const btnStart = new RapidStartStop_A(document.querySelector('.btn-start'));
+ * await btnStart.render();
+ */
+export class RapidStartStop_A extends Component_A {
+  constructor(parent) {
+    super(parent);
+  }
+
+  async onInit() {
+    // subscribe to executionState
+    try {
+      var executionState = RWS.Rapid.getMonitor('execution');
+      executionState.addCallbackOnChanged((eventData) => {
+        if (eventData == 'stopped') {
+          this.find('.tc-rapid-feedback').src = imgStop;
+          this.child.btnStart.enabled = true;
+          this.child.btnStop.enabled = false;
+        } else if (eventData == 'running') {
+          this.find('.tc-rapid-feedback').src = imgStart;
+          this.child.btnStart.enabled = false;
+          this.child.btnStop.enabled = true;
         }
-      }
+      });
+      var rapidstate = await RWS.Rapid.getExecutionState();
+      console.log(rapidstate);
+      executionState.subscribe(true);
+    } catch (e) {
+      Popup_A.danger('Subscribe to failed. >>>', [e.message, e.description]);
+    }
+  }
 
-      mapComponents() {
-        return {
-          btnStart: new TComponents.Button_A(
-            this.find('.tc-btn-start'),
-            this.cbStart.bind(this),
-            'Start'
-          ),
-          btnStop: new TComponents.Button_A(
-            this.find('.tc-btn-stop'),
-            this.cbStop.bind(this),
-            'Stop'
-          ),
-        };
-      }
+  mapComponents() {
+    return {
+      btnStart: new Button_A(this.find('.tc-btn-start'), {
+        callback: this.cbStart.bind(this),
+        label: 'Start',
+      }),
+      btnStop: new Button_A(this.find('.tc-btn-stop'), {
+        callback: this.cbStop.bind(this),
+        label: 'Stop',
+      }),
+    };
+  }
 
-      onRender() {}
+  onRender() {}
 
-      markup({ imgStop }) {
-        return `
+  markup() {
+    return `
 
           <div class="tc-container-row tc-item">
             <img src="${imgStop}" style="width:36px ;height:36px;" class="tc-rapid-feedback tc-item"> </img>
@@ -76,42 +74,35 @@ var TComponents = TComponents || {};
           </div>
 
           `;
-      }
-
-      async cbStart() {
-        try {
-          await RWS.Rapid.resetPP(); //Sets the Program Pointer to main
-          await RWS.Controller.setMotorsState('motors_on'); //Turns the motors on
-
-          //await API.RAPID.Task._startExecution();
-
-          await RWS.Rapid.startExecution({
-            //Starts the execution of the program with the desired features
-            regainMode: 'continue',
-            executionMode: 'continue',
-            cycleMode: 'forever',
-            condition: 'none',
-            stopAtBreakpoint: false,
-            enableByTSP: true,
-          });
-        } catch (e) {
-          TComponents.Popup_A.error(e);
-        }
-      }
-
-      async cbStop() {
-        try {
-          await RWS.Rapid.stopExecution({
-            stopMode: 'stop', //You can stop cycles, instructions or programs, in this case putting 'stop' we stop the program.
-            useTSP: 'normal', //With 'normal' we only stop the normal tasks, not the static ones.
-          });
-        } catch (e) {
-          TComponents.Popup_A.error(e);
-        }
-      }
-    };
   }
-})(TComponents);
+
+  async cbStart() {
+    try {
+      await RWS.Rapid.resetPP(); //Sets the Program Pointer to main
+      await RWS.Controller.setMotorsState('motors_on'); //Turns the motors on
+
+      await RWS.Rapid.startExecution({
+        //Starts the execution of the program with the desired features
+        regainMode: 'continue',
+        executionMode: 'continue',
+        cycleMode: 'forever',
+        condition: 'none',
+        stopAtBreakpoint: false,
+        enableByTSP: true,
+      });
+    } catch (e) {
+      Popup_A.error(e);
+    }
+  }
+
+  async cbStop() {
+    try {
+      await RWS.Rapid.stopExecution();
+    } catch (e) {
+      Popup_A.error(e);
+    }
+  }
+}
 
 var tComponentStyle = document.createElement('style');
 tComponentStyle.innerHTML = `

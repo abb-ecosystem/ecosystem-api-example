@@ -1,4 +1,7 @@
-class SignalConfigurator extends TComponents.Component_A {
+import TComponents from '../t-components/index.js';
+import SignalContainer from './signalContainer.js';
+
+export default class SignalConfigurator extends TComponents.Component_A {
   constructor(parent) {
     super(parent);
   }
@@ -17,6 +20,7 @@ class SignalConfigurator extends TComponents.Component_A {
 
   mapComponents() {
     const editSignal = new TComponents.SignalEdit_A(this.find('.edit-window'));
+
     return {
       inputSignalContainer: new SignalContainer(
         this.find('#signal-container-input'),
@@ -26,14 +30,15 @@ class SignalConfigurator extends TComponents.Component_A {
         this.find('#signal-container-output'),
         this.doSignals
       ),
-      deviceSelector: new TComponents.SelectorEthernetIPDevices_A(
-        this.find('.device-dropdown'),
-        this._deviceSelected,
-        'Select a device:'
-      ),
+      deviceSelector: new TComponents.SelectorEthernetIPDevices_A(this.find('.device-dropdown'), {
+        selected: this._deviceSelected,
+        label: 'Select a device:',
+      }),
       editSignal: editSignal,
-      modalWindow: new TComponents.ModalWindow_A(this.find('.modal-window'), editSignal),
-      btnReboot: new TComponents.ButtonReboot_A(this.find('.reboot-view'), true),
+      modalWindow: new TComponents.ModalWindow_A(this.find('.modal-window'), {
+        content: editSignal,
+      }),
+      btnReboot: new TComponents.ButtonReboot_A(this.find('.reboot-view'), { confirm: true }),
     };
   }
 
@@ -45,6 +50,8 @@ class SignalConfigurator extends TComponents.Component_A {
     this.child.modalWindow.triggerElements(this.child.outputSignalContainer.getEditButtons());
 
     this.child.btnReboot.hide();
+
+    //console.log('😎😎😎😎😎 - SignalConfigurator finished rendering...');
   }
 
   markup() {
@@ -88,9 +95,10 @@ class SignalConfigurator extends TComponents.Component_A {
   }
 
   async updateSignalAttr(attr) {
-    const signal = await API.SIGNAL.searchByName(attr.Name);
-    await signal.setAttr(attr);
-    signal.type === 'DI'
+    // const signal = await API.SIGNAL.searchByName(attr.Name);
+    // await signal.updateSignalAttributes(attr);
+    // signal.type === 'DI'
+    attr.SignalType === 'DI'
       ? this.child.inputSignalContainer.updateSignalAttributes(attr)
       : this.child.outputSignalContainer.updateSignalAttributes(attr);
 

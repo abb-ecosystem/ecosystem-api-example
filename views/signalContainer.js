@@ -1,4 +1,6 @@
-class SignalContainer extends TComponents.Component_A {
+import TComponents from '../t-components/index.js';
+
+export default class SignalContainer extends TComponents.Component_A {
   constructor(parent, signals) {
     super(parent);
     this._parentElement = parent;
@@ -25,12 +27,11 @@ class SignalContainer extends TComponents.Component_A {
   mapComponents() {
     this._signals = this.all('.tc-signal-data');
     this._signals.forEach((signal) => {
-      const s = new TComponents.SignalView_A(
-        signal,
-        this._signalsData[signal.dataset.index],
-        true, //hasSwitch
-        true //hasEditButton
-      );
+      const s = new TComponents.SignalView_A(signal, {
+        signal: this._signalsData[signal.dataset.index],
+        control: true,
+        edit: true,
+      });
       this.signalComponents.push(s);
     });
     return { signalComponents: this.signalComponents };

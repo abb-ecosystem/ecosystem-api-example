@@ -1,8 +1,13 @@
+import TComponents from '../t-components/index.js';
+
 const ToggleImg = 'assets/img/arrows-clockwise-fill.svg';
 
-class SignalComponents extends TComponents.Component_A {
+export default class SignalComponents extends TComponents.Component_A {
   constructor(parent, signal = '') {
     super(parent);
+    /**
+     * @type {API.SIGNAL.Signal | string}
+     */
     this._signal = signal;
   }
 
@@ -19,29 +24,27 @@ class SignalComponents extends TComponents.Component_A {
     if (this._signal) {
       components['signalIndicator'] = new TComponents.SignalIndicator_A(
         this.find('.signal-indicator'),
-        this._signal,
-        this._signal.name
+        { signal: this._signal, label: this._signal.name }
       );
-      components['toggleButton'] = new TComponents.Button_A(
-        this.find('.toggle-btn'),
-        async (value) => {
+      components['toggleButton'] = new TComponents.Button_A(this.find('.toggle-btn'), {
+        callback: async (value) => {
           let v = await this._signal.getValue();
           !v ? this._signal.setValue(1) : this._signal.setValue(0);
         },
-        'Toggle',
-        ToggleImg
-      );
-      components['switch'] = new TComponents.SignalSwitch_A(
-        this.find('.switch-button'),
-        this._signal,
-        ''
-      );
+        label: 'Toggle',
+        icon: ToggleImg,
+      });
+      components['switch'] = new TComponents.SwitchSignal_A(this.find('.switch-button'), {
+        signal: this._signal,
+      });
     }
     return components;
   }
 
   onRender() {
     this.backgroundColor('white');
+
+    // console.log('😎😎😎😎😎 - SignalComponents finished rendering...');
   }
 
   markup() {

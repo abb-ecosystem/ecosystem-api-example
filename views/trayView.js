@@ -1,9 +1,10 @@
-// const imgTray = 'assets/img/tray_w_p1-4_400x400.png';
-const imgPickStragety = 'assets/img/tray_pick_strategy.png';
+import TComponents from '../t-components/index.js';
+import { imgTray } from '../constants/images.js';
+import { imgPickStragety } from '../constants/images.js';
 
-class TrayView extends TComponents.Component_A {
-  constructor(parent, label, module, tray1, tray2, tray3, tray4, trayGrip, trayApproach, trayExit) {
-    super(parent, label);
+export default class TrayView extends TComponents.Component_A {
+  constructor(parent, name, module, tray1, tray2, tray3, tray4, trayGrip, trayApproach, trayExit) {
+    super(parent, { options: { async: false } });
     this._module = module;
     this._tray1 = tray1;
     this._tray2 = tray2;
@@ -12,65 +13,61 @@ class TrayView extends TComponents.Component_A {
     this._trayGrip = trayGrip;
     this._trayApproach = trayApproach;
     this._trayExit = trayExit;
+    this.name = name;
   }
 
   async onInit() {}
 
   mapComponents() {
     return {
-      trayPose01: new TComponents.ButtonTeachMove_A(
-        this.find('.tray-position-1'),
-        this._tray1,
-        this._module,
-        'Location 1'
-      ),
-      trayPose02: new TComponents.ButtonTeachMove_A(
-        this.find('.tray-position-2'),
-        this._tray2,
-        this._module,
-        'Location 2'
-      ),
-      trayPose03: new TComponents.ButtonTeachMove_A(
-        this.find('.tray-position-3'),
-        this._tray3,
-        this._module,
-        'Location 3'
-      ),
-      trayPose04: new TComponents.ButtonTeachMove_A(
-        this.find('.tray-position-4'),
-        this._tray4,
-        this._module,
-        'Location 4'
-      ),
-      trayPoseGrip: new TComponents.ButtonTeachMove_A(
-        this.find('.tray-position-grip'),
-        this._trayGrip,
-        this._module,
-        'Grip Location'
-      ),
-      trayPoseApproach: new TComponents.ButtonTeachMove_A(
-        this.find('.tray-position-approach'),
-        this._trayApproach,
-        this._module,
-        'Approach Location'
-      ),
-      trayPoseExit: new TComponents.ButtonTeachMove_A(
-        this.find('.tray-position-exit'),
-        this._trayExit,
-        this._module,
-        'Exit Location'
-      ),
-      btnTestPick: new TComponents.ButtonProcedure_A(
-        this.find('.tray-btn-test-pick'),
-        'es_testPickStrategy',
-        false,
-        'test',
-        true
-      ),
+      trayPose01: new TComponents.ButtonTeachMove_A(this.find('.tray-position-1'), {
+        variable: this._tray1,
+        module: this._module,
+        label: 'Location 1',
+      }),
+      trayPose02: new TComponents.ButtonTeachMove_A(this.find('.tray-position-2'), {
+        variable: this._tray2,
+        module: this._module,
+        label: 'Location 2',
+      }),
+      trayPose03: new TComponents.ButtonTeachMove_A(this.find('.tray-position-3'), {
+        variable: this._tray3,
+        module: this._module,
+        label: 'Location 3',
+      }),
+      trayPose04: new TComponents.ButtonTeachMove_A(this.find('.tray-position-4'), {
+        variable: this._tray4,
+        module: this._module,
+        label: 'Location 4',
+      }),
+      trayPoseGrip: new TComponents.ButtonTeachMove_A(this.find('.tray-position-grip'), {
+        variable: this._trayGrip,
+        module: this._module,
+        label: 'Grip Location',
+      }),
+      trayPoseApproach: new TComponents.ButtonTeachMove_A(this.find('.tray-position-approach'), {
+        variable: this._trayApproach,
+        module: this._module,
+        label: 'Approach Location',
+      }),
+      trayPoseExit: new TComponents.ButtonTeachMove_A(this.find('.tray-position-exit'), {
+        variable: this._trayExit,
+        module: this._module,
+        label: 'Exit Location',
+      }),
+      btnTestPick: new TComponents.ButtonProcedure_A(this.find('.tray-btn-test-pick'), {
+        procedure: 'es_testPickStrategy',
+        userLevel: false,
+        label: 'test',
+        stopOnRelease: true,
+      }),
     };
   }
 
-  onRender() {}
+  onRender() {
+    this.cssContainer(true);
+    // console.log('😎😎😎 - TrayView finished rendering...');
+  }
 
   markup(self) {
     return `
@@ -79,7 +76,7 @@ class TrayView extends TComponents.Component_A {
         <div class="tc-row">
           <div class="tc-cols-1 tc-infobox">
             <div>
-              <p>${this._label}</p>
+              <p>${this.name}</p>
             </div>
           </div>
         </div>

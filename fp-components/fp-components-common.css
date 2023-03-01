@@ -1,51 +1,155 @@
 
 /*
 
-(c) Copyright 2020-2021 ABB
+(c) Copyright 2020-2023 ABB
 
 Any unauthorized use, reproduction, distribution,
 or disclosure to third parties is strictly forbidden.
 ABB reserves all rights regarding Intellectual Property Rights
 
-// OmniCore App SDK 1.1
+// OmniCore App SDK 1.2
 
 */
 
 :root {
-
-    --fp-color-STD-BACKGROUND:          #FFFFFF;
-    --fp-color-PRIMARY-TEXT:            #000000;
-    --fp-color-SECONDARY-TEXT:          #696969;
-
-    --fp-color-GRAY-10:                 #EBEBEB;
-    --fp-color-GRAY-20:                 #DBDBDB;
-    --fp-color-GRAY-30:                 #BABABA;
-    --fp-color-GRAY-40:                 #9F9F9F;
-    --fp-color-GRAY-50:                 #868686;
-    --fp-color-GRAY-60:                 #696969;
-    --fp-color-GRAY-70:                 #464646;
-    --fp-color-GRAY-80:                 #333333;
-    --fp-color-GRAY-90:                 #1F1F1F;
-    --fp-color-GRAY-100:                #0F0F0F;
-       
-    --fp-color-BLUE-10:                 #E0F0FF;    
-    --fp-color-BLUE-20:                 #C5E0FA;    
-    --fp-color-BLUE-30:                 #9EBFF7;    
-    --fp-color-BLUE-40:                 #77A3FC;    
-    --fp-color-BLUE-50:                 #4C85FF;    
-    --fp-color-BLUE-60:                 #3366FF;  
-    --fp-color-BLUE-70:                 #2A35FF;  
-    --fp-color-BLUE-80:                 #2C20D4;  
-    --fp-color-BLUE-90:                 #160C9C;  
-    --fp-color-BLUE-100:                #080261;  
     
-    --fp-color-BLUE-PRIMARY-HIGHLIGHT:  #3366FF;
+    --fp-color-STD-BACKGROUND:              #FFFFFF;
 
-    --fp-color-GREEN-OK:                #0CA919;
-    --fp-color-YELLOW-WARNING:          #FFD800;
-    --fp-color-RED-DANGER:              #F03040;
+    /* ABB BRAND COLORS */
+    --fp-color-ABB-BRAND-WHITE:             #FFFFFF;
+    --fp-color-ABB-BRAND-RED:               #FF000F;
+    --fp-color-ABB-BRAND-BLACK:             #000000;
 
+    /* ABB THEME COLORS */
+    --fp-color-ABB-THEME-SNOW:              #FFFFFF;
+    --fp-color-ABB-THEME-CLOUD:             #F5F5F5;
+    --fp-color-ABB-THEME-GRAPHITE:          #333333;
+    --fp-color-ABB-THEME-CHARCOAL:          #1F1F1F;
+    
+    /* ABB TEXT COLORS */
+    --fp-color-PRIMARY-TEXT:                #000000;
+    --fp-color-SECONDARY-TEXT:              #DBDBDB;
 
+    --fp-color-TEXT-WHITE-PRIMARY:          #FFFFFF;
+    --fp-color-TEXT-WHITE-SECONDARY:        #DBDBDB;
+    --fp-color-TEXT-WHITE-DISABLED:         rgba(255, 255, 255, 0.4);   /* #FFFFFF66 */
+    --fp-color-TEXT-BLACK-PRIMARY:          #000000;
+    --fp-color-TEXT-BLACK-SECONDARY:        #686868;
+    --fp-color-TEXT-BLACK-DISABLED:         rgba(31, 31, 31, 0.4);      /* #1F1F1F66 */
+    
+    /* ABB COLOR SHADES */
+    --fp-color-WHITE:                       #FFFFFF;
+    --fp-color-BLACK:                       #000000;
+    --fp-color-BLUE-PRIMARY-HIGHLIGHT:      #3366FF;
+
+    --fp-color-GRAY-10:                     #EBEBEB;
+    --fp-color-GRAY-20:                     #DBDBDB;
+    --fp-color-GRAY-30:                     #BABABA;
+    --fp-color-GRAY-40:                     #9F9F9F;
+    --fp-color-GRAY-50:                     #848484;
+    --fp-color-GRAY-60:                     #686868;
+    --fp-color-GRAY-70:                     #525252;
+    --fp-color-GRAY-80:                     #333333;
+    --fp-color-GRAY-90:                     #1F1F1F;
+    --fp-color-GRAY-100:                    #0F0F0F;
+
+    --fp-color-BLUE-10:                     #E0F0FF;    
+    --fp-color-BLUE-20:                     #C5DFF9;    
+    --fp-color-BLUE-30:                     #9EBEF7;    
+    --fp-color-BLUE-40:                     #77A3FC;    
+    --fp-color-BLUE-50:                     #4C85FF;    
+    --fp-color-BLUE-60:                     #3366FF;  
+    --fp-color-BLUE-70:                     #2A35FF;  
+    --fp-color-BLUE-80:                     #2C20D4;  
+    --fp-color-BLUE-90:                     #150C9B;  
+    --fp-color-BLUE-100:                    #080261;  
+
+    --fp-color-RED-10:                      #FFE8E9;
+    --fp-color-RED-20:                      #FFC9CD;
+    --fp-color-RED-30:                      #FF99A0;
+    --fp-color-RED-40:                      #FF757E;
+    --fp-color-RED-50:                      #FF4754;
+    --fp-color-RED-60:                      #E12E2E;
+    --fp-color-RED-70:                      #CC0815;
+    --fp-color-RED-80:                      #A30005;
+    --fp-color-RED-90:                      #5C0006;
+    --fp-color-RED-100:                     #3E0000;
+
+    /* ABB OPACITY SHADES */
+    --fp-color-WHITE-OPACITY-2:             rgba(255, 255, 255, 0.04);  /* #FFFFFF0A  */
+    --fp-color-WHITE-OPACITY-4:             rgba(255, 255, 255, 0.08);  /* #FFFFFF14  */
+    --fp-color-WHITE-OPACITY-6:             rgba(255, 255, 255, 0.12);  /* #FFFFFF1F  */
+    --fp-color-WHITE-OPACITY-8:             rgba(255, 255, 255, 0.16);  /* #FFFFFF29  */
+    --fp-color-WHITE-OPACITY-10:            rgba(255, 255, 255, 0.24);  /* #FFFFFF3D  */
+    --fp-color-WHITE-OPACITY-20:            rgba(255, 255, 255, 0.32);  /* #FFFFFF52  */
+    --fp-color-WHITE-OPACITY-30:            rgba(255, 255, 255, 0.40);  /* #FFFFFF66  */
+    --fp-color-WHITE-OPACITY-40:            rgba(255, 255, 255, 0.48);  /* #FFFFFF7A  */
+    --fp-color-WHITE-OPACITY-50:            rgba(255, 255, 255, 0.56);  /* #FFFFFF8F  */
+    --fp-color-WHITE-OPACITY-60:            rgba(255, 255, 255, 0.64);  /* #FFFFFFA3  */
+    --fp-color-WHITE-OPACITY-70:            rgba(255, 255, 255, 0.72);  /* #FFFFFFB8  */
+    --fp-color-WHITE-OPACITY-80:            rgba(255, 255, 255, 0.80);  /* #FFFFFFCC  */
+    --fp-color-WHITE-OPACITY-90:            rgba(255, 255, 255, 0.88);  /* #FFFFFFE0  */
+    
+    --fp-color-BLACK-OPACITY-2:             rgba(0, 0, 0, 0.04);        /* #0000000A  */
+    --fp-color-BLACK-OPACITY-4:             rgba(0, 0, 0, 0.08);        /* #00000014  */
+    --fp-color-BLACK-OPACITY-6:             rgba(0, 0, 0, 0.12);        /* #0000001F  */
+    --fp-color-BLACK-OPACITY-8:             rgba(0, 0, 0, 0.16);        /* #00000029  */
+    --fp-color-BLACK-OPACITY-10:            rgba(0, 0, 0, 0.24);        /* #0000003D  */
+    --fp-color-BLACK-OPACITY-20:            rgba(0, 0, 0, 0.32);        /* #00000052  */
+    --fp-color-BLACK-OPACITY-30:            rgba(0, 0, 0, 0.40);        /* #00000066  */
+    --fp-color-BLACK-OPACITY-40:            rgba(0, 0, 0, 0.48);        /* #0000007A  */
+    --fp-color-BLACK-OPACITY-50:            rgba(0, 0, 0, 0.56);        /* #0000008F  */
+    --fp-color-BLACK-OPACITY-60:            rgba(0, 0, 0, 0.64);        /* #000000A3  */
+    --fp-color-BLACK-OPACITY-70:            rgba(0, 0, 0, 0.72);        /* #000000B8  */
+    --fp-color-BLACK-OPACITY-80:            rgba(0, 0, 0, 0.80);        /* #000000CC  */
+    --fp-color-BLACK-OPACITY-90:            rgba(0, 0, 0, 0.88);        /* #000000E0  */
+    
+    --fp-color-BLUE-OPACITY-2:              rgba(51, 102, 255, 0.04);   /* #3366FF0A  */
+    --fp-color-BLUE-OPACITY-4:              rgba(51, 102, 255, 0.08);   /* #3366FF14  */
+    --fp-color-BLUE-OPACITY-6:              rgba(51, 102, 255, 0.12);   /* #3366FF1F  */
+    --fp-color-BLUE-OPACITY-8:              rgba(51, 102, 255, 0.16);   /* #3366FF29  */
+    --fp-color-BLUE-OPACITY-10:             rgba(51, 102, 255, 0.24);   /* #3366FF3D  */
+    --fp-color-BLUE-OPACITY-20:             rgba(51, 102, 255, 0.32);   /* #3366FF52  */
+    --fp-color-BLUE-OPACITY-30:             rgba(51, 102, 255, 0.40);   /* #3366FF66  */
+    --fp-color-BLUE-OPACITY-40:             rgba(51, 102, 255, 0.48);   /* #3366FF7A  */
+    --fp-color-BLUE-OPACITY-50:             rgba(51, 102, 255, 0.56);   /* #3366FF8F  */
+    --fp-color-BLUE-OPACITY-60:             rgba(51, 102, 255, 0.64);   /* #3366FFA3  */
+    --fp-color-BLUE-OPACITY-70:             rgba(51, 102, 255, 0.72);   /* #3366FFB8  */
+    --fp-color-BLUE-OPACITY-80:             rgba(51, 102, 255, 0.80);   /* #3366FFCC  */
+    --fp-color-BLUE-OPACITY-90:             rgba(51, 102, 255, 0.88);   /* #3366FFE0  */
+    
+    --fp-color-RED-OPACITY-2:               rgba(255, 0, 15, 0.04);     /* #FF000F0A  */
+    --fp-color-RED-OPACITY-4:               rgba(255, 0, 15, 0.08);     /* #FF000F14  */
+    --fp-color-RED-OPACITY-6:               rgba(255, 0, 15, 0.12);     /* #FF000F1F  */
+    --fp-color-RED-OPACITY-8:               rgba(255, 0, 15, 0.16);     /* #FF000F29  */
+    --fp-color-RED-OPACITY-10:              rgba(255, 0, 15, 0.24);     /* #FF000F3D  */
+    --fp-color-RED-OPACITY-20:              rgba(255, 0, 15, 0.32);     /* #FF000F52  */
+    --fp-color-RED-OPACITY-30:              rgba(255, 0, 15, 0.40);     /* #FF000F66  */
+    --fp-color-RED-OPACITY-40:              rgba(255, 0, 15, 0.48);     /* #FF000F7A  */
+    --fp-color-RED-OPACITY-50:              rgba(255, 0, 15, 0.56);     /* #FF000F8F  */
+    --fp-color-RED-OPACITY-60:              rgba(255, 0, 15, 0.64);     /* #FF000FA3  */
+    --fp-color-RED-OPACITY-70:              rgba(255, 0, 15, 0.72);     /* #FF000FB8  */
+    --fp-color-RED-OPACITY-80:              rgba(255, 0, 15, 0.80);     /* #FF000FCC  */
+    --fp-color-RED-OPACITY-90:              rgba(255, 0, 15, 0.88);     /* #FF000FE0  */
+
+    /* ABB STATUS COLORS */
+
+    --fp-color-GREEN-OK:            #21A67A;
+    --fp-color-YELLOW-WARNING:      #FFA200;
+    --fp-color-RED-DANGER:          #EF3934;
+
+    --fp-color-STATUS-SUCCESS:      #21A67A;
+    --fp-color-STATUS-SUCCESS-BG:   #EEF8F5;
+
+    --fp-color-STATUS-WARNING:      #FFA200;
+    --fp-color-STATUS-WARNIN-BG:    #FEF9EF;
+
+    --fp-color-STATUS-ERROR:        #EF3934;
+    --fp-color-STATUS-ERROR-BG:     #FBF0F0;
+
+    --fp-color-STATUS-INFO:         #0052FF;
+    --fp-color-STATUS-INFO-BG:      #D8E4FF;
+    
 }
 
 /** ANIMATION **/
@@ -222,6 +326,7 @@ body {
     border-style: solid;
     border-color: var(--fp-color-GRAY-20);
     border-width: 2px;
+    border-radius: 20px;
 }
 
 .fp-components-keyboard-button:hover {    
@@ -318,6 +423,12 @@ body {
     margin: 0;
 }
 
+#fp-debugwindow-content > pre {
+    padding: 0;
+    margin: 0;
+    white-space: pre-wrap;
+}
+
 #fp-debugwindow-menu {
     grid-area: fp-debugwindow-gridarea-menu;
     margin-left: 8px;
@@ -337,10 +448,10 @@ body {
     border-color: rgb(120,120,120);
     border-radius: 5px;
     border-width: 2px;
-    padding-top: 8px;
-    padding-bottom: 8px;
+    padding: 8px 4px 8px 4px;
     margin-left: 12px;
-    min-width: 120px;
+    min-width: 100px;
+    box-sizing: border-box;
     text-align: center;
     font-weight: bold;
 }

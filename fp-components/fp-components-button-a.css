@@ -1,70 +1,64 @@
 
 /*
 
-(c) Copyright 2020-2021 ABB
+(c) Copyright 2020-2023 ABB
 
 Any unauthorized use, reproduction, distribution,
 or disclosure to third parties is strictly forbidden.
 ABB reserves all rights regarding Intellectual Property Rights
 
-// OmniCore App SDK 1.1
+// OmniCore App SDK 1.2
 
 */
 
 .fp-components-button, .fp-components-button-disabled {
-    background-color: var(--fp-color-GRAY-20);
+    background-color: var(--fp-color-BLACK-OPACITY-4);
     display: flex;
     flex-direction: row;
     justify-content: center;
     align-items: center;
     padding: 0px 18px;
-    transition: transform 0.03s linear;
-    font-size: 1.0em;
-    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 600;
     min-width: 90px;
     height: 40px;
     box-sizing: border-box;
-    border-style: solid;
-    border-color: var(--fp-color-GRAY-20);
-    border-width: 2px;
+    border-radius: 20px;
 }
 
 .fp-components-button {
-    color: var(--fp-color-PRIMARY-TEXT);
+    color: var(--fp-color-TEXT-BLACK-PRIMARY);
 }
 
 .fp-components-button-disabled {
-    color: var(--fp-color-GRAY-40);
-    border-color: var(--fp-color-GRAY-30);
-    background-color: var(--fp-color-GRAY-10);
-    border-width: 2px;
+    color: var(--fp-color-BLACK-OPACITY-30);
+    background-color: var(--fp-color-BLACK-OPACITY-2);
+}
+
+.fp-components-button-disabled.fp-components-button-highlight {
+    color: var(--fp-color-WHITE-OPACITY-30);
+    background-color: var(--fp-color-BLUE-OPACITY-50);
 }
 
 .fp-components-button:active {
-    background-color: var(--fp-color-GRAY-40);
-    border-color: var(--fp-color-GRAY-40);
-    transform: scale(0.96, 0.96);
+    background-color: var(--fp-color-BLACK-OPACITY-8);
 }
 
 .fp-components-button:hover:not(:active) {
-    background-color: var(--fp-color-GRAY-30);
-    border-color: var(--fp-color-GRAY-30);
+    background-color: var(--fp-color-BLACK-OPACITY-6);
 }
 
 .fp-components-button.fp-components-button-highlight {
-    background-color: var(--fp-color-BLUE-PRIMARY-HIGHLIGHT);
-    border-color: var(--fp-color-BLUE-PRIMARY-HIGHLIGHT);
-    color: white;
+    background-color: var(--fp-color-BLUE-60);
+    color: var(--fp-color-TEXT-WHITE-PRIMARY);
 }
 
 .fp-components-button.fp-components-button-highlight:active {
-    background-color: var(--fp-color-BLUE-80);
-    border-color: var(--fp-color-BLUE-80);
+    background-color: var(--fp-color-BLUE-OPACITY-70);
 }
 
 .fp-components-button.fp-components-button-highlight:hover:not(:active) {
-    background-color: var(--fp-color-BLUE-70);
-    border-color: var(--fp-color-BLUE-70);
+    background-color: var(--fp-color-BLUE-OPACITY-90);
 }
 
 .fp-components-button-text {
@@ -79,4 +73,8 @@ ABB reserves all rights regarding Intellectual Property Rights
     background-size: contain;
     background-position: center;
     background-repeat: no-repeat;
+}
+
+.fp-components-button-disabled > .fp-components-button-icon {
+    opacity: 0.4;
 }

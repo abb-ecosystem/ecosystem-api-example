@@ -1,8 +1,9 @@
-const imgTray = 'assets/img/tray_w_p1-4_400x400.png';
+import TComponents from '../t-components/index.js';
+import { imgTray } from '../constants/images.js';
 
-class SettingsView extends TComponents.Component_A {
+export default class SettingsView extends TComponents.Component_A {
   constructor(parent, module, nrParts, rows, columns, currentPart, simMachine) {
-    super(parent);
+    super(parent, { options: { async: false } });
     this._module = module;
     this._nrParts = nrParts;
     this._rows = rows;
@@ -13,28 +14,36 @@ class SettingsView extends TComponents.Component_A {
 
   mapComponents() {
     return {
-      numParts: new TComponents.VarIndicator_A(
-        this.find('.mt-numParts'),
-        this._module,
-        this._nrParts
-      ),
-      rows: new TComponents.VarIncrDecr_A(this.find('.mt-numRows'), this._module, this._rows),
-      cols: new TComponents.VarIncrDecr_A(this.find('.mt-numCols'), this._module, this._columns),
-      currentPart: new TComponents.VarInput_A(
-        this.find('.mt-currentPart'),
-        this._module,
-        this._currentPart
-      ),
-      simMachine: new TComponents.VarSwitch_A(
-        this.find('.checkbox-sim'),
-        this._module,
-        this._simMachine
-      ),
+      numParts: new TComponents.InputVariable_A(this.find('.mt-numParts'), {
+        module: this._module,
+        variable: this._nrParts,
+        readOnly: true,
+      }),
+      rows: new TComponents.VarIncrDecr_A(this.find('.mt-numRows'), {
+        module: this._module,
+        variable: this._rows,
+      }),
+      cols: new TComponents.VarIncrDecr_A(this.find('.mt-numCols'), {
+        module: this._module,
+        variable: this._columns,
+      }),
+      currentPart: new TComponents.InputVariable_A(this.find('.mt-currentPart'), {
+        module: this._module,
+        variable: this._currentPart,
+      }),
+      simMachine: new TComponents.SwitchVariable_A(this.find('.checkbox-sim'), {
+        module: this._module,
+        variable: this._simMachine,
+      }),
       btnStart: new TComponents.RapidStartStop_A(this.find('.btn-start')),
 
-      switchMotors: new TComponents.MotorsOnOff_A(this.find('.switch-motors')),
+      switchMotors: new TComponents.MotorsOnOff_A(this.find('.switch-motors'), {
+        // label: 'Motor',
+      }),
 
-      radioOpMode: new TComponents.OpMode_A(this.find('.radio-opmode')),
+      radioOpMode: new TComponents.OpMode_A(this.find('.radio-opmode'), {
+        // label: 'Operation mode',
+      }),
     };
   }
 

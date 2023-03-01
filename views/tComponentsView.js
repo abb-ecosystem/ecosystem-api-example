@@ -1,6 +1,8 @@
-class TComponentsView extends TComponents.Component_A {
+import TComponents from '../t-components/index.js';
+
+export default class TComponentsView extends TComponents.Component_A {
   constructor(parent, name = 'TComponents') {
-    super(parent);
+    super(parent, { options: { async: false } });
     this._name = name;
     this._module = 'Ecosystem_BASE';
     this._variable = 'esNumber';
@@ -14,190 +16,202 @@ class TComponentsView extends TComponents.Component_A {
   }
 
   mapComponents() {
-    const editSignal = new TComponents.SignalEdit_A(this.find('.edit-signal'), this._signal);
+    const editSignal = new TComponents.SignalEdit_A(this.find('.edit-signal'), {
+      signal: this._signal,
+    });
+    const templateComp = new TComponents.TemplateView_A(this.find('.template-comp'), {
+      name: 'Template Example View',
+    });
     return {
-      varInput: new TComponents.VarInput_A(
-        this.find('.var-input-num'),
-        this._module,
-        this._variable,
-        'VarInput_A'
-      ),
-      varInputString: new TComponents.VarInput_A(
-        this.find('.var-input-string'),
-        this._module,
-        this._variableString,
-        'VarInput_A (string)'
-      ),
-      varInputBool: new TComponents.VarInput_A(
-        this.find('.var-input-bool'),
-        this._module,
-        this._variableBool,
-        'VarInput_A (boolean)'
-      ),
-      varSwitch: new TComponents.VarSwitch_A(
-        this.find('.var-switch-bool'),
-        this._module,
-        this._variableBool,
-        'VarSwitch_A'
-      ),
-      varInd: new TComponents.VarIndicator_A(
-        this.find('.var-ind'),
-        this._module,
-        this._variable,
-        'VarIndicator_A'
-      ),
-      varIndString: new TComponents.VarIndicator_A(
-        this.find('.var-ind-string'),
-        this._module,
-        this._variableString,
-        'VarIndicator_A (string)'
-      ),
-      varIndBool: new TComponents.VarIndicator_A(
-        this.find('.var-ind-bool'),
-        this._module,
-        this._variableBool,
-        'VarIndicator_A (boolean)'
-      ),
-      varIncrDecrInd: new TComponents.VarIncrDecr_A(
-        this.find('.var-incr-decr-readonly'),
-        this._module,
-        this._variable,
-        true,
-        5,
-        'VarIncrDecr_A (readonly)'
-      ),
-      varIncrDecrInput: new TComponents.VarIncrDecr_A(
-        this.find('.var-incr-decr-input'),
-        this._module,
-        this._variable,
-        false,
-        1,
-        'VarIncrDecr_A'
-      ),
+      InputVariable: new TComponents.InputVariable_A(this.find('.var-input-num'), {
+        module: this._module,
+        variable: this._variable,
+        label: 'InputVariable_A',
+        useBorder: false,
+      }),
+      InputVariableString: new TComponents.InputVariable_A(this.find('.var-input-string'), {
+        module: this._module,
+        variable: this._variableString,
+        label: 'InputVariable_A (string)',
+      }),
+      InputVariableBool: new TComponents.InputVariable_A(this.find('.var-input-bool'), {
+        module: this._module,
+        variable: this._variableBool,
+        label: 'InputVariable_A (boolean)',
+      }),
+      SwitchVariable: new TComponents.SwitchVariable_A(this.find('.var-switch-bool'), {
+        module: this._module,
+        variable: this._variableBool,
+        label: 'SwitchVariable_A',
+        callback: () => {
+          console.log('SwitchVariable_A changed...');
+        },
+      }),
+      varInd: new TComponents.InputVariable_A(this.find('.var-ind'), {
+        module: this._module,
+        variable: this._variable,
+        label: 'InputVariable_A readOnly',
+        readOnly: true,
+        useBorder: false,
+      }),
+      varIndString: new TComponents.InputVariable_A(this.find('.var-ind-string'), {
+        module: this._module,
+        variable: this._variableString,
+        label: 'InputVariable_A readOnly (string)',
+        readOnly: true,
+      }),
+      varIndBool: new TComponents.InputVariable_A(this.find('.var-ind-bool'), {
+        module: this._module,
+        variable: this._variableBool,
+        label: 'InputVariable_A readOnly (boolean)',
+        readOnly: true,
+      }),
+      varIncrDecrInd: new TComponents.VarIncrDecr_A(this.find('.var-incr-decr-readonly'), {
+        module: this._module,
+        variable: this._variable,
+        readOnly: true,
+        steps: 5,
+        label: 'VarIncrDecr_A (readonly)',
+      }),
+      varIncrDecrInput: new TComponents.VarIncrDecr_A(this.find('.var-incr-decr-input'), {
+        module: this._module,
+        variable: this._variable,
+        readOnly: false,
+        steps: 1,
+        label: 'VarIncrDecr_A',
+      }),
       // dropDownMenu: new FPComponents.Dropdown_A(),
-      btnRender: new TComponents.Button_A(
-        this.find('.btn-render'),
-        this.cbRender.bind(this),
-        'Button_A - Render'
-      ),
-      varButton: new TComponents.VarButton_A(
-        this.find('.btn-var'),
-        this._module,
-        this._variable,
-        async function (value) {
-          console.log(`tComponentsView: VarButton_A : value = ${value}`);
-          console.log(this);
+      btnRender: new TComponents.Button_A(this.find('.btns-all'), {
+        callback: this.cbRender.bind(this),
+        label: 'Button_A - Render',
+      }),
+      varButton: new TComponents.ButtonVariable_A(this.find('.btns-all'), {
+        module: this._module,
+        variable: this._variable,
+        callback: async function (value) {
+          console.log(`tComponentsView: ButtonVariable_A : `);
+
+          const valueString = value.toString();
+
           TComponents.Popup_A.message('I am a Message window', [
-            `Variable ${this._variable} equals:`,
-            '',
-            value,
+            `Variable ${this._variable} changed`,
+            '\n',
+            ` ${this._variable} = ${value}`,
           ]);
           TComponents.Popup_A.info('I am a Information window', [
             `Variable ${this._variable} equals:`,
-            '',
-            value,
+            '\n',
+            ` ${this._variable} = ${value}`,
           ]);
           TComponents.Popup_A.warning('I am a Warning window', [
             `Variable ${this._variable} equals:`,
-            '',
-            value,
+            '\n',
+            ` ${this._variable} = ${value}`,
           ]);
           TComponents.Popup_A.danger('I am a Error window', [
             `Variable ${this._variable} equals:`,
-            '',
-            value,
+            '\n',
+            ` ${this._variable} = ${value}`,
           ]);
           TComponents.Popup_A.confirm('I am a Confirm window', [
             `Variable ${this._variable} equals:`,
-            '',
-            value,
+            '\n',
+            ` ${this._variable} = ${value}`,
           ]);
         }.bind(this),
-        'Call variable and popups'
-      ),
-      btnProcedure: new TComponents.ButtonProcedure_A(
-        this.find('.btn-procedure'),
-        'es_Procedure_01',
-        true,
-        'Execute procedure'
-      ),
-      teach: new TComponents.ButtonTeach_A(
-        this.find('.btn-teach'),
-        'esTarget02',
-        'Ecosystem_BASE',
-        'ButtonTeach_A'
-      ),
-      move: new TComponents.ButtonMoveTo_A(
-        this.find('.btn-move'),
-        'esTarget02',
-        'Ecosystem_BASE',
-        'ButtonMoveTo_A'
-      ),
-      teachMove: new TComponents.ButtonTeachMove_A(
-        this.find('.btn-teach-move'),
-        'esTarget02',
-        'Ecosystem_BASE',
-        'ButtonTeachMove_A'
-      ),
-      selectorVar: new TComponents.SelectorVariables_A(
-        this.find('.selector-var'),
-        'Ecosystem_BASE',
-        true,
-        '',
-        'SelectorVariables_A',
-        false
-      ),
-      selectorModule: new TComponents.SelectorModules_A(
-        this.find('.selector-module'),
-        false,
-        '',
-        'SelectorModules_A',
-        false
-      ),
-      selectorProc: new TComponents.SelectorProcedures_A(
-        this.find('.selector-proc'),
-        'Ecosystem_BASE',
-        false,
-        '',
-        'SelectorProcedures_A',
-        false
-      ),
-      selectorDevice: new TComponents.SelectorEthernetIPDevices_A(
-        this.find('.selector-device'),
-        '',
-        'SelectorEthernetIPDevices_A'
-      ),
-      selectorSignal: new TComponents.SelectorSignals_A(
-        this.find('.selector-signal'),
-        { name: 'di_', category: 'EcoSystem' },
-        'do_gripper_close',
-        'SelectorSignals_A'
-      ),
-      signalIndicator: new TComponents.SignalIndicator_A(
-        this.find('.signal-indicator'),
-        this._signal,
-        'DI Is Gripper Closed'
-      ),
-      signalView: new TComponents.SignalView_A(this.find('.signal-view'), this._signal, true),
-      switch: new TComponents.SignalSwitch_A(
-        this.find('.signal-switch'),
-        this._signal,
-        'DI Is Gripper Closed'
-      ),
+        label: 'Call variable and popups',
+      }),
+      btnProcedure: new TComponents.ButtonProcedure_A(this.find('.btns-all'), {
+        procedure: 'es_Procedure_01',
+        userLevel: true,
+        label: 'Execute procedure',
+      }),
+      align: new TComponents.ButtonAlign_A(this.find('.btns-move'), {
+        label: 'Align',
+      }),
+      teach: new TComponents.ButtonTeach_A(this.find('.btns-move'), {
+        variable: 'esTarget02',
+        module: 'Ecosystem_BASE',
+        label: 'ButtonTeach_A',
+      }),
+      move: new TComponents.ButtonMoveTo_A(this.find('.btns-move'), {
+        variable: 'esTarget02',
+        module: 'Ecosystem_BASE',
+        label: 'ButtonMoveTo_A',
+      }),
+      teachMove: new TComponents.ButtonTeachMove_A(this.find('.btns-move'), {
+        variable: 'esTarget02',
+        module: 'Ecosystem_BASE',
+        label: 'ButtonTeachMove_A',
+      }),
+      selectorVar: new TComponents.SelectorVariables_A(this.find('.selectors-all'), {
+        module: 'Ecosystem_BASE',
+        isInUse: true,
+        label: 'SelectorVariables_A',
+        addNoSelection: false,
+      }),
+      selectorModule: new TComponents.SelectorModules_A(this.find('.selectors-all'), {
+        isInUse: false,
+        label: 'SelectorModules_A',
+        addNoSelection: false,
+      }),
+      selectorProc: new TComponents.SelectorProcedures_A(this.find('.selectors-all'), {
+        module: 'Ecosystem_BASE',
+        isInUse: false,
+        label: 'SelectorProcedures_A',
+        addNoSelection: false,
+      }),
+      selectorDevice: new TComponents.SelectorEthernetIPDevices_A(this.find('.selectors-all'), {
+        label: 'SelectorEthernetIPDevices_A',
+      }),
+      selectorSignal: new TComponents.SelectorSignals_A(this.find('.selectors-all'), {
+        filter: { name: 'di_', category: 'EcoSystem' },
+        selected: 'di_part_clamped',
+        label: 'SelectorSignals_A',
+      }),
+      signalIndicator: new TComponents.SignalIndicator_A(this.find('.signal-indicator'), {
+        signal: this._signal,
+        readOnly: false,
+        label: 'DI Is Gripper Closed',
+        onChange: (value) => {
+          console.log(`SignalIndicator callback onChange called -- value ${value}`);
+        },
+      }),
+      signalView: new TComponents.SignalView_A(this.find('.signal-view'), {
+        signal: this._signal,
+        control: true,
+        // edit: true,
+      }),
+      switch: new TComponents.SwitchSignal_A(this.find('.signal-switch'), {
+        signal: this._signal,
+        label: 'DI Is Gripper Closed',
+      }),
       editSignal: editSignal,
-      modalWindow: new TComponents.ModalWindow_A(this.find('.modal-window'), editSignal),
-      btnTrigger: new TComponents.Button_A(
-        this.find('.btn-modal-trigger'),
-        null,
-        'trigger modal window'
-      ),
-      templateComp: new TComponents.TemplateView_A(this.find('.template-comp'), 'Template View'),
+      modalWindow: new TComponents.ModalWindow_A(this.find('.modal-window'), {
+        content: templateComp,
+      }),
+      modalWindowSignal: new TComponents.ModalWindow_A(this.find('.modal-window'), {
+        content: editSignal,
+      }),
+      btnTrigger: new TComponents.Button_A(this.find('.btns-all'), {
+        label: 'trigger modal window',
+      }),
+      templateComp: templateComp,
+      btnStart: new TComponents.RapidStartStop_A(this.find('.controls-all')),
+
+      switchMotors: new TComponents.MotorsOnOff_A(this.find('.controls-all'), {
+        // label: 'Motor',
+      }),
+
+      radioOpMode: new TComponents.OpMode_A(this.find('.controls-all'), {
+        // label: 'Operation mode',
+      }),
     };
   }
 
   onRender() {
-    this.child.varInput.onChange((value) => {
-      console.log(`varInput called - value ${value}`);
+    this.child.InputVariable.onChange((value) => {
+      console.log(`InputVariable called - value ${value}`);
     });
     this.child.varInd.onChange((value) => {
       console.log(`varInd called - value ${value}`);
@@ -218,7 +232,8 @@ class TComponentsView extends TComponents.Component_A {
     // this.child.dropDownMenu.selected = 1;
     // this.child.dropDownMenu.desc = 'Using FPComponents';
     // this.child.dropDownMenu.attachToElement(this.find('.selector-dropdown'));
-    this.child.modalWindow.triggerElements(this.child.signalView.getEditButton());
+
+    this.child.modalWindowSignal.triggerElements(this.child.signalView.getEditButton());
     this.child.modalWindow.triggerElements(this.child.btnTrigger.container);
 
     this.child.btnRender.highlight = true;
@@ -228,6 +243,8 @@ class TComponentsView extends TComponents.Component_A {
     sections.map((section) => {
       section.addEventListener('click', this.cbArrowClick.bind(this));
     });
+
+    // console.log('😎😎😎 - TComponentsView finished rendering...');
   }
 
   markup({ _name }) {
@@ -259,10 +276,7 @@ class TComponentsView extends TComponents.Component_A {
           <p class="tc-accordion-info-text">Motion Buttons</p>  
           <div class="tc-image-arrow-down tc-icon"></div>        
           <div class="tc-hidden-box">
-            <div class="tc-container-row">
-              <div class="btn-teach"></div>
-              <div class="btn-move"></div>
-              <div class="btn-teach-move"></div>
+            <div class="flex-row gap-4  items-center btns-move">
             </div>
           </div>
         </div>
@@ -271,12 +285,7 @@ class TComponentsView extends TComponents.Component_A {
           <p class="tc-accordion-info-text">RAPID Buttons</p>  
           <div class="tc-image-arrow-down tc-icon"></div>        
           <div class="tc-hidden-box">
-            <div class="tc-container-row">
-              <div class="btn-var"></div>
-              <div class="btn-procedure "></div>
-              <div class="btn-render"></div>
-              <div class="btn-modal-trigger"></div>
-            </div>
+            <div class="flex-row gap-4 btns-all"></div>
           </div>
         </div>
 
@@ -284,14 +293,15 @@ class TComponentsView extends TComponents.Component_A {
           <p class="tc-accordion-info-text">Selectors</p>  
           <div class="tc-image-arrow-down tc-icon"></div>        
           <div class="tc-hidden-box">
-            <div class="tc-container-row">
-              <div class="selector-module item"></div>
-              <div class="selector-var item"></div>
-              <div class="selector-proc item"></div>
-              <div class="selector-device item"></div>
-              <div class="selector-signal item"></div>
-              <div class="selector-dropdown"></div>
-            </div>
+            <div class="flex-row gap-4 selectors-all"></div>
+          </div>
+        </div>
+
+        <div class="tc-accordion-item">
+          <p class="tc-accordion-info-text">Controls</p>  
+          <div class="tc-image-arrow-down tc-icon"></div>        
+          <div class="tc-hidden-box">
+            <div class="flex-row gap-4 controls-all"></div>
           </div>
         </div>
 
@@ -308,19 +318,9 @@ class TComponentsView extends TComponents.Component_A {
           </div>
         </div>
 
-        <div class="tc-accordion-item">
-          <p class="tc-accordion-info-text">Template</p>  
-          <div class="tc-image-arrow-down tc-icon"></div>        
-          <div class="tc-hidden-box">
-            <div class="tc-container-row">
-              <div class="template-comp"></div>
-            </div>
-          </div>
-        </div>
-
-
         <div class="edit-signal item"></div>
         <div class="modal-window"></div>
+        <div class="template-comp"></div>
       `;
   }
   cbArrowClick(e) {
@@ -368,6 +368,7 @@ class TComponentsView extends TComponents.Component_A {
   }
 
   cbRender() {
-    this.render();
+    const v = this.child.varInd.variable;
+    this.child.varInd.variable = v === this._variable ? this._variableString : this._variable;
   }
 }

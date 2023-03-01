@@ -1,11 +1,13 @@
-class Variable extends TComponents.Component_A {
+import TComponents from '../t-components/index.js';
+
+export default class Variable extends TComponents.Component_A {
   /**
    * @brief Called when an instance of this component is created.
    *
    * @param {HTMLElement} parent - DOM element in which this component is to be inserted
    */
   constructor(parent, module = null) {
-    super(parent);
+    super(parent, { options: { async: false } });
     this._module = module;
     this._esNumber = 'esNumber';
   }
@@ -20,56 +22,51 @@ class Variable extends TComponents.Component_A {
 
   mapComponents() {
     return {
-      varCtrl: new TComponents.VarInput_A(
-        this.find('.var-ctrl'),
-        this._module,
-        this._esNumber,
-        this._esNumber
-      ),
-      varInd: new TComponents.VarIndicator_A(
-        this.find('.var-ind'),
-        this._module,
-        this._esNumber,
-        this._esNumber
-      ),
-      varIncrDecrInd: new TComponents.VarIncrDecr_A(
-        this.find('.var-incr-decr-ind'),
-        this._module,
-        this._esNumber,
-        false
-      ),
-      varIncrDecrCtrl: new TComponents.VarIncrDecr_A(
-        this.find('.var-incr-decr-ctrl'),
-        this._module,
-        this._esNumber,
-        true
-      ),
-      toggleBtn: new TComponents.Button_A(
-        this.find('.toggle-view'),
-        () => {
+      varCtrl: new TComponents.InputVariable_A(this.find('.var-ctrl'), {
+        module: this._module,
+        variable: this._esNumber,
+        label: this._esNumber,
+      }),
+      varInd: new TComponents.InputVariable_A(this.find('.var-ind'), {
+        module: this._module,
+        variable: this._esNumber,
+        label: this._esNumber,
+      }),
+      varIncrDecrInd: new TComponents.VarIncrDecr_A(this.find('.var-incr-decr-ind'), {
+        module: this._module,
+        variable: this._esNumber,
+        readOnly: false,
+      }),
+      varIncrDecrCtrl: new TComponents.VarIncrDecr_A(this.find('.var-incr-decr-ctrl'), {
+        module: this._module,
+        variable: this._esNumber,
+        readOnly: true,
+      }),
+      toggleBtn: new TComponents.Button_A(this.find('.toggle-view'), {
+        callback: () => {
           this.child.varIncrDecrCtrl.toggle();
           this.child.varIncrDecrInd.toggle();
           this.child.varCtrl.toggle();
           this.child.varInd.toggle();
           this.child.toggleBtn.text =
-            this.child.toggleBtn.text === 'hide'
-              ? (this.child.toggleBtn.text = 'show')
-              : (this.child.toggleBtn.text = 'hide');
+            this.child.toggleBtn.label === 'hide'
+              ? (this.child.toggleBtn.label = 'show')
+              : (this.child.toggleBtn.label = 'hide');
         },
-        'hide'
-      ),
-      stepsSelector: new TComponents.Dropdown_A(
-        this.find('.steps-selector'),
-        [1, 5, 10, 50, 100],
-        1,
-        'steps'
-      ),
-      selector: new TComponents.SelectorVariables_A(this.find('.dd-menu'), this._module),
-      getBtn: new TComponents.Button_A(
-        this.find('.get-btn'),
-        this.cbOnClick.bind(this),
-        'Get value'
-      ),
+        label: 'hide',
+      }),
+      stepsSelector: new TComponents.Dropdown_A(this.find('.steps-selector'), {
+        itemList: [1, 5, 10, 50, 100],
+        selected: 1,
+        label: 'steps',
+      }),
+      selector: new TComponents.SelectorVariables_A(this.find('.dd-menu'), {
+        module: this._module,
+      }),
+      getBtn: new TComponents.Button_A(this.find('.get-btn'), {
+        callback: this.cbOnClick.bind(this),
+        label: 'Get value',
+      }),
     };
   }
 
@@ -79,14 +76,14 @@ class Variable extends TComponents.Component_A {
     this.swUseContainer.desc = 'use border';
     this.swUseContainer.onchange = (value) => {
       if (value) {
-        this.child.varInd.useIndicatorBorder();
+        // this.child.varInd.useBorder();
         this.child.varIncrDecrInd.cssContainer();
         this.child.varIncrDecrCtrl.css({
           border: '3px double',
           margin: '5px',
         });
       } else {
-        this.child.varInd.useIndicatorBorder(false);
+        // this.child.varInd.useBorder(false);
         this.child.varIncrDecrInd.cssContainer(false);
         this.child.varIncrDecrCtrl.css('');
       }
@@ -122,7 +119,7 @@ class Variable extends TComponents.Component_A {
   markup() {
     return `
     <div class="tc-container">
-      <div class="tc-row">
+      <div class="tc-row var-view-subscribe">
         <div class="tc-cols-1 tc-infobox">
           <div><p> Subscription to variables</p></div> 
           <div class="tc-row">
@@ -164,7 +161,7 @@ class Variable extends TComponents.Component_A {
           <p>Please select a varialbe and press the button to get its value.</p>
           <h4>Variables:</h4>
           <div class="tc-container-row">
-            <div class="dd-menu tc-item"></div>
+            <div class="dd-menu tc-item dd-w-40"></div>
             <div class="get-btn tc-item"></div>
           </div>
           <div class="show-var"></div>
@@ -225,3 +222,14 @@ class Variable extends TComponents.Component_A {
     return tbl;
   }
 }
+
+var componentStyle = document.createElement('style');
+componentStyle.innerHTML = `
+
+.var-view-subscribe {
+  min-height: 350px;
+}
+  `;
+
+var ref = document.querySelector('script');
+ref.parentNode.insertBefore(componentStyle, ref);
