@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 /**
  * API Namespace
@@ -7,7 +7,7 @@
 // @ts-ignore
 var API = API || {};
 
-if (typeof API.constructedBase === 'undefined') {
+if (typeof API.constructedBase === "undefined") {
   (function (es) {
     /**
      * @alias ECOSYSTEM_LIB_VERSION
@@ -15,7 +15,7 @@ if (typeof API.constructedBase === 'undefined') {
      * @constant
      * @type {number}
      */
-    es.ECOSYSTEM_LIB_VERSION = '0.5';
+    es.ECOSYSTEM_LIB_VERSION = "0.6";
 
     const TIMEOUT_SEC = 5;
     es.verbose = false;
@@ -30,9 +30,9 @@ if (typeof API.constructedBase === 'undefined') {
 
       function buildErrorArray(e) {
         const errArr = [];
-        if (typeof e === 'string') {
+        if (typeof e === "string") {
           errArr.push(e);
-        } else if (typeof e === 'object') {
+        } else if (typeof e === "object") {
           errArr.push(e.message);
           if (e.controllerStatus) {
             errArr.push(`Code: ${e.controllerStatus.code} `);
@@ -42,17 +42,20 @@ if (typeof API.constructedBase === 'undefined') {
         return errArr;
       }
 
-      window.addEventListener('error', (e) => {
+      window.addEventListener("error", (e) => {
         console.error(e);
         FPComponents.Popup_A.message(`Asynchronous error:`, buildErrorArray(e));
       });
 
-      window.addEventListener('unhandledrejection', (evt) => {
+      window.addEventListener("unhandledrejection", (evt) => {
         console.error(evt.reason);
-        FPComponents.Popup_A.message(`Asynchronous error:`, buildErrorArray(evt.reason));
+        FPComponents.Popup_A.message(
+          `Asynchronous error:`,
+          buildErrorArray(evt.reason)
+        );
       });
     };
-    window.addEventListener('load', es.init, false);
+    window.addEventListener("load", es.init, false);
 
     es.__unload = false;
 
@@ -60,7 +63,7 @@ if (typeof API.constructedBase === 'undefined') {
      * Clean up when the web page is closed
      */
     window.addEventListener(
-      'beforeunload',
+      "beforeunload",
       () => {
         es.__unload = true;
 
@@ -103,20 +106,20 @@ if (typeof API.constructedBase === 'undefined') {
     function createStatusObject(message, item = {}) {
       let r = {};
       try {
-        let msg = '';
-        if (typeof message === 'string' && message !== null) msg = message;
+        let msg = "";
+        if (typeof message === "string" && message !== null) msg = message;
         r.message = msg;
 
         if (item instanceof Error) {
           if (r.message.length <= 0) r.message = `Exception: ${item.message}`;
           else r.message += ` >>> Exception: ${item.message}`;
-        } else if (typeof item === 'string') {
+        } else if (typeof item === "string") {
           if (r.message.length <= 0) r.message = item;
           else r.message += ` >>> ${item}`;
-        } else if (item.hasOwnProperty('message')) {
+        } else if (item.hasOwnProperty("message")) {
           r = JSON.parse(JSON.stringify(item));
           r.message = msg;
-          if (typeof item.message === 'string' && item.message.length > 0)
+          if (typeof item.message === "string" && item.message.length > 0)
             r.message += ` >>> ${item.message}`;
         }
       } catch (error) {
@@ -137,9 +140,9 @@ if (typeof API.constructedBase === 'undefined') {
      */
     const isNonEmptyString = (x) => {
       if (x === null) return false;
-      if (typeof x !== 'string') return false;
-      if (x === '') return false;
-      if (x === 'undefined') return false;
+      if (typeof x !== "string") return false;
+      if (x === "") return false;
+      if (x === "undefined") return false;
 
       return true;
     };
@@ -210,20 +213,26 @@ if (typeof API.constructedBase === 'undefined') {
       // Public Domain/MIT
       var d = new Date().getTime(); //Timestamp
       var d2 =
-        (typeof performance !== 'undefined' && performance.now && performance.now() * 1000) || 0; //Time in microseconds since page-load or 0 if unsupported
-      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-        var r = Math.random() * 16; //random number between 0 and 16
-        if (d > 0) {
-          //Use timestamp until depleted
-          r = (d + r) % 16 | 0;
-          d = Math.floor(d / 16);
-        } else {
-          //Use microseconds since page-load if supported
-          r = (d2 + r) % 16 | 0;
-          d2 = Math.floor(d2 / 16);
+        (typeof performance !== "undefined" &&
+          performance.now &&
+          performance.now() * 1000) ||
+        0; //Time in microseconds since page-load or 0 if unsupported
+      return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(
+        /[xy]/g,
+        function (c) {
+          var r = Math.random() * 16; //random number between 0 and 16
+          if (d > 0) {
+            //Use timestamp until depleted
+            r = (d + r) % 16 | 0;
+            d = Math.floor(d / 16);
+          } else {
+            //Use microseconds since page-load if supported
+            r = (d2 + r) % 16 | 0;
+            d2 = Math.floor(d2 / 16);
+          }
+          return (c === "x" ? r : (r & 0x3) | 0x8).toString(16);
         }
-        return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16);
-      });
+      );
     };
 
     /**
@@ -271,7 +280,7 @@ if (typeof API.constructedBase === 'undefined') {
           if (!condition) await API.sleep(interval_ms);
         }
       } catch (e) {
-        return API.rejectWithStatus('Error while waiting for condition', e);
+        return API.rejectWithStatus("Error while waiting for condition", e);
       }
     };
 
@@ -292,7 +301,8 @@ if (typeof API.constructedBase === 'undefined') {
        * @param {function} callback -function to be called when event is triggered
        */
       on(eventName, callback) {
-        if (typeof callback !== 'function') throw new Error('callback is not a valid function');
+        if (typeof callback !== "function")
+          throw new Error("callback is not a valid function");
         const handlers = this.events[eventName] || [];
         if (handlers.includes(callback)) return;
         handlers.push(callback);
@@ -330,13 +340,13 @@ if (typeof API.constructedBase === 'undefined') {
        * @enum {string}
        */
       this.STATE = {
-        Init: 'initializing', // the controller is starting up
-        MotorsOn: 'motors_on', //motors on state
-        MotorsOff: 'motors_off', // motors off state
-        GuardStop: 'guard_stop', // stopped due to safety
-        EStop: 'emergency_stop', // emergency stop state
-        EStopR: 'emergency_stop_resetting', // emergency stop state resetting
-        SysFailure: 'system_failure', // system failure state
+        Init: "initializing", // the controller is starting up
+        MotorsOn: "motors_on", //motors on state
+        MotorsOff: "motors_off", // motors off state
+        GuardStop: "guard_stop", // stopped due to safety
+        EStop: "emergency_stop", // emergency stop state
+        EStopR: "emergency_stop_resetting", // emergency stop state resetting
+        SysFailure: "system_failure", // system failure state
       };
 
       /**
@@ -346,10 +356,10 @@ if (typeof API.constructedBase === 'undefined') {
        * @enum {string}
        */
       this.OPMODE = {
-        Auto: 'automatic',
-        Manual: 'manual',
-        ManualR: 'manual_reduced',
-        ManualFull: 'manual_full',
+        Auto: "automatic",
+        Manual: "manual",
+        ManualR: "manual_reduced",
+        ManualFull: "manual_full",
       };
 
       /**
@@ -379,8 +389,8 @@ if (typeof API.constructedBase === 'undefined') {
        */
       this.monitorOperationMode = async function (callback = null) {
         try {
-          if (typeof callback !== 'function' && callback !== null)
-            throw new Error('callback is not a valid function');
+          if (typeof callback !== "function" && callback !== null)
+            throw new Error("callback is not a valid function");
           /**
            * @alias opMode
            * @memberof API.CONTROLLER
@@ -394,7 +404,8 @@ if (typeof API.constructedBase === 'undefined') {
            * @property {boolean} isManual true if operation mode is manual reduced, false otherwise
            * This property is available only after calling API.CONTROLLER.monitorController()
            */
-          this.isManual = this.opMode === API.CONTROLLER.OPMODE.ManualR ? true : false;
+          this.isManual =
+            this.opMode === API.CONTROLLER.OPMODE.ManualR ? true : false;
 
           /**
            * @alias isAuto
@@ -402,19 +413,22 @@ if (typeof API.constructedBase === 'undefined') {
            * @property {boolean} isAuto true if operation mode is manual reduced, false otherwise
            * This property is available only after calling API.CONTROLLER.monitorController()
            */
-          this.isAuto = this.opMode === API.CONTROLLER.OPMODE.Auto ? true : false;
+          this.isAuto =
+            this.opMode === API.CONTROLLER.OPMODE.Auto ? true : false;
           const cbOpMode = function (data) {
             this.opMode = data;
             data === API.CONTROLLER.OPMODE.ManualR
               ? (this.isManual = true)
               : (this.isManual = false);
-            data === API.CONTROLLER.OPMODE.Auto ? (this.isAuto = true) : (this.isAuto = false);
+            data === API.CONTROLLER.OPMODE.Auto
+              ? (this.isAuto = true)
+              : (this.isAuto = false);
             callback && callback(data);
             API.verbose && console.log(this.opMode);
           };
-          subscribeRes('operation-mode', cbOpMode.bind(this));
+          subscribeRes("operation-mode", cbOpMode.bind(this));
         } catch (e) {
-          return API.rejectWithStatus('Failed to subscribe operation mode', e);
+          return API.rejectWithStatus("Failed to subscribe operation mode", e);
         }
       };
 
@@ -428,8 +442,8 @@ if (typeof API.constructedBase === 'undefined') {
        */
       this.monitorControllerState = async function (callback) {
         try {
-          if (typeof callback !== 'function' && callback !== null)
-            throw new Error('callback is not a valid function');
+          if (typeof callback !== "function" && callback !== null)
+            throw new Error("callback is not a valid function");
           /**
            * @alias ctrlState
            * @memberof API.CONTROLLER
@@ -443,17 +457,23 @@ if (typeof API.constructedBase === 'undefined') {
            * @property {boolean} isMotOn true if motors are on, false otherwise
            * This property is available only after calling API.CONTROLLER.monitorController()
            */
-          this.isMotOn = this.ctrlState === API.CONTROLLER.STATE.MotorsOn ? true : false;
+          this.isMotOn =
+            this.ctrlState === API.CONTROLLER.STATE.MotorsOn ? true : false;
           const cbControllerState = function (data) {
             this.ctrlState = data;
 
-            data === API.CONTROLLER.STATE.MotorsOn ? (this.isMotOn = true) : (this.isMotOn = false);
+            data === API.CONTROLLER.STATE.MotorsOn
+              ? (this.isMotOn = true)
+              : (this.isMotOn = false);
             callback && callback(data);
             API.verbose && console.log(this.ctrlState);
           };
-          subscribeRes('controller-state', cbControllerState.bind(this));
+          subscribeRes("controller-state", cbControllerState.bind(this));
         } catch (e) {
-          return API.rejectWithStatus('Failed to subscribe controller state', e);
+          return API.rejectWithStatus(
+            "Failed to subscribe controller state",
+            e
+          );
         }
       };
 
@@ -520,7 +540,7 @@ if (typeof API.constructedBase === 'undefined') {
        * @returns {Promise<string>}
        */
       this.getLanguage = async function () {
-        return await RWS.Controller.getEnvironmentVariable('$LANGUAGE');
+        return await RWS.Controller.getEnvironmentVariable("$LANGUAGE");
       };
 
       /**
@@ -537,30 +557,32 @@ if (typeof API.constructedBase === 'undefined') {
        * @param [mode] - The parameter mode indicates what kind of restart is requested.
        * @returns {Promise<{}>}
        */
-      this.restart = async function (mode = RWS.Controller.RestartModes.restart) {
+      this.restart = async function (
+        mode = RWS.Controller.RestartModes.restart
+      ) {
         try {
           await API.sleep(1000);
           await RWS.Controller.restartController(mode);
         } catch (e) {
-          return API.rejectWithStatus('Failed to restart controller', e);
+          return API.rejectWithStatus("Failed to restart controller", e);
         }
       };
     })();
 
-    var script1 = document.createElement('script');
-    script1.src = 'api/ecosystem-rws.js';
+    var script1 = document.createElement("script");
+    script1.src = "api/ecosystem-rws.js";
     document.head.appendChild(script1);
-    var script2 = document.createElement('script');
-    script2.src = 'api/ecosystem-cfg.js';
+    var script2 = document.createElement("script");
+    script2.src = "api/ecosystem-cfg.js";
     document.head.appendChild(script2);
-    var script3 = document.createElement('script');
-    script3.src = 'api/ecosystem-rapid.js';
+    var script3 = document.createElement("script");
+    script3.src = "api/ecosystem-rapid.js";
     document.head.appendChild(script3);
-    var script4 = document.createElement('script');
-    script4.src = 'api/ecosystem-motion.js';
+    var script4 = document.createElement("script");
+    script4.src = "api/ecosystem-motion.js";
     document.head.appendChild(script4);
-    var script5 = document.createElement('script');
-    script5.src = 'api/ecosystem-file.js';
+    var script5 = document.createElement("script");
+    script5.src = "api/ecosystem-file.js";
     document.head.appendChild(script5);
 
     es.constructedBase = true;
