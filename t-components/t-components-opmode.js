@@ -1,6 +1,7 @@
 'use strict';
 
 import { Component_A } from './t-components-component.js';
+import { Popup_A } from './t-components-popup.js';
 import { imgOpModeAuto, imgOpModeMan } from './img/images.js';
 
 /**

@@ -1,4 +1,4 @@
-import TComponents from '../t-components/index.js';
+// import TComponents from '../t-components/index.js';
 import { T_COMPONENTS_EXAMPLE_VERSION } from '../constants/common.js';
 
 export default class About extends TComponents.Component_A {

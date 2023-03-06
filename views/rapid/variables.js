@@ -1,4 +1,4 @@
-import TComponents from '../t-components/index.js';
+// import TComponents from '../t-components/index.js';
 
 export default class Variable extends TComponents.Component_A {
   /**

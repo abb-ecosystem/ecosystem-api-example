@@ -4,13 +4,19 @@ import { Component_A } from './t-components-component.js';
 import { Popup_A } from './t-components-popup.js';
 
 import { Button_A } from './t-components-buttons.js';
-import { imgStart, imgStop } from './img/images.js';
+import { imgStart, imgStop, imgPlayIcon, imgStopIcon } from './img/images.js';
+
+/**
+ * @typedef RapidStartStopProps
+ * @prop {boolean} [indicator] - If true (default value), the indicator is displayed. Otherwise is hidden.
+ */
 
 /**
  * Called when an instance of this component is created.
  * @class TComponents.RapidStartStop_A
  * @extends TComponents.Component_A
  * @param {HTMLElement} parent - DOM element in which this component is to be inserted
+ * @param {RapidStartStopProps} props
  * @example
  * // index.html
  * ...
@@ -22,8 +28,25 @@ import { imgStart, imgStop } from './img/images.js';
  * await btnStart.render();
  */
 export class RapidStartStop_A extends Component_A {
-  constructor(parent) {
-    super(parent);
+  constructor(parent, props) {
+    super(parent, props);
+
+    /**
+     * @type {RapidStartStopProps}
+     */
+    this._props;
+  }
+
+  /**
+   * Returns class properties default values. Notice that parent properties are not included.
+   * @alias defaultProps
+   * @memberof TComponents.RapidStartStop_A
+   * @returns {TComponents.RapidStartStopProps}
+   */
+  defaultProps() {
+    return {
+      indicator: true,
+    };
   }
 
   async onInit() {
@@ -32,11 +55,11 @@ export class RapidStartStop_A extends Component_A {
       var executionState = RWS.Rapid.getMonitor('execution');
       executionState.addCallbackOnChanged((eventData) => {
         if (eventData == 'stopped') {
-          this.find('.tc-rapid-feedback').src = imgStop;
+          if (this._props.indicator) this.find('.tc-rapid-feedback').src = imgStop;
           this.child.btnStart.enabled = true;
           this.child.btnStop.enabled = false;
         } else if (eventData == 'running') {
-          this.find('.tc-rapid-feedback').src = imgStart;
+          if (this._props.indicator) this.find('.tc-rapid-feedback').src = imgStart;
           this.child.btnStart.enabled = false;
           this.child.btnStop.enabled = true;
         }
@@ -45,6 +68,7 @@ export class RapidStartStop_A extends Component_A {
       console.log(rapidstate);
       executionState.subscribe(true);
     } catch (e) {
+      this.error = true;
       Popup_A.danger('Subscribe to failed. >>>', [e.message, e.description]);
     }
   }
@@ -53,11 +77,13 @@ export class RapidStartStop_A extends Component_A {
     return {
       btnStart: new Button_A(this.find('.tc-btn-start'), {
         callback: this.cbStart.bind(this),
-        label: 'Start',
+        label: 'Play',
+        icon: imgPlayIcon,
       }),
       btnStop: new Button_A(this.find('.tc-btn-stop'), {
         callback: this.cbStop.bind(this),
         label: 'Stop',
+        icon: imgStopIcon,
       }),
     };
   }
@@ -68,7 +94,11 @@ export class RapidStartStop_A extends Component_A {
     return `
 
           <div class="tc-container-row tc-item">
-            <img src="${imgStop}" style="width:36px ;height:36px;" class="tc-rapid-feedback tc-item"> </img>
+          ${
+            this._props.indicator
+              ? `<img src="${imgStop}" style="width:36px ;height:36px;" class="tc-rapid-feedback tc-item"> </img>`
+              : ''
+          }
             <div class="tc-btn-start tc-item"></div>
             <div class="tc-btn-stop tc-item"></div>
           </div>

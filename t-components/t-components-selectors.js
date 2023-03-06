@@ -62,7 +62,7 @@ export class Dropdown_A extends Component_A {
 
   /**
    * Update list of items, only used internally.
-   * @param {string[]} itemsList - list of paramenters
+   * @param {string[]} ilist - list of paramenters
    * @protected
    */
   _updateItemList(ilist) {
@@ -213,7 +213,7 @@ export class SelectorVariables_A extends Dropdown_A {
    * Returns class properties default values. Notice that parent properties are not included.
    * @alias defaultProps
    * @memberof TComponents.SelectorVariable_A
-   * @returns {TComponents.SelectorVariableProps}
+   * @returns {TComponents.SelectorVariablesProps}
    */
   defaultProps() {
     return {
@@ -236,7 +236,7 @@ export class SelectorVariables_A extends Dropdown_A {
       );
       this._updateItemList(vars.map((v) => v.name));
     } catch (e) {
-      console.error(e);
+      this.error = true;
       Popup_A.error(e);
     }
   }
@@ -302,7 +302,7 @@ export class SelectorProcedures_A extends Dropdown_A {
    * Returns class properties default values. Notice that parent properties are not included.
    * @alias defaultProps
    * @memberof TComponents.SelectorProcedure_A
-   * @returns {TComponents.SelectorProcedureProps}
+   * @returns {TComponents.SelectorProceduresProps}
    */
   defaultProps() {
     return {
@@ -326,7 +326,7 @@ export class SelectorProcedures_A extends Dropdown_A {
 
       this._updateItemList(procs.map((p) => p.name));
     } catch (e) {
-      console.error(e);
+      this.error = true;
       Popup_A.error(e);
     }
 
@@ -389,17 +389,20 @@ export class SelectorModules_A extends Dropdown_A {
    * Returns class properties default values. Notice that parent properties are not included.
    * @alias defaultProps
    * @memberof TComponents.SelectorModule_A
-   * @returns {TComponents.SelectorModuleProps}
+   * @returns {TComponents.SelectorModulesProps}
    */
   defaultProps() {
     return { isInUse: false, selected: '', label: '', addNoSelection: true, filter: '' };
   }
 
   async onInit() {
-    if (!this.task) this.task = await API.RAPID.getTask();
-    const modules = await this.task.searchModules(this._props.isInUse, this._props.filter);
-    this._updateItemList(modules.map((m) => m.name));
-    // await super.onInit();
+    try {
+      if (!this.task) this.task = await API.RAPID.getTask();
+      const modules = await this.task.searchModules(this._props.isInUse, this._props.filter);
+      this._updateItemList(modules.map((m) => m.name));
+    } catch (e) {
+      this.error = true;
+    }
   }
 
   /**
@@ -442,8 +445,11 @@ export class SelectorEthernetIPDevices_A extends Dropdown_A {
   }
 
   async onInit() {
-    this._updateItemList(await API.DEVICE.searchEthernetIPDevices());
-    // await super.onInit();
+    try {
+      this._updateItemList(await API.DEVICE.searchEthernetIPDevices());
+    } catch (e) {
+      this.error = true;
+    }
   }
 
   /**
@@ -514,8 +520,11 @@ export class SelectorSignals_A extends Dropdown_A {
   }
 
   async onInit() {
-    this._updateItemList(await API.SIGNAL.search(this._props.filter, true));
-    // await super.onInit();
+    try {
+      this._updateItemList(await API.SIGNAL.search(this._props.filter, true));
+    } catch (e) {
+      this.error = true;
+    }
   }
 
   /**

@@ -1,7 +1,7 @@
-import TComponents from '../t-components/index.js';
+// import TComponents from '../t-components/index.js';
 import Module from './module.js';
 
-import { moduleName, modulePath } from '../constants/common.js';
+import { moduleName, modulePath } from '../../constants/common.js';
 
 export default class Procedure extends TComponents.Component_A {
   /**
@@ -11,16 +11,19 @@ export default class Procedure extends TComponents.Component_A {
    */
   constructor(parent, module = null) {
     super(parent, { options: { async: true } });
+    this.checkboxIsSR = new FPComponents.Checkbox_A();
+    this._isSR = false;
   }
 
   async onInit() {
-    this.task = await API.RAPID.getTask();
-
-    this.checkboxIsSR = new FPComponents.Checkbox_A();
-    this._isSR = false;
+    try {
+      this.task = await API.RAPID.getTask();
+      this.checkboxIsSR.onclick = this.cbIsSR.bind(this);
+    } catch (e) {
+      this.error = true;
+    }
 
     this.checkboxIsSR.desc = 'run as service routine';
-    this.checkboxIsSR.onclick = this.cbIsSR.bind(this);
   }
 
   mapComponents() {

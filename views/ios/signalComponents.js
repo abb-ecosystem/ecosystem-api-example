@@ -1,22 +1,34 @@
-import TComponents from '../t-components/index.js';
-
-const ToggleImg = 'assets/img/arrows-clockwise-fill.svg';
+// import TComponents from '../t-components/index.js';
+import { imgToggle } from '../../constants/images.js';
 
 export default class SignalComponents extends TComponents.Component_A {
-  constructor(parent, signal = '') {
-    super(parent);
-    /**
-     * @type {API.SIGNAL.Signal | string}
-     */
-    this._signal = signal;
+  constructor(parent, props) {
+    super(parent, props);
+
+    this.initPropsDependencies = ['signal'];
+  }
+
+  defaultProps() {
+    return {
+      signal: '',
+    };
   }
 
   async onInit() {
-    try {
-      if (typeof this._signal === 'string') this._signal = await API.SIGNAL.getSignal(this._signal);
-    } catch (e) {
-      // silently ignore
+    if (!this._props.signal) {
+      this.error = true;
+      return;
     }
+    console.log('😎 - SignalComponents onInit...', this._props.signal, this.error);
+    try {
+      this._signal =
+        typeof this._props.signal === 'string'
+          ? await API.SIGNAL.getSignal(this._props.signal)
+          : this._props.signal;
+    } catch (e) {
+      this.error = true;
+    }
+    console.log('😎 - SignalComponents onInit finished...', this.error);
   }
 
   mapComponents() {
@@ -32,7 +44,7 @@ export default class SignalComponents extends TComponents.Component_A {
           !v ? this._signal.setValue(1) : this._signal.setValue(0);
         },
         label: 'Toggle',
-        icon: ToggleImg,
+        icon: imgToggle,
       });
       components['switch'] = new TComponents.SwitchSignal_A(this.find('.switch-button'), {
         signal: this._signal,
@@ -44,7 +56,7 @@ export default class SignalComponents extends TComponents.Component_A {
   onRender() {
     this.backgroundColor('white');
 
-    // console.log('😎😎😎😎😎 - SignalComponents finished rendering...');
+    console.log('😎😎😎😎😎 - SignalComponents finished rendering...');
   }
 
   markup() {
@@ -57,14 +69,7 @@ export default class SignalComponents extends TComponents.Component_A {
     `;
   }
 
-  set signal(name) {
-    (async () => {
-      try {
-        this._signal = await API.SIGNAL.getSignal(name);
-      } catch (e) {
-        this._signal = undefined;
-      }
-      this.render();
-    })();
+  set signal(signal) {
+    this.setProps({ signal });
   }
 }

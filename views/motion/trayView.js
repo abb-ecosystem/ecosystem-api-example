@@ -1,6 +1,6 @@
-import TComponents from '../t-components/index.js';
-import { imgTray } from '../constants/images.js';
-import { imgPickStragety } from '../constants/images.js';
+// import TComponents from '../t-components/index.js';
+import { imgTray } from '../../constants/images.js';
+import { imgPickStragety } from '../../constants/images.js';
 
 export default class TrayView extends TComponents.Component_A {
   constructor(parent, name, module, tray1, tray2, tray3, tray4, trayGrip, trayApproach, trayExit) {

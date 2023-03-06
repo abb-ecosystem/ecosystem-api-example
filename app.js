@@ -1,7 +1,7 @@
-import TComponents from './t-components/index.js';
-import RapidView from './views/rapid.js';
-import TrayView from './views/trayView.js';
-import IoView from './views/ios.js';
+// import TComponents from './t-components/index.js';
+import RapidView from './views/rapid/rapid.js';
+import TrayView from './views/motion/trayView.js';
+import IoView from './views/ios/ios.js';
 import TComponentsView from './views/tComponentsView.js';
 import About from './views/about.js';
 
@@ -16,31 +16,33 @@ export default class App extends TComponents.Component_A {
   }
 
   async onInit() {
-    const task = await API.RAPID.getTask();
-    const modules = await task.searchModules();
-    const moduleFound = modules.some((module) => module.name === moduleName);
-    if (!moduleFound) {
-      this.error = true;
-      TComponents.Popup_A.confirm(
-        `${moduleName} module not yet loaded on the controller`,
-        ['This module is required for this WebApp.', 'Do you want to load the module?'],
-        this.cbConfirmLoadModule.bind(this)
-      );
-    }
+    try {
+    } catch (e) {
+      const task = await API.RAPID.getTask();
+      const modules = await task.searchModules();
+      const moduleFound = modules.some((module) => module.name === moduleName);
+      if (!moduleFound) {
+        this.error = true;
+        TComponents.Popup_A.confirm(
+          `${moduleName} module not yet loaded on the controller`,
+          ['This module is required for this WebApp.', 'Do you want to load the module?'],
+          this.cbConfirmLoadModule.bind(this)
+        );
+      }
 
-    const signalFound = await API.SIGNAL.search({ name: 'di_is_gripper_closed' }, true);
-    console.log('😊', signalFound);
-    if (signalFound.length === 0) {
-      this.error = true;
-      TComponents.Popup_A.confirm(
-        `Required signals not yet loaded on the controller`,
-        [
-          'Youl can load a demo singal configuration.',
-          'A system restart will be executed.',
-          'Do you want to proceed?',
-        ],
-        this.cbConfirmLoadConfiguration.bind(this)
-      );
+      const signalFound = await API.SIGNAL.search({ name: 'di_is_gripper_closed' }, true);
+      if (signalFound.length === 0) {
+        this.error = true;
+        TComponents.Popup_A.confirm(
+          `Required signals not yet loaded on the controller`,
+          [
+            'Youl can load a demo singal configuration.',
+            'A system restart will be executed.',
+            'Do you want to proceed?',
+          ],
+          this.cbConfirmLoadConfiguration.bind(this)
+        );
+      }
     }
   }
 

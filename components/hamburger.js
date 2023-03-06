@@ -1,4 +1,4 @@
-import TComponents from '../t-components/index.js';
+// import TComponents from '../t-components/index.js';
 
 /**
  * @brief Hamburger menu componet

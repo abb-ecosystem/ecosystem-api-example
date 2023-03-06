@@ -100,7 +100,8 @@ export class SignalView_A extends Component_A {
 
       this._signal.modified ? (this.modified = true) : (this.modified = false);
     } catch (e) {
-      Popup_A.error(e);
+      this.error = true;
+      Popup_A.error(e, 'SignalView_A');
     }
   }
 
@@ -111,17 +112,19 @@ export class SignalView_A extends Component_A {
    * @returns {object} Contains all child TComponents instances used within the component.
    */
   mapComponents() {
-    return {
+    const children = {
       indicator: new SignalIndicator_A(this.find(`.tc-signal-view-ind`), {
         signal: this._signal ? this._signal.name : '',
         readOnly: true,
       }),
-      switch: this._props.control
-        ? new SwitchSignal_A(this.find('.tc-signal-view-switch'), {
-            signal: this._signal ? this._signal.name : '',
-          })
-        : '',
     };
+
+    if (this._props.control)
+      children.switch = new SwitchSignal_A(this.find('.tc-signal-view-switch'), {
+        signal: this._signal ? this._signal.name : '',
+      });
+
+    return children;
   }
 
   /**
@@ -136,7 +139,6 @@ export class SignalView_A extends Component_A {
 
     this._device = this.find(`.tc-signal-view-device`);
     this._btnEdit = this.find(`.tc-edit-btn`);
-    this._FPCompAttached = true;
     this._msg = this.find(`.${this._id}`).querySelector('.message');
     this.modified
       ? this._msg.classList.add('tc-warning')
@@ -155,7 +157,7 @@ export class SignalView_A extends Component_A {
             <div class="tc-signal-view-ind tc-signalview-ind tc-item"></div>
             <div class="tc-signal-view-switch tc-signalview-switch tc-item"></div>
             <p class="tc-signalview-name tc-item">${
-              this._props.signal ? _signal.name : 'No signal detected'
+              this._props.signal && _signal ? _signal.name : 'No signal detected'
             }</p>
             <p class="tc-signal-view-device tc-signalview-device tc-item message">${
               this._props.signal && _signal.device ? _signal.device : ''
@@ -257,7 +259,7 @@ export class SignalView_A extends Component_A {
    * @returns {HTMLElement} - Button element
    */
   getEditButton() {
-    return this._props.edit ? this.find(`.tc-edit-btn`) : null;
+    return this.find(`.tc-edit-btn`);
   }
 }
 

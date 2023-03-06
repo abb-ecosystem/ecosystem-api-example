@@ -1,4 +1,4 @@
-import TComponents from '../t-components/index.js';
+// import TComponents from '../t-components/index.js';
 import SignalExamples from './signalExamples.js';
 import SignalConfigurator from './signalConfigurator.js';
 

@@ -1,4 +1,8 @@
 import App from "./app.js";
+import Module from "./module.js";
+import Test from "./test.js";
+
+import playground from "./playground.js";
 
 /**
  * Start loading the app file. Put all of
@@ -13,7 +17,7 @@ window.addEventListener("load", async function () {
   const locale = await API.CONTROLLER.getLanguage();
   console.log(`Current language: ${locale}`);
 
-  API.RAPID.monitorExecutionState((value) => {
+  let monitor = API.RAPID.monitorExecutionState((value) => {
     console.log(`monitorExecutionState : ${value}`);
   });
   API.CONTROLLER.monitorOperationMode((value) => {

@@ -44,6 +44,18 @@ export class Base_A extends Eventing_A {
   }
 
   /**
+   * @alias props
+   * @memberof Base_A
+   */
+  get props() {
+    return this.getProps();
+  }
+
+  set props(props) {
+    this.setProps(props);
+  }
+
+  /**
    * Returns an object with expected input properties together with their initial value.
    * Every child class shall have a {@link defaultProps} to register its corresponding input properties.
    * @alias defaultProps

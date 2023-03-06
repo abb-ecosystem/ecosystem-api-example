@@ -96,7 +96,11 @@ export class Component_A extends Base_A {
        */
       this.enabled = true;
 
-      await this.onInit();
+      try {
+        await this.onInit();
+      } catch (e) {
+        this.error = true;
+      }
 
       return await this.render();
     } catch (e) {
@@ -186,18 +190,19 @@ export class Component_A extends Base_A {
             `Promise detected but not expected at ${this._compId} mapComponent element ${key}...`
           );
 
-        value._parentComponent = this._compId;
-
-        const sort = (value) => {
-          value._props.options.async ? acc[0].push(value) : acc[1].push(value);
+        const sortComponent = (value) => {
+          if (value instanceof Component_A) {
+            value._parentComponent = this._compId;
+            value._props.options.async ? acc[0].push(value) : acc[1].push(value);
+          }
         };
-
-        value instanceof Component_A && sort(value);
 
         if (Array.isArray(value)) {
           value.forEach((v) => {
-            sort(v);
+            sortComponent(v);
           });
+        } else {
+          sortComponent(value);
         }
         return acc;
       },
@@ -326,7 +331,7 @@ export class Component_A extends Base_A {
    * @alias find
    * @memberof TComponents.Component_A
    * @param {string} selector - A string containing one selector to match. This string must be a valid CSS selector string
-   * @returns {HTMLElement} An Element object representing the first element wthin the component that matches the specified set of CSS selectors, or null is returned if there are no matches.
+   * @returns {Element} An Element object representing the first element wthin the component that matches the specified set of CSS selectors, or null is returned if there are no matches.
    */
   find(selector) {
     const el = this.template.content.querySelector(selector);
@@ -339,7 +344,7 @@ export class Component_A extends Base_A {
    * @alias all
    * @memberof TComponents.Component_A
    * @param {string} selector - A string containing one selector to match. This string must be a valid CSS selector string
-   * @returns {HTMLElement[]} An Array of Elements that matches the specified CSS selector, or empty array is returned if there are no matches.
+   * @returns {Element[]} An Array of Elements that matches the specified CSS selector, or empty array is returned if there are no matches.
    */
   all(selector) {
     var aContainer = Array.from(this.container.querySelectorAll(selector));

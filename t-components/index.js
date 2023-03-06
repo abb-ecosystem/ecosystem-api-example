@@ -1,6 +1,6 @@
-import { Base_A } from "./t-components-base.js";
-import { Component_A } from "./t-components-component.js";
-import { Popup_A } from "./t-components-popup.js";
+import { Base_A } from './t-components-base.js';
+import { Component_A } from './t-components-component.js';
+import { Popup_A } from './t-components-popup.js';
 
 import {
   Button_A,
@@ -11,14 +11,10 @@ import {
   ButtonTeach_A,
   ButtonTeachMove_A,
   ButtonVariable_A,
-} from "./t-components-buttons.js";
-import { Digital_A, SignalIndicator_A } from "./t-components-digital.js";
-import { Input_A, InputVariable_A } from "./t-components-inputs.js";
-import {
-  Switch_A,
-  SwitchSignal_A,
-  SwitchVariable_A,
-} from "./t-components-switches.js";
+} from './t-components-buttons.js';
+import { Digital_A, SignalIndicator_A } from './t-components-digital.js';
+import { Input_A, InputVariable_A } from './t-components-inputs.js';
+import { Switch_A, SwitchSignal_A, SwitchVariable_A } from './t-components-switches.js';
 import {
   Dropdown_A,
   SelectorVariables_A,
@@ -26,33 +22,33 @@ import {
   SelectorModules_A,
   SelectorEthernetIPDevices_A,
   SelectorSignals_A,
-} from "./t-components-selectors.js";
-import { ModalWindow_A } from "./t-components-modalwindow.js";
-import { MotorsOnOff_A } from "./t-components-motorsonoff.js";
-import { OpMode_A } from "./t-components-opmode.js";
-import { RapidStartStop_A } from "./t-components-rapidstartstop.js";
-import { SignalView_A } from "./t-components-signalview.js";
-import { SignalEdit_A } from "./t-components-signaledit.js";
-import { TemplateView_A } from "./t-components-templateview.js";
-import { VarIncrDecr_A } from "./t-components-varincrdecr.js";
+} from './t-components-selectors.js';
+import { ModalWindow_A } from './t-components-modalwindow.js';
+import { MotorsOnOff_A } from './t-components-motorsonoff.js';
+import { OpMode_A } from './t-components-opmode.js';
+import { RapidStartStop_A } from './t-components-rapidstartstop.js';
+import { SignalView_A } from './t-components-signalview.js';
+import { SignalEdit_A } from './t-components-signaledit.js';
+import { TemplateView_A } from './t-components-templateview.js';
+import { VarIncrDecr_A } from './t-components-varincrdecr.js';
 
-export * from "./t-components-base.js";
-export * from "./t-components-buttons.js";
-export * from "./t-components-digital.js";
-export * from "./t-components-inputs.js";
-export * from "./t-components-modalwindow.js";
-export * from "./t-components-motorsonoff.js";
-export * from "./t-components-opmode.js";
-export * from "./t-components-rapidstartstop.js";
-export * from "./t-components-selectors.js";
-export * from "./t-components-signaledit.js";
-export * from "./t-components-signalview.js";
-export * from "./t-components-switches.js";
-export * from "./t-components-templateview.js";
-export * from "./t-components-varincrdecr.js";
-export * from "./img/images.js";
+export * from './t-components-base.js';
+export * from './t-components-buttons.js';
+export * from './t-components-digital.js';
+export * from './t-components-inputs.js';
+export * from './t-components-modalwindow.js';
+export * from './t-components-motorsonoff.js';
+export * from './t-components-opmode.js';
+export * from './t-components-rapidstartstop.js';
+export * from './t-components-selectors.js';
+export * from './t-components-signaledit.js';
+export * from './t-components-signalview.js';
+export * from './t-components-switches.js';
+export * from './t-components-templateview.js';
+export * from './t-components-varincrdecr.js';
+export * from './img/images.js';
 
-const T_COMPONENTS_BASE_VERSION = "0.5";
+const T_COMPONENTS_BASE_VERSION = '0.5';
 
 const TComponents = {};
 TComponents.version = T_COMPONENTS_BASE_VERSION;

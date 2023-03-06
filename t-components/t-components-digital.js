@@ -54,11 +54,6 @@ export class Digital_A extends Component_A {
     };
   }
 
-  /**
-   * Contains component specific asynchronous implementation (like access to controller).
-   * This method is called internally during initialization process orchestrated by {@link init() init}.
-   * @private
-   */
   onRender() {
     this.label = this._props.label;
     this._dig.onclick = this.cbOnClick.bind(this);
@@ -79,7 +74,7 @@ export class Digital_A extends Component_A {
    * @memberof TComponents.Digital_A
    */
   get label() {
-    return this._dig.text;
+    return this._dig.desc;
   }
 
   /**
@@ -216,8 +211,8 @@ export class SignalIndicator_A extends Digital_A {
   /**
    * Callback function which is called when the indicatoer is pressed, it trigger any function registered with {@link TComponents.Digital_A.onClick() onClick}
    * @alias cbOnClick
-   * @memberof TComponents.Button_A
-   * @protected
+   * @memberof TComponents.Digital_A
+   * @private
    * @async
    */
   async cbOnClick() {

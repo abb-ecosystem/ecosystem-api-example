@@ -1,4 +1,4 @@
-import TComponents from '../t-components/index.js';
+// import TComponents from '../t-components/index.js';
 
 export default class SignalContainer extends TComponents.Component_A {
   constructor(parent, signals) {
@@ -14,11 +14,8 @@ export default class SignalContainer extends TComponents.Component_A {
     this._signalsData.forEach(async (s) => {
       try {
         if (typeof s === 'string') s = await API.SIGNAL.getSignal(s);
-        else if (!s || (typeof s === 'object' && s.constructor.name !== 'Signal'))
-          throw new Error(
-            'API.SIGNALS.Signal instance or signal name expected but not detected...'
-          );
       } catch (e) {
+        this.error = true;
         TComponents.Popup_A.danger('Signal Container', [e.message, e.description]);
       }
     });

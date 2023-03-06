@@ -110,9 +110,9 @@ declare namespace API {
     function updateCrossConnectionAttributes(attr: any): Promise<any>;
     function deleteCrossConnection(name: string);
 
-    function fetchAllInstancesOfType(type: TYPE): Promise<object>;
-    function fetchAllCrossConnections(): Promise<object>;
-    function fetchAllSignals(): Promise<object>;
+    function fetchAllInstancesOfType(type: TYPE): Promise<object[]>;
+    function fetchAllCrossConnections(): Promise<object[]>;
+    function fetchAllSignals(): Promise<object[]>;
   }
 
   namespace DEVICE {

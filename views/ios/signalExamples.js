@@ -1,26 +1,24 @@
-import TComponents from '../t-components/index.js';
+// import TComponents from '../t-components/index.js';
 import SignalComponents from './signalComponents.js';
 
-import { configPath, configName } from '../constants/common.js';
+import { configPath, configName } from '../../constants/common.js';
 
 export default class SignalExamples extends TComponents.Component_A {
   constructor(parent) {
     super(parent);
+
+    this._deviceSelected = '';
+    this._signalSelected = '';
+    this._filter = {};
   }
 
   async onInit() {
     try {
       const devices = await API.DEVICE.searchEthernetIPDevices();
-
-      this._deviceSelected = '';
-      this._filter = {
-        // device: devices[0],
-      };
       const signals = await API.SIGNAL.search(this._filter, true);
-
-      this._signalSelected = '';
       this._signal = await API.SIGNAL.getSignal(signals[0]);
     } catch (e) {
+      this.error = true;
       TComponents.Popup_A.danger('SignalComponents', [e.message, e.description]);
     }
   }
@@ -86,11 +84,13 @@ export default class SignalExamples extends TComponents.Component_A {
     if (this.child.signalSelector.selected)
       this._signal = await API.SIGNAL.getSignal(this.child.signalSelector.selected);
     this._signalSelected = this.child.signalSelector.selected;
-    this.render();
+    // this.render();
   }
 
   async cbSignalSelector(selected) {
     this._signalSelected = selected;
+    console.log('😃', selected);
+
     this.child.signalComponents.signal = selected;
   }
 

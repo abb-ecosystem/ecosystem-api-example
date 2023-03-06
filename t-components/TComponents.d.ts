@@ -344,8 +344,11 @@ declare namespace TComponents {
     ): void;
   }
 
+  interface RapidStartStopProps {
+    indicator?: boolean;
+  }
   class RapidStartStop_A extends Component_A {
-    constructor(parent: HTMLElement);
+    constructor(parent: HTMLElement, props: RapidStartStopProps);
     cbStart(): Promise<void>;
     cbStop(): Promise<void>;
   }

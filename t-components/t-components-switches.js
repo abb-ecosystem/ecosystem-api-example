@@ -68,15 +68,12 @@ export class Switch_A extends Component_A {
    * Component label text
    * @alias label
    * @type {string}
-   * @memberof TComponents.Button_A
+   * @memberof TComponents.Switch_A
    */
   get label() {
     return this._switch.desc;
   }
 
-  /**
-   * @protected
-   */
   set label(label) {
     this.setProps({ label });
     this._switch.desc = label;
@@ -123,7 +120,7 @@ export class Switch_A extends Component_A {
   /**
    * Adds a callback funciton to the component. This will be called after the button is pressed and released
    * @alias onChange
-   * @memberof TComponents.Button_A
+   * @memberof TComponents.Switch_A
    * @param   {function}  func    The callback function which is called when the button is pressed
    */
   onChange(func) {
@@ -133,9 +130,9 @@ export class Switch_A extends Component_A {
   /**
    * Callback function which is called when the button is pressed, it trigger any function registered with {@link onChange() onChange}
    * @alias cbOnChange
-   * @memberof TComponents.Button_A
+   * @memberof TComponents.Switch_A
    * @param   {any}  value
-   * @protected
+   * @private
    * @async
    */
   async cbOnChange(value) {
@@ -214,7 +211,7 @@ export class SwitchVariable_A extends Switch_A {
           `TComponents.SwitchVariable_A : ${this._props.variable} is not a bool variable`
         );
     } catch (e) {
-      console.error(e);
+      this.error = true;
       Popup_A.error(e);
     }
   }

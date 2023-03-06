@@ -1,4 +1,4 @@
-import TComponents from '../t-components/index.js';
+// import TComponents from '../t-components/index.js';
 
 export default class Module extends TComponents.Component_A {
   constructor(parent, path, name, isSysmodule = true) {
@@ -6,23 +6,27 @@ export default class Module extends TComponents.Component_A {
     this.path = path.replace(/\:$/, '');
     this.name = name;
     this.extension = isSysmodule ? '.sysx' : '.modx';
-  }
-
-  async onInit() {
-    const task = await API.RAPID.getTask();
-    const modules = await task.searchModules();
 
     this.btnLoadModule = new FPComponents.Button_A();
     this.btnUnloadModule = new FPComponents.Button_A();
+  }
 
-    this.btnLoadModule.onclick = this.load.bind(this);
-    this.btnUnloadModule.onclick = this.unload.bind(this);
+  async onInit() {
+    try {
+      const task = await API.RAPID.getTask();
+      const modules = await task.searchModules();
 
-    this.btnLoadModule.text = 'Load Module';
-    this.btnUnloadModule.text = 'Unload Module';
+      this.btnLoadModule.onclick = this.load.bind(this);
+      this.btnUnloadModule.onclick = this.unload.bind(this);
+    } catch (e) {
+      this.error = true;
+    }
   }
 
   onRender() {
+    this.btnLoadModule.text = 'Load Module';
+    this.btnUnloadModule.text = 'Unload Module';
+
     this.btnLoadModule.attachToElement(this.find('.load-module'));
     this.btnUnloadModule.attachToElement(this.find('.unload-module'));
   }

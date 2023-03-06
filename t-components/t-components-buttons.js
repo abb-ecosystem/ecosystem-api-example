@@ -76,9 +76,6 @@ export class Button_A extends Component_A {
     return this._btn.text;
   }
 
-  /**
-   * @protected
-   */
   set label(text) {
     this._props.label = text;
     this._btn.text = text;
@@ -115,7 +112,7 @@ export class Button_A extends Component_A {
    * @alias cbOnClick
    * @memberof TComponents.Button_A
    * @param   {any}  value
-   * @protected
+   * @private
    * @async
    */
   async cbOnClick(value) {
@@ -666,7 +663,7 @@ export class ButtonMoveTo_A extends Button_A {
       module: '',
       tool: '',
       wobj: '',
-      coords: API.MOTION.Current,
+      coords: API.MOTION.COORDS.Current,
     };
   }
 
@@ -722,7 +719,7 @@ export class ButtonMoveTo_A extends Button_A {
       try {
         this._isJogging = true;
 
-        const props = {
+        let props = {
           jogMode: API.MOTION.JOGMODE.GoToPos,
           jogData: jogData,
           robtarget: this._value,
@@ -730,8 +727,6 @@ export class ButtonMoveTo_A extends Button_A {
         if (this._props.tool) props = Object.assign({ props }, { tool: this._props.tool });
         if (this._props.wobj) props = Object.assign({ props }, { wobj: this._props.wobj });
         if (this._props.coords) props = Object.assign({ props }, { coords: this._props.coords });
-
-        console.log('😚', props);
 
         await API.MOTION.executeJogging(props);
 
@@ -813,7 +808,7 @@ export class ButtonAlign_A extends Button_A {
     return {
       tool: '',
       wobj: '',
-      coords: API.MOTION.Current,
+      coords: API.MOTION.COORDS.Current,
     };
   }
 
@@ -843,8 +838,6 @@ export class ButtonAlign_A extends Button_A {
       if (this._props.tool) props = Object.assign({ props }, { tool: this._props.tool });
       if (this._props.wobj) props = Object.assign({ props }, { wobj: this._props.wobj });
       if (this._props.coords) props = Object.assign({ props }, { coords: this._props.coords });
-
-      console.log('😚', props);
 
       try {
         this._isJogging = true;

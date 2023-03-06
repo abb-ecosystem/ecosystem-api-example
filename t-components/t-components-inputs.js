@@ -185,9 +185,9 @@ export class Input_A extends Component_A {
   /**
    * Callback function which is called when the button is pressed, it trigger any function registered with {@link onChange() onChange}
    * @alias cbOnChange
-   * @memberof TComponents.Button_A
+   * @memberof TComponents.Input_A
    * @param   {any}  value
-   * @protected
+   * @private
    * @async
    */
   async cbOnChange(value) {
@@ -269,7 +269,7 @@ export class InputVariable_A extends Input_A {
         this.regex = /^-?[0-9]+(\.[0-9]+)?$/;
       if (this.varElement.type === 'bool') this.regex = /^([Tt][Rr][Uu][Ee]|[Ff][Aa][Ll][Ss][Ee])$/;
     } catch (e) {
-      console.error(e);
+      this.error = true;
       Popup_A.error(e, 'TComponents.InputVariable_A.onInit');
     }
   }

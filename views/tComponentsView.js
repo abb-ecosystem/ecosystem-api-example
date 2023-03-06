@@ -1,4 +1,4 @@
-import TComponents from '../t-components/index.js';
+// import TComponents from '../t-components/index.js';
 
 export default class TComponentsView extends TComponents.Component_A {
   constructor(parent, name = 'TComponents') {
@@ -197,7 +197,7 @@ export default class TComponentsView extends TComponents.Component_A {
         label: 'trigger modal window',
       }),
       templateComp: templateComp,
-      btnStart: new TComponents.RapidStartStop_A(this.find('.controls-all')),
+      btnStart: new TComponents.RapidStartStop_A(this.find('.controls-all'), { indicator: false }),
 
       switchMotors: new TComponents.MotorsOnOff_A(this.find('.controls-all'), {
         // label: 'Motor',

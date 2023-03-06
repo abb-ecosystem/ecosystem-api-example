@@ -1,11 +1,11 @@
-import TComponents from '../t-components/index.js';
+// import TComponents from '../t-components/index.js';
+import Hamburger from '../../components/hamburger.js';
 import Procedure from './procedures.js';
 import Variable from './variables.js';
-import Hamburger from '../components/hamburger.js';
 import SettingsView from './settingsView.js';
 
-import { imgVar, imgProc, imgSettings } from '../constants/images.js';
-import { moduleName, modulePath } from '../constants/common.js';
+import { imgVar, imgProc, imgSettings } from '../../constants/images.js';
+import { moduleName, modulePath } from '../../constants/common.js';
 
 export default class RapidView extends TComponents.Component_A {
   constructor(parent) {

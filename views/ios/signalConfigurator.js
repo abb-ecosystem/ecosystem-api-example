@@ -1,4 +1,4 @@
-import TComponents from '../t-components/index.js';
+// import TComponents from '../t-components/index.js';
 import SignalContainer from './signalContainer.js';
 
 export default class SignalConfigurator extends TComponents.Component_A {
@@ -7,15 +7,19 @@ export default class SignalConfigurator extends TComponents.Component_A {
   }
 
   async onInit() {
-    this._devices = await API.DEVICE.searchEthernetIPDevices();
+    try {
+      this._devices = await API.DEVICE.searchEthernetIPDevices();
 
-    this._deviceSelected = this._devices[0];
-    this._filter = {
-      device: this._deviceSelected,
-    };
+      this._deviceSelected = this._devices[0];
+      this._filter = {
+        device: this._deviceSelected,
+      };
 
-    this.diSignals = await API.SIGNAL.searchByType('DI', this._deviceSelected);
-    this.doSignals = await API.SIGNAL.searchByType('DO', this._deviceSelected);
+      this.diSignals = await API.SIGNAL.searchByType('DI', this._deviceSelected);
+      this.doSignals = await API.SIGNAL.searchByType('DO', this._deviceSelected);
+    } catch (e) {
+      this.error = true;
+    }
   }
 
   mapComponents() {

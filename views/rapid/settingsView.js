@@ -1,5 +1,5 @@
-import TComponents from '../t-components/index.js';
-import { imgTray } from '../constants/images.js';
+// import TComponents from '../t-components/index.js';
+import { imgTray } from '../../constants/images.js';
 
 export default class SettingsView extends TComponents.Component_A {
   constructor(parent, module, nrParts, rows, columns, currentPart, simMachine) {

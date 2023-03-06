@@ -99,6 +99,7 @@ if (typeof API.constructedCfg === 'undefined') {
        * Create a SIGNAL configuraiton instance with attributes
        * @alias createSignalInstance
        * @memberof API.CONFIG
+       * @returns {Promise{any}} - A Promise which is empty if it resolves and contains a status if it is rejected.
        */
       this.createSignalInstance = async function (attr) {
         try {
@@ -109,6 +110,12 @@ if (typeof API.constructedCfg === 'undefined') {
         }
       };
 
+      /**
+       * Create a Cross-Conneciton configuraiton instance with attributes
+       * @alias createCrossConnectionInstance
+       * @memberof API.CONFIG
+       * @returns {Promise{any}} - A Promise which is empty if it resolves and contains a status if it is rejected.
+       */
       this.createCrossConnectionInstance = async function (attr) {
         try {
           await RWS.CFG.createInstance(API.CONFIG.DOMAIN.EIO, API.CONFIG.TYPE.CROSS, attr.Name);
@@ -118,6 +125,13 @@ if (typeof API.constructedCfg === 'undefined') {
         }
       };
 
+      /**
+       * Updates attributes of a signal instance in the configuration data-base.
+       * The attributes Object should only contain valid members, i.e. attributes valid for the instance’s specific Type, and the corresponding values.
+       * @alias updateSignalAttributes
+       * @memberof API.CONFIG
+       * @returns {Promise{object}} - A Promise with an instance object
+       */
       this.updateSignalAttributes = async function (attr) {
         if (attr.Device === '') {
           console.log('Device is a empty string...');
@@ -134,6 +148,13 @@ if (typeof API.constructedCfg === 'undefined') {
         );
       };
 
+      /**
+       * Updates attributes of a cross-connection instance in the configuration data-base.
+       * The attributes Object should only contain valid members, i.e. attributes valid for the instance’s specific Type, and the corresponding values.
+       * @alias updateCrossConnectionAttributes
+       * @memberof API.CONFIG
+       * @returns {Promise{object}} - A Promise with an instance object
+       */
       this.updateCrossConnectionAttributes = async function (attr) {
         await RWS.CFG.updateAttributesByName(
           API.CONFIG.DOMAIN.EIO,
@@ -143,35 +164,48 @@ if (typeof API.constructedCfg === 'undefined') {
         );
       };
 
+      /**
+       * Get all instances on a type
+       * @alias fetchAllInstancesOfType
+       * @memberof API.CONFIG
+       * @returns {Promise{object[]}} - A Promise with an list of objects
+       */
       this.fetchAllInstancesOfType = async function (type) {
         try {
           const instances = await RWS.CFG.getInstances(API.CONFIG.DOMAIN.EIO, type);
           return instances;
-        } catch (err) {
-          console.error(err);
-          return undefined;
+        } catch (e) {
+          return API.rejectWithStatus(`Failed to fetch instances of type ${type}`, e);
         }
       };
 
+      /**
+       * Get all cross-connection instances
+       * @alias fetchAllCrossConnections
+       * @memberof API.CONFIG
+       * @returns {Promise{object[]}} - A Promise with an list of objects
+       */
       this.fetchAllCrossConnections = async function () {
-        try {
-          return await this.fetchAllInstancesOfType(API.CONFIG.TYPE.CROSS);
-        } catch (err) {
-          console.error(err);
-          throw err;
-        }
+        return await this.fetchAllInstancesOfType(API.CONFIG.TYPE.CROSS);
       };
 
+      /**
+       * Get all signal instances
+       * @alias fetchAllSignals
+       * @memberof API.CONFIG
+       * @returns {Promise{object[]}} - A Promise with an list of objects
+       */
       this.fetchAllSignals = async function () {
-        try {
-          return await this.fetchAllInstancesOfType(API.CONFIG.TYPE.SIGNAL);
-        } catch (err) {
-          console.error(err);
-          throw err;
-        }
+        return await this.fetchAllInstancesOfType(API.CONFIG.TYPE.SIGNAL);
       };
 
-      // ToDo: handle reject
+      /**
+       * Delete a cross-conneciton instance from the configuration data-base.
+       * @alias deleteCrossConnection
+       * @memberof API.CONFIG
+       * @returns {Promise{any}} - A Promise which is empty if it resolves and contains a status if it is rejected.
+       * @private
+       */
       this.deleteCrossConnection = async function (name) {
         return await API.RWS.CFG.deleteConfigInstance(
           name,
@@ -180,7 +214,13 @@ if (typeof API.constructedCfg === 'undefined') {
         );
       };
 
-      // ToDo: handle reject
+      /**
+       * Delete a signal instance from the configuration data-base.
+       * @alias deleteSignal
+       * @memberof API.CONFIG
+       * @returns {Promise{any}} - A Promise which is empty if it resolves and contains a status if it is rejected.
+       * @private
+       */
       this.deleteSignal = async function (name) {
         return await API.RWS.CFG.deleteConfigInstance(
           name,
