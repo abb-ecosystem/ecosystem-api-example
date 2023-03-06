@@ -37,6 +37,7 @@ import { TemplateView_A } from "./t-components-templateview.js";
 import { VarIncrDecr_A } from "./t-components-varincrdecr.js";
 
 export * from "./t-components-base.js";
+export * from "./t-components-component.js";
 export * from "./t-components-buttons.js";
 export * from "./t-components-digital.js";
 export * from "./t-components-inputs.js";
