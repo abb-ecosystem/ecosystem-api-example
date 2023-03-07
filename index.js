@@ -1,8 +1,4 @@
 import App from "./app.js";
-import Module from "./module.js";
-import Test from "./test.js";
-
-import playground from "./playground.js";
 
 /**
  * Start loading the app file. Put all of
