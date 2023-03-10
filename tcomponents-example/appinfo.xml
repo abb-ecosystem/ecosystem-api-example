@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<WebApp>
+    <name>Ecosystem Framework 1.0.6</name>
+    <icon>puzzle-piece-light.png</icon>
+    <path>index.html</path>
+</WebApp>
+
+
