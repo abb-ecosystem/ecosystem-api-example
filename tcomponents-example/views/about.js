@@ -6,13 +6,13 @@ export default class About extends TComponents.Component_A {
   }
 
   onRender() {
-    this.find('.about-api').textContent = API.ECOSYSTEM_LIB_VERSION;
-    this.find('.about-tcomponents').textContent = TComponents.version;
+    this.find('.about-api').textContent = API.ECOSYSTEM_API_VERSION;
+    this.find('.about-tcomponents').textContent = TComponents.T_COMPONENTS_BASE_VERSION;
     this.find('.about-tcomponents-example').textContent = T_COMPONENTS_EXAMPLE_VERSION;
-    // console.log('😎😎😎 - AboutView finished rendering...');
+    this.find('.about-omnicore-sdk').textContent = RWS.RWS_LIB_VERSION;
   }
   markup() {
-    return `
+    return /*html*/ `
       <div id="about-view" class="about-view" style="background-color: #ebebeb">
         <div class="tc-container-box">
           <div>
@@ -36,6 +36,10 @@ export default class About extends TComponents.Component_A {
                   <tr>
                     <td class="about-label">ECOSYSTEM WEBAPP</td>
                     <td class="about-tcomponents-example" class="label">--</td>
+                  </tr>
+                  <tr>
+                    <td class="about-label">OMNICORE APP SDK</td>
+                    <td class="about-omnicore-sdk" class="label">--</td>
                   </tr>
                 </table>
               </div>

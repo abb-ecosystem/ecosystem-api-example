@@ -5,7 +5,7 @@
 // or disclosure to third parties is strictly forbidden.
 // ABB reserves all rights regarding Intellectual Property Rights
 
-// OmniCore App SDK 1.2
+// OmniCore App SDK 1.3
 
 'use strict';
 
@@ -14,7 +14,7 @@ if (typeof RWS.constructedMain === "undefined") {
     (function (o) {
 
         // VERSION INFO
-        o.RWS_LIB_VERSION = "1.2";
+        o.RWS_LIB_VERSION = "1.3";
 
         var script = document.createElement('script');
         script.src = "rws-api/rapiddata-rws.js";
@@ -483,6 +483,223 @@ if (typeof RWS.constructedMain === "undefined") {
                 motionPointer: 'motion-pointer',
                 uiInstruction: 'uiinstr'
             }
+
+            /**
+            * Enum for regain modes
+            */
+            this.RegainModes = {
+                continue: 'continue',
+                regain: 'regain',
+                clear: 'clear',
+                enterConsume: 'enter_consume'
+            }
+
+            /**
+             * Enum for execution modes
+             */
+            this.ExecutionModes = {
+                continue: 'continue',
+                stepIn: 'step_in',
+                stepOver: 'step_over',
+                stepOut: 'step_out',
+                stepBackwards: 'step_backwards',
+                stepToLast: 'step_to_last',
+                stepToMotion: 'step_to_motion',
+            }
+
+            /**
+             * Enum for cycle modes
+             */
+            this.CycleModes = {
+                forever: 'forever',
+                asIs: 'as_is',
+                once: 'once',
+            }
+
+            /**
+             * Enum for conditions
+             */
+            this.Conditions = {
+                none: 'none',
+                callChain: 'callchain',
+            }
+
+            /**
+             * Enum for stop modes
+             */
+            this.StopModes = {
+                cycle: 'cycle',
+                instruction: 'instruction',
+                stop: 'stop',
+                quickStop: 'quick_stop',
+            }
+
+            /**
+             * Enum for task selection panel options
+             */
+            this.UseTSPOptions = {
+                normal: 'normal',
+                allTasks: 'all_tasks',
+            }
+
+            /**
+             * Enum for symbol search method.
+             */
+            this.SearchMethods = {
+                block: 1,
+                scope: 2,
+            }
+
+            /**
+             * Flag Enum for types of symbols that can be searched for.
+             */
+            this.SymbolTypes = {
+                undefined: 0,
+                constant: 1,
+                variable: 2,
+                persistent: 4,
+                function: 8,
+                procedure: 16,
+                trap: 32,
+                module: 64,
+                task: 128,
+                routine: 8 + 16 + 32,
+                rapidData: 1 + 2 + 4,
+                any: 255,
+            }
+
+            /**
+             * Enum for execution states
+             */
+            this.ExecutionStates = {
+                running: 'running',
+                stopped: 'stopped'
+            }
+
+            /**
+             * Enum for UIInst events
+             */
+            this.UiinstrEvents = {
+                send: 'send',
+                post: 'post',
+                abort: 'abort'
+            }
+
+            /**
+             * Enum for UIInstr exec levels
+             */
+            this.UiinstrExecLevels = {
+                user: 'user',
+                normal: 'normal'
+            }
+
+            /**
+             * Enum for Task Type
+             */
+            this.TaskTypes = {
+                normal: 'normal',
+                static: 'static',
+                semistatic: 'semistatic',
+                unknown: 'unknown'
+            }
+
+            /**
+             * Enum for Task state
+             */
+            this.TaskStates = {
+                empty: 'empty',
+                initiated: 'initiated',
+                linked: 'linked',
+                loaded: 'loaded',
+                uninitialized: 'uninitialized'
+            }
+        
+            /**
+             * Enum for Task execution state
+             */
+            this.TaskExecutionStates = {
+                ready: 'ready',
+                stopped: 'stopped',
+                started: 'started',
+                uninitialized: 'uninitialized'
+            }
+        
+            /**
+             * Enum for Task active state
+             */
+            this.TaskActiveStates = {
+                on: 'on',
+                off: 'off'
+            }
+        
+            /**
+             * Enum for Task trust level
+             */
+            this.TaskTrustLevels = {
+                sys_fail: 'sys_fail',
+                sys_halt: 'sys_halt',
+                sys_stop: 'sys_stop',
+                none: 'none'
+            }
+        
+            /**
+             * Enum for Task execution level
+             */
+            this.TaskExecutionLevels = {
+                none: 'none',
+                normal: 'normal',
+                trap: 'trap',
+                user: 'user',
+                unknown: 'unknown'
+            }
+        
+            /**
+             * Enum for Task execution mode
+             */
+            this.TaskExecutionModes = {
+                continous: 'continous',
+                step_over: 'step_over',
+                step_in: 'step_in',
+                step_out_of: 'step_out_of',
+                step_back: 'step_back',
+                step_last: 'step_last',
+                stepwise: 'stepwise',
+                unknown: 'unknown'
+            }
+        
+            /**
+             * Enum for Task execution type
+             */
+            this.TaskExecutionTypes = {
+                none: 'none',
+                normal: 'normal',
+                interrupt: 'interrupt',
+                external_interrupt: 'external_interrupt',
+                user_routine: 'user_routine',
+                event_routine: 'event_routine',
+                unknown: 'unknown'
+            }
+
+
+            /**
+             * Enum for Data symbol type
+             */
+            this.DataSymbolTypes = {
+                constant: 'constant',
+                variable: 'variable',
+                persistent: 'persistent'
+            }
+        
+            /**
+             * Enum for Data scope
+             */
+            this.DataScopes = {
+                local: 'local',
+                task: 'task',
+                global: 'global'
+            }
+            
+
 
             /**
              * A Monitoring object for subscriptions
@@ -2148,44 +2365,7 @@ if (typeof RWS.constructedMain === "undefined") {
             }
 
             /**
-             * Enum for regain modes
-             */
-            this.RegainModes = {
-                continue: 'continue',
-                regain: 'regain',
-                clear: 'clear',
-                enterConsume: 'enter_consume'
-            }
-
-            /**
-             * Enum for execution modes
-             */
-            this.ExecutionModes = {
-                continue: 'continue',
-                stepIn: 'step_in',
-                stepOver: 'step_over',
-                stepOut: 'step_out',
-                stepBackwards: 'step_backwards',
-                stepToLast: 'step_to_last',
-                stepToMotion: 'step_to_motion',
-            }
-
-            /**
-             * Enum for cycle modes
-             */
-            this.CycleModes = {
-                forever: 'forever',
-                asIs: 'as_is',
-                once: 'once',
-            }
-
-            /**
-             * Enum for conditions
-             */
-            this.Conditions = {
-                none: 'none',
-                callChain: 'callchain',
-            }
+  
 
             /**
              * Starts the rapid execution
@@ -2233,23 +2413,6 @@ if (typeof RWS.constructedMain === "undefined") {
                     .catch(err => rejectWithStatus('Could not start execution.', err));
             }
 
-            /**
-             * Enum for stop modes
-             */
-            this.StopModes = {
-                cycle: 'cycle',
-                instruction: 'instruction',
-                stop: 'stop',
-                quickStop: 'quick_stop',
-            }
-
-            /**
-             * Enum for task selection panel options
-             */
-            this.UseTSPOptions = {
-                normal: 'normal',
-                allTasks: 'all_tasks',
-            }
 
             /**
              * Stops the rapid execution
@@ -2308,31 +2471,6 @@ if (typeof RWS.constructedMain === "undefined") {
             }
 
 
-            /**
-             * Enum for symbol search method.
-             */
-            this.SearchMethods = {
-                block: 1,
-                scope: 2,
-            }
-
-            /**
-             * Flag Enum for types of symbols that can be searched for.
-             */
-            this.SymbolTypes = {
-                undefined: 0,
-                constant: 1,
-                variable: 2,
-                persistent: 4,
-                function: 8,
-                procedure: 16,
-                trap: 32,
-                module: 64,
-                task: 128,
-                routine: 8 + 16 + 32,
-                rapidData: 1 + 2 + 4,
-                any: 255,
-            }
 
             /**
              * Get default properties for a symbol search.
@@ -2546,6 +2684,72 @@ if (typeof RWS.constructedMain === "undefined") {
          * The domain used for IO handling
          */
         o.IO = new function () {
+
+            /**
+             * Enum
+             */
+            this.NetworkPhysicalState = {
+                halted: 'halted',
+                running: 'running',
+                error: 'error',
+                startup: 'startup',
+                init: 'init',
+                unknown: 'unknown'
+            };
+        
+            /**
+             * Enum
+             */
+            this.NetworkLogicalState = {
+                stopped: 'stopped',
+                started: 'started',
+                unknown: 'unknown'
+            }
+
+            /**
+             * Enum
+             */
+            this.DevicePhysicalState = {
+                deact: 'deact',
+                running: 'running',
+                error: 'error',
+                unconnect: 'unconnect',
+                unconfg: 'unconfg',
+                startup: 'startup',
+                init: 'init',
+                unknown: 'unknown',
+            }
+        
+            /**
+             * Enum
+             */
+            this.DeviceLogicalState = {
+                disabled: 'disabled',
+                enabled: 'enabled',
+                unknown: 'unknown'
+            }
+
+            /**
+             * Enum
+             */
+            this.SignalQuality = {
+                bad: 'bad',
+                good: 'good',
+                unknown: 'unknown'
+            }
+        
+            /**
+             * Enum
+             */
+            this.SignalType = {
+                DI: "DI",
+                DO: "DO",
+                AI: "AI",
+                AO: "AO",
+                GI: "GI",
+                GO: "GO"
+            }
+
 
             /**
              * IO-network object
@@ -2778,7 +2982,7 @@ if (typeof RWS.constructedMain === "undefined") {
                  * @returns {string}    The path
                  */
                 this.getPath = function () {
-                    return signalPath
+                    return signalPath;
                 }
 
                 /**
@@ -2971,12 +3175,11 @@ if (typeof RWS.constructedMain === "undefined") {
                     let lvalue = '';
                     if (newValue.hasOwnProperty('lvalue')) lvalue = newValue['lvalue'];
 
-                    if (this.signalType === 'AI' || this.signalType === 'AO') this.signalValue = parseFloat(lvalue);
-                    else this.signalValue = parseInt(lvalue);
-
+                    if (signalType === 'AI' || signalType === 'AO') signalValue = parseFloat(lvalue);
+                    else signalValue = parseInt(lvalue);
                     for (let iii = 0; iii < callbacks.length; iii++) {
                         try {
-                            callbacks[iii](this.signalValue);
+                            callbacks[iii](signalValue);
                         } catch (error) {
                             o.writeDebug(`IO.Signal callback failed. >>> ${error.toString()}`, 3);
                         }
@@ -3221,6 +3424,15 @@ if (typeof RWS.constructedMain === "undefined") {
          * The domain used for configuration database handling
          */
         o.CFG = new function () {
+
+            /**
+             * Elog
+             */
+            this.LoadMode = {
+                add: 'add',
+                replace: 'replace',
+                'add-with-reset': 'add-with-reset'
+            }
 
             /**
              * CFG-domain object
@@ -3912,6 +4124,81 @@ if (typeof RWS.constructedMain === "undefined") {
                 controllerState: 'controller-state',
                 operationMode: 'operation-mode'
             }
+
+            /**
+             * Enum for controller restart modes
+             */
+            this.RestartModes = {
+                restart: 'restart',
+                shutdown: 'shutdown',
+                bootApplication: 'boot_application',
+                resetSystem: 'reset_system',
+                resetRapid: 'reset_rapid',
+                revertToAutoSave: 'revert_to_auto',
+            }
+
+            /**
+             * Enum for controller settings verification
+             */
+            this.BackupIgnoreMismatches = {
+                all: 'all',
+                systemId: 'system-id',
+                templateId: 'template-id',
+                none: 'none'
+            }
+
+            /**
+             * Enum for safety settings verification
+             */
+            this.BackupInclude = {
+                all: 'all',
+                cfg: 'cfg',
+                modules: 'modules'
+            }
+
+
+            this.ControllerStates = {
+                initializing: 'initializing',
+                motors_on: 'motors_on',
+                motors_off: 'motors_off',
+                guard_stop: 'guard_stop',
+                emergency_stop: 'emergency_stop',
+                emergency_stop_resetting: 'emergency_stop_resetting',
+                system_failure: 'system_failure'
+            }
+            
+            this.MotorsState = {
+                motors_on: 'motors_on',
+                motors_off: 'motors_off'
+            }
+        
+            this.OperationModes = {
+                initializing: 'initializing',
+                automatic_changing: 'automatic_changing',
+                manual_full_changing: 'manual_full_changing',
+                manual_reduced: 'manual_reduced',
+                manual_full: 'manual_full',
+                automatic: 'automatic',
+                undefined: 'undefined'
+            }
+        
+            this.SettableOperationModes = {
+                manual: 'manual',
+                manual_full: 'manual_full',
+                automatic: 'automatic'
+            }
+        
+        
+            this.BackupStatus = {
+                ok: 'ok',
+                system_id_mismatch: 'system_id_mismatch',
+                template_id_mismatch: 'template_id_mismatch',
+                file_or_directory_missing: 'file_or_directory_missing',
+                cfg_file_corrupt: 'cfg_file_corrupt'
+            }
+
+
+
             /**
              * A Monitoring object for subscriptions
              * 
@@ -4183,17 +4470,6 @@ if (typeof RWS.constructedMain === "undefined") {
                     .catch(err => rejectWithStatus('Could not set controller operation mode.', err));
             }
 
-            /**
-             * Enum for controller restart modes
-             */
-            this.RestartModes = {
-                'restart': 'restart',
-                'shutdown': 'shutdown',
-                'bootApplication': 'boot_application',
-                'resetSystem': 'reset_system',
-                'resetRapid': 'reset_rapid',
-                'revertToAutoSave': 'revert_to_auto',
-            }
 
             /**
              * Restart the controller
@@ -4455,25 +4731,6 @@ if (typeof RWS.constructedMain === "undefined") {
                         return Promise.resolve();
                     })
                     .catch(err => rejectWithStatus('Backup process failed.', err));
-            }
-
-            /**
-             * Enum for controller settings verification
-             */
-            this.BackupIgnoreMismatches = {
-                all: 'all',
-                systemId: 'system-id',
-                templateId: 'template-id',
-                none: 'none'
-            }
-
-            /**
-             * Enum for safety settings verification
-             */
-            this.BackupInclude = {
-                all: 'all',
-                cfg: 'cfg',
-                modules: 'modules'
             }
 
             /**
@@ -5310,6 +5567,15 @@ if (typeof RWS.constructedMain === "undefined") {
          * The domain used for Elog handling
          */
         o.Elog = new function () {
+
+            /**
+             * Enum
+             */
+            this.EventType = {
+                informational: 'informational',
+                warning:'warning',
+                error: 'error'
+            }
 
             /**
             * Enum for elog domains.

@@ -7,9 +7,14 @@ Any unauthorized use, reproduction, distribution,
 or disclosure to third parties is strictly forbidden.
 ABB reserves all rights regarding Intellectual Property Rights
 
-// OmniCore App SDK 1.2
+// OmniCore App SDK 1.3
 
 */
+
+.fp-components-dropdown-container {
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
 
 .fp-components-dropdown {
     /* position: relative; */
@@ -95,7 +100,7 @@ ABB reserves all rights regarding Intellectual Property Rights
 .fp-components-dropdown-menu > p {
     padding-top: 12px;
     padding-bottom: 12px;
-    padding-left: 4px;
+    padding-left: 16px;
     padding-right: 14px;
     margin: 0px; 
     /* margin: 4px;  */
@@ -110,7 +115,9 @@ ABB reserves all rights regarding Intellectual Property Rights
 }
 
 .fp-components-dropdown-desc {
-    margin-bottom: 6px;
+    margin-bottom: 4px;
+    margin-left: 2px;
     display: block;
-    font-size: inherit;
+    font-size: 14px;
+    line-height: 20px;
 }

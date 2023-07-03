@@ -3,11 +3,6 @@ import Module from './module.js';
 import { moduleName, modulePath } from '../../constants/common.js';
 
 export default class Procedure extends TComponents.Component_A {
-  /**
-   * @brief Called when an instance of this component is created.
-   *
-   * @param {HTMLElement} container - DOM element in which this component is to be inserted
-   */
   constructor(parent, module = null) {
     super(parent, { options: { async: true } });
     this.checkboxIsSR = new FPComponents.Checkbox_A();
@@ -27,7 +22,10 @@ export default class Procedure extends TComponents.Component_A {
 
   mapComponents() {
     return {
-      module: new Module(this.find('.module-container'), modulePath, moduleName),
+      module: new TComponents.LayoutInfobox_A(this.find('.module-container'), {
+        label: 'Modules',
+        content: { children: new Module(null, modulePath, moduleName) },
+      }),
       modSelector: new TComponents.SelectorModules_A(this.find('.module-dropdown'), {
         isInUse: false,
         label: 'Select a module:',
@@ -40,30 +38,46 @@ export default class Procedure extends TComponents.Component_A {
         userLevel: this._isSR,
         label: 'Execute',
       }),
+      selectCycleMode: new TComponents.SelectorAlias_A(this.find('.cycle-mode'), {
+        // label: 'Cycle mode:',
+        itemMap: [
+          { item: 'once', alias: 'Single' },
+          { item: 'forever', alias: 'Continous' },
+          { item: 'as_is', alias: 'As is' },
+        ],
+      }),
+      layout: new TComponents.LayoutInfobox_A(this.find('.procedure-container'), {
+        label: 'Procedures',
+        content: { children: this.find('.procedure-content') },
+      }),
     };
   }
 
   async onRender() {
     this.child.modSelector.onSelection(this.cbOnSelectionModule.bind(this));
     this.child.procSelector.onSelection(this.cbOnSelectionProcedure.bind(this));
+    this.child.selectCycleMode.onSelection(this.cbOnSelectionCycleMode.bind(this));
     this.checkboxIsSR.attachToElement(this.find('.cb-btn'));
   }
 
   markup() {
-    return `
+    return /*html*/ `
     <div class="tc-container">
         <div class="module-container"></div>
-        <div class="tc-infobox">
-          <div><p>Calling a Rapid procedure</p></div>
+        <div class="procedure-container"></div>
+
+        <div class="procedure-content">
           <p>Please select a procedure and press execute button to call it.</p>
+          <h4>Procedures:</h4>
+          <div class="flex-row items-center">
+            <div class="module-dropdown tc-item dd-h-30 dd-w-40"></div>
+            <div class="proc-dropdown tc-item dd-h-30 dd-w-40"></div>
+            <div class="exe-btn tc-item mt-7"></div>
+            <div class="cb-btn tc-item mt-7"></div>
+            <div class="cycle-mode tc-item mt-7"></div>  
+          </div>
         </div>
-        <h4>Procedures:</h4>
-        <div class="flex-row items-center">
-          <div class="module-dropdown tc-item dd-h-30 dd-w-40"></div>
-          <div class="proc-dropdown tc-item dd-h-30 dd-w-40"></div>
-          <div class="exe-btn tc-item mt-7"></div>
-          <div class="cb-btn tc-item mt-7"></div>
-        </div>
+
       </div>
     </div>
     `;
@@ -75,10 +89,21 @@ export default class Procedure extends TComponents.Component_A {
 
   async cbOnSelectionModule(selection) {
     await this.child.procSelector.updateSearch(selection);
-    this.child.btnProcedure.procedure = this.child.procSelector.selected;
+    const cycleMode = this.child.selectCycleMode.selected;
+    const procedure = this.child.procSelector.selected;
+    this.child.btnProcedure.setProps({ procedure, cycleMode });
   }
 
   cbOnSelectionProcedure(selection) {
     this.child.btnProcedure.procedure = selection;
+    const cycleMode = this.child.selectCycleMode.selected;
+    console.log('cycleMode', cycleMode);
+
+    this.child.btnProcedure.setProps({ procedure: selection, cycleMode });
+  }
+
+  cbOnSelectionCycleMode(selection) {
+    this.child.btnProcedure.cycleMode = selection;
+    this.child.btnProcedure.setProps({ cycleMode: selection });
   }
 }

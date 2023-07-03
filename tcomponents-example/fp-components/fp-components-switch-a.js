@@ -5,7 +5,7 @@
 // or disclosure to third parties is strictly forbidden.
 // ABB reserves all rights regarding Intellectual Property Rights
 
-// OmniCore App SDK 1.2
+// OmniCore App SDK 1.3
 
 'use strict';
 
@@ -108,7 +108,9 @@ var FPComponents = FPComponents || {};
                 }
 
                 if (!d) {
-                    this._container.removeChild(this._descDiv);
+                    if (this._descDiv !== null) {
+                        this._container.removeChild(this._descDiv);
+                    }
                     this._descDiv = null;
                     return;
                 }
@@ -164,7 +166,7 @@ var FPComponents = FPComponents || {};
                     this._root = divOuter;
                     this._knob = divKnob;
 
-                    if (this._desc) {
+                    if (this._desc !== null) {
                         this._createDesc();
                     }
 
@@ -179,23 +181,22 @@ var FPComponents = FPComponents || {};
             }
 
             set scale(s) {
-                this._scale = s;
+                this._scale = Number.parseFloat(s);
                 if (this._root !== null) {
 
-                    if (s === 1.0) {
+                    if (s == 1.0) {
 
-                        this._root.style.borderWidth = null;
                         this._root.style.borderRadius = null;
                         this._root.style.height = null;
                         this._root.style.width = null;
                         this._knob.style.borderRadius = null;
+                        this._knob.style.borderWidth = null;
                         this._knob.style.height = null;
                         this._knob.style.width = null;
-                        this._knob.style.marginTop = null;
                         this._knob.style.marginLeft = null;
-
+                    
                     } else {
-
+                        
                         this._root.style.borderRadius = (12 * s).toString() + "px";
                         this._root.style.height = (24 * s).toString() + "px";
                         this._root.style.width = (40 * s).toString() + "px";
@@ -217,7 +218,7 @@ var FPComponents = FPComponents || {};
             }
         }
 
-        o.Switch_A.VERSION = "1.2";
+        o.Switch_A.VERSION = "1.3";
 
     }
 

@@ -25,6 +25,7 @@ export default class SignalComponents extends TComponents.Component_A {
           : this._props.signal;
     } catch (e) {
       this.error = true;
+      TComponents.Popup_A.error(e, 'SignalComponents');
     }
   }
 
@@ -55,7 +56,7 @@ export default class SignalComponents extends TComponents.Component_A {
   }
 
   markup() {
-    return `
+    return /*html*/ `
     <div class="tc-container">
       <div class="signal-indicator tc-item"></div>
       <div class="toggle-btn tc-item"></div>

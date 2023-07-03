@@ -42,14 +42,19 @@ export default class Variable extends TComponents.Component_A {
       }),
       toggleBtn: new TComponents.Button_A(this.find('.toggle-view'), {
         callback: () => {
-          this.child.varIncrDecrCtrl.toggle();
-          this.child.varIncrDecrInd.toggle();
-          this.child.varCtrl.toggle();
-          this.child.varInd.toggle();
-          this.child.toggleBtn.text =
-            this.child.toggleBtn.label === 'hide'
-              ? (this.child.toggleBtn.label = 'show')
-              : (this.child.toggleBtn.label = 'hide');
+          if (this.child.toggleBtn.label === 'hide') {
+            this.child.varIncrDecrCtrl.hide();
+            this.child.varIncrDecrInd.hide();
+            this.child.varCtrl.hide();
+            this.child.varInd.hide();
+            this.child.toggleBtn.text = this.child.toggleBtn.label = 'show';
+          } else {
+            this.child.varIncrDecrCtrl.show();
+            this.child.varIncrDecrInd.show();
+            this.child.varCtrl.show();
+            this.child.varInd.show();
+            this.child.toggleBtn.text = this.child.toggleBtn.label = 'hide';
+          }
         },
         label: 'hide',
       }),
@@ -75,14 +80,14 @@ export default class Variable extends TComponents.Component_A {
     this.swUseContainer.onchange = (value) => {
       if (value) {
         // this.child.varInd.useBorder();
-        this.child.varIncrDecrInd.cssContainer();
+        this.child.varIncrDecrInd.cssBox();
         this.child.varIncrDecrCtrl.css({
           border: '3px double',
           margin: '5px',
         });
       } else {
         // this.child.varInd.useBorder(false);
-        this.child.varIncrDecrInd.cssContainer(false);
+        this.child.varIncrDecrInd.cssBox(false);
         this.child.varIncrDecrCtrl.css('');
       }
     };
@@ -115,7 +120,7 @@ export default class Variable extends TComponents.Component_A {
   }
 
   markup() {
-    return `
+    return /*html*/ `
     <div class="tc-container">
       <div class="tc-row var-view-subscribe">
         <div class="tc-cols-1 tc-infobox">
@@ -221,13 +226,10 @@ export default class Variable extends TComponents.Component_A {
   }
 }
 
-var componentStyle = document.createElement('style');
-componentStyle.innerHTML = `
+Variable.loadCssClassFromString(/*css*/ `
 
 .var-view-subscribe {
   min-height: 350px;
 }
-  `;
 
-var ref = document.querySelector('script');
-ref.parentNode.insertBefore(componentStyle, ref);
+`);

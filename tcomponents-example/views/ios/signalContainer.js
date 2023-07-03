@@ -1,11 +1,28 @@
+/**
+ * @typedef SignalContainerProps
+ * @prop {API.SIGNAL.Signal[] | string[]} [signals] Function to be called when button is pressed
+ */
+
+/**
+ * @class SignalContainer
+ * @extends TComponents.Component_A
+ * @param {HTMLElement} parent - HTMLElement that is going to be the parent of the component
+ * @param {SignalContainerProps} [props]
+ * @example
+ */
 export default class SignalContainer extends TComponents.Component_A {
-  constructor(parent, signals) {
-    super(parent);
-    this._parentElement = parent;
+  constructor(parent, props = {}) {
+    super(parent, props);
     this._errorMessage = 'No signals found 😆!';
     this._message = '';
-    Array.isArray(signals) ? (this._signalsData = signals) : (this._signalsData = [signals]);
-    this.signalComponents = [];
+    Array.isArray(this._props.signals)
+      ? (this._signalsData = this._props.signals)
+      : (this._signalsData = [this._props.signals]);
+  }
+
+  defaultProps() {
+    this.noCheck = ['signals'];
+    return { signals: [] };
   }
 
   async onInit() {
@@ -20,60 +37,42 @@ export default class SignalContainer extends TComponents.Component_A {
   }
 
   mapComponents() {
-    this._signals = this.all('.tc-signal-data');
-    this._signals.forEach((signal) => {
-      const s = new TComponents.SignalView_A(signal, {
-        signal: this._signalsData[signal.dataset.index],
-        control: true,
-        edit: true,
-      });
-      this.signalComponents.push(s);
-    });
-    return { signalComponents: this.signalComponents };
+    const children = this._signalsData.map(
+      (signal) =>
+        new TComponents.SignalView_A(null, {
+          signal,
+          control: true,
+          edit: true,
+        })
+    );
+    return {
+      signalContainer: new TComponents.Container_A(this.find('.tc-signal-container'), {
+        children,
+        box: true,
+      }),
+    };
   }
 
-  onRender() {}
-
-  renderSignals() {
-    return this._signalsData
-      .map((signal, index) => {
-        return this.renderSignal(index);
-      })
-      .join('');
-  }
-
-  renderSignal(i) {
-    let signal_markup;
-
-    if (this._signals) {
-      const signal = this._signals.find((signal) => Number(signal.dataset.index) === i);
-      signal_markup = `<div class="tc-signal-data" data-ref="${signal.dataset.ref}" data-index="${i}"></div>`;
-    } else {
-      signal_markup = `
-        <div class="tc-signal-data" data-index="${i}"></div>
-      `;
-    }
-    return signal_markup;
+  onRender() {
+    // this.child.signalContainer.css(/*css*/ `
+    // border: 1px solid #ccc;
+    // border-radius: 10px;
+    // padding: 10px;`);
+    // this.child.signalContainer.cssBox();
+    // this.child.signalContainer.cssItem('signal-red');
   }
 
   markup(self) {
-    return `
+    return /*html*/ `
       <div class="tc-row">
-        <div class="tc-col-1">
-            ${self.renderSignals()}
-         </div>
+        <div class="tc-col-1 ">
+          <div class="tc-signal-container"></div>
       </div>
       `;
   }
 
-  set signals(signals) {
-    signals.forEach((signal, idx) => {
-      this.child.signalComponents[idx].value = signal;
-    });
-  }
-
   updateSignalAttributes(attr) {
-    const signal = this.child.signalComponents.find((signalview) => {
+    const signal = this.child.signalContainer.child.children.find((signalview) => {
       return signalview.name === attr.Name;
     });
     signal && signal.updateAttributes(attr);
@@ -81,11 +80,15 @@ export default class SignalContainer extends TComponents.Component_A {
 
   getEditButtons() {
     const editButtons = [];
-    if (this.child.signalComponents.length === 0) return editButtons;
-
-    this.child.signalComponents.forEach((signal) => {
+    this.child.signalContainer.child.children.forEach((signal) => {
       editButtons.push(signal.getEditButton());
     });
     return editButtons;
   }
 }
+
+SignalContainer.loadCssClassFromString(/*css*/ `
+.signal-red {
+  background-color: #da8181;
+}
+`);

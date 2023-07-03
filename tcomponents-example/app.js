@@ -1,5 +1,4 @@
 
-
 import RapidView from './views/rapid/rapid.js';
 import TrayView from './views/motion/trayView.js';
 import IoView from './views/ios/ios.js';
@@ -53,17 +52,8 @@ export default class App extends TComponents.Component_A {
     return this.error
       ? {}
       : {
-          /**
-           * RAPID TAB
-           */
-          rapidView: new RapidView(this.find('#rapid-view')),
-          /**
-           * TComponents
-           */
-          tComponents: new TComponentsView(this.find('#tc-view')),
-          /**
-           * MOTION TAB
-           */
+          rapidView: new RapidView(null),
+          tComponents: new TComponentsView(null),
           trayView: new TrayView(
             this.find('#motion-view'),
             'Tray Configuration',
@@ -76,14 +66,8 @@ export default class App extends TComponents.Component_A {
             'esTrayApproach',
             'esTrayExit'
           ),
-          /**
-           * DIGITAL IO TAB
-           */
-          ioView: new IoView(this.find('#io-view')),
-          /**
-           * About
-           */
-          about: new About(this.find('#about-view')),
+          ioView: new IoView(null),
+          about: new About(null),
         };
   }
 
@@ -94,26 +78,24 @@ export default class App extends TComponents.Component_A {
     /**
      * TAB CONTAINER
      */
-    const tabContainer = new FPComponents.Tabcontainer_A();
-    tabContainer.addTab('RAPID', 'rapid-view');
-    tabContainer.addTab('Motion', 'motion-view');
-    tabContainer.addTab('Digital IOs', 'io-view');
-    tabContainer.addTab('TComponents', 'tc-view');
-    tabContainer.addTab('About', 'about-view');
-    tabContainer.attachToId('tab-container');
-
-    // console.log('😎😎😎😎😎 - App finished rendering...');
+    const tabContainer = new TComponents.TabContainer_A(this.find('#tab-container'), {
+      // hiddenTabs: true,
+      views: [
+        { name: 'RAPID', content: this.child.rapidView },
+        { name: 'Motion', content: this.child.trayView },
+        { name: 'Digital IOs', content: this.child.ioView },
+        { name: 'TComponents', content: this.child.tComponents },
+        { name: 'About', content: this.child.about },
+      ],
+      options: { async: false },
+    });
+    tabContainer.render();
   }
 
   markup() {
-    return `
+    return /*html*/ `
     <div class="box-grow">
       <div id="tab-container" class="tc-container"></div>
-      <div id="rapid-view"></div>
-      <div id="motion-view"></div>
-      <div id="io-view"></div>
-      <div id="tc-view"></div>
-      <div id="about-view"></div>
     </div>
     `;
   }
@@ -136,7 +118,6 @@ export default class App extends TComponents.Component_A {
   async cbConfirmLoadConfiguration(action) {
     if (action === 'ok') {
       let url = `${configPath}/${configName}.cfg`;
-      console.log('💥', url);
       const action = 'replace';
       try {
         await API.CONFIG.loadConfiguration(url, action);

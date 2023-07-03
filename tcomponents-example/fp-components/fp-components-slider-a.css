@@ -7,17 +7,18 @@ Any unauthorized use, reproduction, distribution,
 or disclosure to third parties is strictly forbidden.
 ABB reserves all rights regarding Intellectual Property Rights
 
-// OmniCore App SDK 1.2
+// OmniCore App SDK 1.3
 
 */
 
 .fp-components-slider {
      
+    background-color: initial;
     height: auto;
     width: auto;
     display: flex;
     flex-direction: column;
-    padding-top: 8px;
+    padding-top: 7px;
     padding-bottom: 8px;
     padding-left: 14px;
     padding-right: 14px;
@@ -27,7 +28,7 @@ ABB reserves all rights regarding Intellectual Property Rights
 
  /* Container for the top labels */
 .fp-components-slider__labels-wrapper{
-    height: 38px;
+    height: 37px;
     width: auto;
     display: flex;
     position: relative;

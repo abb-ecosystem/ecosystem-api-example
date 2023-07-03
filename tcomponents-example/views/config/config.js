@@ -14,7 +14,7 @@ export default class ConfigView extends TComponents.Component_A {
   }
 
   markup() {
-    return `
+    return /*html*/ `
     <div class="row">
       <div class="cols-2">     
           <div class="cross-connections-container"></div>

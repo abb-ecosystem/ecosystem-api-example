@@ -18,6 +18,7 @@ export default class SignalConfigurator extends TComponents.Component_A {
       this.doSignals = await API.SIGNAL.searchByType('DO', this._deviceSelected);
     } catch (e) {
       this.error = true;
+      TComponents.Popup_A.error(e, 'SignalContainer');
     }
   }
 
@@ -25,14 +26,12 @@ export default class SignalConfigurator extends TComponents.Component_A {
     const editSignal = new TComponents.SignalEdit_A(this.find('.edit-window'));
 
     return {
-      inputSignalContainer: new SignalContainer(
-        this.find('#signal-container-input'),
-        this.diSignals
-      ),
-      outputSignalContainer: new SignalContainer(
-        this.find('#signal-container-output'),
-        this.doSignals
-      ),
+      inputSignalContainer: new SignalContainer(this.find('#signal-container-input'), {
+        signals: this.diSignals,
+      }),
+      outputSignalContainer: new SignalContainer(this.find('#signal-container-output'), {
+        signals: this.doSignals,
+      }),
       deviceSelector: new TComponents.SelectorEthernetIPDevices_A(this.find('.device-dropdown'), {
         selected: this._deviceSelected,
         label: 'Select a device:',
@@ -58,7 +57,7 @@ export default class SignalConfigurator extends TComponents.Component_A {
   }
 
   markup() {
-    return `
+    return /*html*/ `
       <div class="tc-container">
         <div class="tc-row">
           <div class="tc-cols-1 tc-infobox">

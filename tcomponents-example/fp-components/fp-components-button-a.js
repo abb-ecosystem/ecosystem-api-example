@@ -5,7 +5,7 @@
 // or disclosure to third parties is strictly forbidden.
 // ABB reserves all rights regarding Intellectual Property Rights
 
-// OmniCore App SDK 1.2
+// OmniCore App SDK 1.3
 
 'use strict';
 
@@ -75,8 +75,9 @@ var FPComponents = FPComponents || {};
             }
 
             set icon(i) {
-                this._icon = i;
-                
+
+                this._icon = i === null ? null : i.replace(/\\/g,"/");
+
                 if(this._root == null) {
                     return;
                 }
@@ -94,7 +95,16 @@ var FPComponents = FPComponents || {};
                     return;
                 }
 
-                this._divIcon.style.backgroundImage = `url("${this._icon}")`;
+                this._divIcon.style.backgroundImage = `url("${this._urlEncode(this._icon)}")`;
+            }
+
+            _urlEncode(url) {
+                const urlItems = url.split("/");
+                const escapedItems = [];
+                for (const item of urlItems) {
+                    escapedItems.push(encodeURIComponent(item));
+                }
+                return escapedItems.join("/");
             }
 
             _updateClassNames() {
@@ -126,7 +136,7 @@ var FPComponents = FPComponents || {};
             _addIcon() {
                 if(this._root) {
                     this._divIcon = document.createElement("div");
-                    this._divIcon.style.backgroundImage = `url("${this._icon}")`;
+                    this._divIcon.style.backgroundImage = `url("${this._urlEncode(this._icon)}")`;
                     this._divIcon.className = "fp-components-button-icon";
 
                     this._root.prepend(this._divIcon);
@@ -160,7 +170,7 @@ var FPComponents = FPComponents || {};
             }
         }
 
-        o.Button_A.VERSION = "1.2";
+        o.Button_A.VERSION = "1.3";
 
     }
 

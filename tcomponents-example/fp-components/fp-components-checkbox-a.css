@@ -7,7 +7,7 @@ Any unauthorized use, reproduction, distribution,
 or disclosure to third parties is strictly forbidden.
 ABB reserves all rights regarding Intellectual Property Rights
 
-// OmniCore App SDK 1.2
+// OmniCore App SDK 1.3
 
 */
 
@@ -81,7 +81,7 @@ ABB reserves all rights regarding Intellectual Property Rights
     font-size: 14px;
     color: inherit;
     white-space: nowrap;
-    margin-left: 5px;
+    margin-left: 10px;
     align-items: center;
     justify-content: center;
 }

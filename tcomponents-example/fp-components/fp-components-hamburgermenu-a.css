@@ -7,18 +7,9 @@ Any unauthorized use, reproduction, distribution,
 or disclosure to third parties is strictly forbidden.
 ABB reserves all rights regarding Intellectual Property Rights
 
-// OmniCore App SDK 1.2
+// OmniCore App SDK 1.3
 
 */
-
-:root {
-    /* --menu-width: 320px; */
-    --menu-width: auto;
-    --menu-min-width: 300px;
-    --menu-visible-width: 48px;
-    --menu-item-height: 70px;
-    --menu-title-height: 48px;
-}
 
 /* Contains entire component */
 .fp-components-hamburgermenu-a-container {
@@ -88,8 +79,8 @@ ABB reserves all rights regarding Intellectual Property Rights
 }
 
 .fp-components-hamburgermenu-a-menu__wrapper--visible {
-    width: var(--menu-visible-width);
-    min-width: var(--menu-visible-width);
+    width: 48px;
+    min-width: 48px;
 }
 
 /* Menu container, used to hide scrollbar when menu is scrollable, and to separate menu from header */
@@ -105,11 +96,11 @@ ABB reserves all rights regarding Intellectual Property Rights
 }
 
 .fp-components-hamburgermenu-a-menu__container--visible {
-    width: var(--menu-visible-width);
+    width: 48px;
 }
 
 .fp-components-hamburgermenu-a-menu__container--open {
-    width: var(--menu-width);
+    width: 320px;
 }
 
 /* Menu containing the menu buttons */
@@ -121,9 +112,9 @@ ABB reserves all rights regarding Intellectual Property Rights
     position: relative;
     overflow-x: hidden;
     overflow-y: auto;
-    height: calc(100% - var(--menu-title-height));
+    height: calc(100% - 48px);
     width: 0px;
-    /* padding-right: 18px; */
+    padding-right: 18px;
     background:
         /* Shadow covers, hide shadows when scrolled to top or bottom*/
         linear-gradient(var(--fp-color-GRAY-10) 30%, rgba(34,34,34,0)),
@@ -140,21 +131,21 @@ ABB reserves all rights regarding Intellectual Property Rights
 }
 
 .fp-components-hamburgermenu-a-menu__container--visible .fp-components-hamburgermenu-a-menu {
-    width: var(--menu-visible-width);
+    width: 48px;
 }
 
 .fp-components-hamburgermenu-a--open {
-    width: var(--menu-width) !important;
+    width: 320px !important;
 }
 
 .fp-components-hamburgermenu-a-menu__title-container {
     background-color: var(--fp-color-GRAY-10);
-    height: var(--menu-title-height);
-    line-height: var(--menu-title-height);
+    height: 48px;
+    line-height: 48px;
     top: -2px;
     left: 0;
     width: 0;
-    margin-right: 18px;
+					   
     padding-left: 55px;
     overflow: hidden;
     position: sticky;
@@ -162,7 +153,7 @@ ABB reserves all rights regarding Intellectual Property Rights
 }
 
 .fp-components-hamburgermenu-a-menu__title-text {
-    width: calc(var(--menu-width) - 55px);
+    width: calc(320px - 55px);
     font-size: 24px;
     font-weight: 600;
     flex: 1 0 auto;
@@ -173,16 +164,16 @@ ABB reserves all rights regarding Intellectual Property Rights
 }
 
 .fp-components-hamburgermenu-a-menu__container--open .fp-components-hamburgermenu-a-menu__title-container {
-    width: var(--menu-width);
-    min-width: var(--menu-min-width);
+    width: 320px;
+									 
 }
 
 .fp-components-hamburgermenu-a-menu__button {
     display: flex;
-    /* width: var(--menu-width); */
-    width: 100%;
-    min-width: var(--menu-min-width);
-    max-height: var(--menu-item-height);
+								   
+				
+    width: 320px;
+    max-height: 70px;
     min-height: 48px;
     flex-direction: row;
     justify-content: flex-start;

@@ -5,7 +5,7 @@
 // or disclosure to third parties is strictly forbidden.
 // ABB reserves all rights regarding Intellectual Property Rights
 
-// OmniCore App SDK 1.2
+// OmniCore App SDK 1.3
 
 'use strict';
 
@@ -239,8 +239,8 @@ var FPComponents = FPComponents || {};
                     for (let item of model) {
                         if (Array.isArray(item.points)) {
                             for (let p of item.points) {
-                                var xValue = parseInt(p[0]);
-                                var yValue = parseInt(p[1]);
+                                var xValue = parseFloat(p[0]);
+                                var yValue = parseFloat(p[1]);
 
                                 if (isNaN(xValue) || isNaN(yValue)) {
                                     console.error(`Point ${p} was not a number!`);
@@ -640,7 +640,7 @@ var FPComponents = FPComponents || {};
             }
         }
 
-        o.Linechart_A.VERSION = "1.2";
+        o.Linechart_A.VERSION = "1.3";
 
     }
 

@@ -35,7 +35,7 @@ export default class LogicSignal extends TComponents.Component_A {
   }
 
   markup() {
-    return `
+    return /*html*/ `
     <div class="container border">
     <div class="row">
       <div class="cols-1 tc-infobox">

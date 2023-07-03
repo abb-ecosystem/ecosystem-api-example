@@ -5,7 +5,7 @@
 // or disclosure to third parties is strictly forbidden.
 // ABB reserves all rights regarding Intellectual Property Rights
 
-// OmniCore App SDK 1.2
+// OmniCore App SDK 1.3
 
 'use strict';
 
@@ -73,7 +73,9 @@ var FPComponents = FPComponents || {};
                 }
 
                 if (!d) {
-                    this._root.removeChild(this._descDiv);
+                    if (this._descDiv !== null) {
+                        this._root.removeChild(this._descDiv);
+                    }
                     this._descDiv = null;
                     return;
                 }
@@ -159,7 +161,7 @@ var FPComponents = FPComponents || {};
                 divButton.appendChild(canvas1);
                 divButton.appendChild(canvas2);
 
-                divButton.onclick = () => {
+                checkBoxDiv.onclick = () => {
 
                     if (this._enabled == true) {
                         this._checked = this._checked == true ? false : true;
@@ -174,7 +176,7 @@ var FPComponents = FPComponents || {};
                 this._button = divButton;
                 checkBoxDiv.appendChild(divButton)
 
-                if (this._desc) {
+                if (this._desc !== null) {
                     this._createDesc(checkBoxDiv);
                 }
 
@@ -210,7 +212,7 @@ var FPComponents = FPComponents || {};
             }
         }
 
-        o.Checkbox_A.VERSION = "1.2";
+        o.Checkbox_A.VERSION = "1.3";
     }
 
 })(FPComponents); 

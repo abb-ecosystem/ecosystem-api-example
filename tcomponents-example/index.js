@@ -4,7 +4,7 @@ window.addEventListener('load', async function () {
   // RWS.setDebug(1, 0)
   fpComponentsEnableLog();
 
-  API.setVerbose(true);
+  // API.setVerbose(true);
   // TComponents.Popup_A.enabled = false;
 
   try {

@@ -5,7 +5,7 @@
 // or disclosure to third parties is strictly forbidden.
 // ABB reserves all rights regarding Intellectual Property Rights
 
-// OmniCore App SDK 1.2
+// OmniCore App SDK 1.3
 
 'use strict';
 
@@ -20,7 +20,7 @@ function fpComponentsLoadCSS(href) {
     head.appendChild(link);
 }
 
-const FP_COMPONENTS_COMMON_VERSION = "1.2";
+const FP_COMPONENTS_COMMON_VERSION = "1.3";
 
 fpComponentsLoadCSS("fp-components/fp-components-common.css");
 
@@ -351,30 +351,35 @@ function fpComponentsEnableLog() {
                 }
             }).join(' ');
         }
+
         let originalConsoleLog = console.log;
         console.log = (...messages) => {
             logToDebugWindow(format(messages), NORMAL);
             originalConsoleLog.apply(console, messages);
         };
+
         let originalConsoleInfo = console.info;
         console.info = (...messages) => {
             logToDebugWindow(format(messages), INFO);
             originalConsoleInfo.apply(console, messages);
         };
+
         let originalConsoleWarn = console.warn;
         console.warn = (...messages) => {
             logToDebugWindow(format(messages), WARN);
             originalConsoleWarn.apply(console, messages);
         };
+
         let originalConsoleError = console.error;
         console.error = (...messages) => {
             logToDebugWindow(format(messages), ERROR);
             originalConsoleError.apply(console, messages);
         };
+
     } else {
         logToDebugWindow("Not running in embedded browser. Please open the browser's JavaScript console to see log messages or to enter commmands.");
     }
-    
+
     window.addEventListener("error", e => {
         console.error(e.filename + " (" + e.lineno + ":" + e.colno + "): " + e.message);
     });

@@ -22,13 +22,13 @@ export default class IoView extends TComponents.Component_A {
 
   onRender() {
     this.backgroundColor('#EBEBEB');
-    this.child.signalExamples.cssContainer(true);
-    this.child.signalConfig.cssContainer(true);
+    this.child.signalExamples.cssBox(true);
+    this.child.signalConfig.cssBox(true);
     // console.log('😎😎😎 - IoView finished rendering...');
   }
 
   markup() {
-    return `
+    return /*html*/ `
       <div class="tc-container">
         <div class="io-signal-configurator"></div>
         <div class="io-signal-example"></div>

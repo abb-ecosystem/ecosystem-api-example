@@ -246,7 +246,7 @@ export default class TComponentsView extends TComponents.Component_A {
   }
 
   markup({ _name }) {
-    return `
+    return /*html*/ `
         <h1 class="row comp-text">${_name}</h1>
         <div class="tc-accordion-item">
           <p class="tc-accordion-info-text">Variables</p>  

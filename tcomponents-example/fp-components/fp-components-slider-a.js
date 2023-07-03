@@ -5,7 +5,7 @@
 // or disclosure to third parties is strictly forbidden.
 // ABB reserves all rights regarding Intellectual Property Rights
 
-// OmniCore App SDK 1.2
+// OmniCore App SDK 1.3
 
 'use strict';
 
@@ -45,7 +45,7 @@ var FPComponents = FPComponents || {};
                 this._tickStep = 1;
                 this._displayTicks = false;
                 this._value = 0;
-                this._width = 200;
+                this._width = 172; // 200 - 28px padding
                 this._numberOfDecimals = 0;
 
                 this._ondrag = null;
@@ -69,6 +69,9 @@ var FPComponents = FPComponents || {};
             }
 
             set min(v){
+
+                if(isNaN(v)){ return; }
+
                 this._min = v;
 
                 if(this._anchor){
@@ -81,6 +84,9 @@ var FPComponents = FPComponents || {};
             }
 
             set max(v){
+                
+                if(isNaN(v)){ return; }
+
                 this._max = v;
 
                 if(this._anchor){
@@ -93,6 +99,9 @@ var FPComponents = FPComponents || {};
             }
 
             set value(v){
+                
+                if(isNaN(v)){ return; }
+                
                 this._value = v;
 
                 if(this._anchor){
@@ -153,6 +162,9 @@ var FPComponents = FPComponents || {};
             }
 
             set tickStep(v){
+
+                if(isNaN(v)){ return; }
+
                 this._tickStep = v;
 
                 if(this._anchor){
@@ -189,11 +201,17 @@ var FPComponents = FPComponents || {};
             }
 
             get width(){
-                return this._width;
+                return this._width + 28;
             }
 
             set width(v){
-                this._width = v;
+                if (isNaN(v) || v === null || v === undefined) {
+                    return;
+                }
+                this._width = v - 28;
+                if (this._width < 0) {
+                    this._width = 1;
+                }
 
                 if(this._anchor){
                     this._rebuild();
@@ -565,7 +583,7 @@ var FPComponents = FPComponents || {};
             }
         }
 
-        o.Slider_A.VERSION = "1.2";
+        o.Slider_A.VERSION = "1.3";
     }
 
 })(FPComponents); 

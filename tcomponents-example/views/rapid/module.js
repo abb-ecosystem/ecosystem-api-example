@@ -30,19 +30,30 @@ export default class Module extends TComponents.Component_A {
   }
 
   markup() {
-    return `
-      <div class="tc-infobox">
-        <div><p>Load/unload a module</p></div>
-        <p>
-          Modules can be dynamically loaded and unloaded by a WebApp from a file. Click on the
-          following buttons to load/unload the "Ecosysten_BASE" module.
-        </p>
-        <div class="tc-container-row">
-          <div class="load-module tc-item"></div>
-          <div class="unload-module tc-item"></div>
-        </div>
+    return /*html*/ `
+      <p>
+        Modules can be dynamically loaded and unloaded by a WebApp from a file. Click on the
+        following buttons to load/unload the "Ecosysten_BASE" module.
+      </p>
+      <div class="tc-container-row">
+        <div class="load-module tc-item"></div>
+        <div class="unload-module tc-item"></div>
       </div>
-    `;
+  `;
+
+    // return /*html*/ `
+    //   <div class="tc-infobox">
+    //     <div><p>Load/unload a module</p></div>
+    //     <p>
+    //       Modules can be dynamically loaded and unloaded by a WebApp from a file. Click on the
+    //       following buttons to load/unload the "Ecosysten_BASE" module.
+    //     </p>
+    //     <div class="tc-container-row">
+    //       <div class="load-module tc-item"></div>
+    //       <div class="unload-module tc-item"></div>
+    //     </div>
+    //   </div>
+    // `;
   }
 
   async load() {

@@ -5,7 +5,7 @@
 // or disclosure to third parties is strictly forbidden.
 // ABB reserves all rights regarding Intellectual Property Rights
 
-// OmniCore App SDK 1.2
+// OmniCore App SDK 1.3
 
 'use strict';
 
@@ -31,7 +31,6 @@ var FPComponents = FPComponents || {};
                 this._activeView = null;
                 this._activeViewId = null;
                 this._dirty = false;
-                this._viewsQueue = [];
                 this._views = [];
                 this._onchange = null;
             }
@@ -68,7 +67,7 @@ var FPComponents = FPComponents || {};
             }
 
             get activeView() {
-                return this._activeView;
+                return this._activeViewId;
             }
 
             set activeView(id) {
@@ -113,7 +112,7 @@ var FPComponents = FPComponents || {};
             getViewButtonLabel(id) {
                 for (const v of this._views) {
                     if (v.id === id) {
-                        return v.title;
+                        return v.label;
                     }
                 }
                 return null;
@@ -126,23 +125,36 @@ var FPComponents = FPComponents || {};
 
                 let id = {};
 
-                this._viewsQueue.push({ id, label, icon, contentElement, active });
-                this._updateViews();
+                let newView = { id, label, icon, contentElement, active };
+                this._views.push(newView);
+
+                this._updateViews(newView);
 
                 return id;
             }
 
             removeView(id) {
-                this._viewsQueue.push({ id, delete: true })
-                this._updateViews();
+
+                const view = this._views.find(v => v.id === id);
+
+                if(view) {
+                    let i = this._views.indexOf(view);
+
+                    if(i >= 0) {
+                        this._views.splice(i, 1);
+                    }
+                }
+
+                this._updateViews({ id, delete: true });
             }
 
-            setViewButtonLabel(id, label) {
-                const view = this._views.find(v => v.id === id);
+            setViewButtonLabel(id, newText) {
+                const view = this._views.find(v => v.id === id);                
                 if(view) {
                     const textNode = view.menuButton.getElementsByTagName("p");
                     if(textNode) {
-                        textNode[0].textContent = label;
+                        view.label = newText;
+                        textNode[0].textContent = view.label;
                     }
                 }
             }
@@ -164,44 +176,44 @@ var FPComponents = FPComponents || {};
                 return this._build();
             }
 
-            _updateViews() {
-                if (!this._dirty) {
+            _updateViews(view = null) {
+
+                if(view != null && view != undefined) {
+                    if (view.delete) {
+                        this._removeViewButton(view);
+                    } else {
+                        this._addViewButton(view);
+                    } 
+                }
+                if (this._dirty == false) {
                     this._dirty = true;
 
                     window.setTimeout(() => {
                         this._dirty = false;
                         if (this._root !== null) {
-                            let view;
-
-                            while (view = this._viewsQueue.shift()) {
-                                if (view.delete) {
-                                    this._removeViewButton(view);
-                                } else {
-                                    this._addViewButton(view);
-                                }
-                            }
-
+                            
                             let child;
                             while (child = this._contentPane.lastChild) {
                                 this._contentPane.removeChild(child);
                             }
 
                             // Update view status and switch content and set exising scroll value
-                            for (view of this._views) {
-                                if (view.id === this._activeViewId) {
+                            let currView;
+                            for (currView of this._views) {
+                                if (currView.id === this._activeViewId) {
 
-                                    if (view.contentElement.parentElement !== null) {
-                                        view.contentElement.parentElement.removeChild(view.contentElement);
+                                    if (currView.contentElement.parentElement !== null) {
+                                        currView.contentElement.parentElement.removeChild(currView.contentElement);
                                     }
 
-                                    this._contentPane.appendChild(view.contentElement);
-                                    this._contentPane.scrollTop = view.scrollTop;
+                                    this._contentPane.appendChild(currView.contentElement);
+                                    this._contentPane.scrollTop = currView.scrollTop;
                                     (function (view, scope) {
                                         window.setTimeout(() => { scope._contentPane.scrollTop = view.scrollTop; }, 0);
-                                    })(view, this);
+                                    })(currView, this);
 
-                                    if (view.menuButton) {
-                                        view.menuButton.classList.add(o.Hamburgermenu_A._MENU_BUTTON_ACTIVE);
+                                    if (currView.menuButton) {
+                                        currView.menuButton.classList.add(o.Hamburgermenu_A._MENU_BUTTON_ACTIVE);
                                     }
 
                                     window.setTimeout(() => {
@@ -213,8 +225,8 @@ var FPComponents = FPComponents || {};
                                     }, 0);
 
                                 } else {
-                                    if (view.contentElement && view.contentElement.parentElement !== null && view.contentElement.parentElement !== this._contentPane) {
-                                        view.contentElement.parentElement.removeChild(view.contentElement);
+                                    if (currView.contentElement && currView.contentElement.parentElement !== null && currView.contentElement.parentElement !== this._contentPane) {
+                                        currView.contentElement.parentElement.removeChild(currView.contentElement);
                                     }
                                 }
                             }
@@ -265,8 +277,6 @@ var FPComponents = FPComponents || {};
                 }
 
                 view.menuButton = divNode;
-
-                this._views.push(view);
             }
 
             _removeViewButton(view) {
@@ -290,8 +300,6 @@ var FPComponents = FPComponents || {};
                                 v.contentElement = null;
                             }, 0);
                         }
-
-                        this._views.splice(i, 1);
 
                         // if active view was removed, we need to activate another if possible.
                         if (this._activeViewId === v.id) {
@@ -409,7 +417,7 @@ var FPComponents = FPComponents || {};
             }
         }
 
-        o.Hamburgermenu_A.VERSION = "1.2";
+        o.Hamburgermenu_A.VERSION = "1.3";
         o.Hamburgermenu_A._MENU_OVERLAY_OPEN = "fp-components-hamburgermenu-a-overlay--open"
         o.Hamburgermenu_A._MENU_CONTAINER_OPEN = "fp-components-hamburgermenu-a-menu__container--open"
         o.Hamburgermenu_A._MENU_OPEN = "fp-components-hamburgermenu-a--open"

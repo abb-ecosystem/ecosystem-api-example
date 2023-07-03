@@ -46,74 +46,72 @@ export default class SettingsView extends TComponents.Component_A {
     };
   }
 
+  onRender() {
+    const setup = new TComponents.LayoutInfobox_A(this.find('.setup'), {
+      label: 'Setup',
+      content: { children: this.find('.setup-content') },
+    });
+    setup.render();
+
+    const basicControl = new TComponents.LayoutInfobox_A(this.find('#basic-control'), {
+      label: 'Basic control',
+      content: {
+        children: [this.child.btnStart, this.child.switchMotors, this.child.radioOpMode],
+        classNames: 'justify-start',
+      },
+    });
+    basicControl.render();
+  }
+
   markup(self) {
-    return `
-      <div id="settings-subview" class="tc-content">
-        <div class="tc-row">
-          <div class="tc-cols-1 tc-infobox">
+    return /*html*/ `
+      <div id="settings-subview" class="tc-content flex-col">
+        <div class="flex-col"> 
+
+          <div class="tc-infobox">
             <div>
               <p>Machine Tending Example</p>
             </div>
-          </div>
+            
+            <div class="flex-row">
 
-          <div class="tc-row">
-            <div class="tc-cols-2">
-              <div class="tc-row">
-                <div class="tc-settings-view-flex-container">
-                  <div class="tc-cols-1 tc-infobox">
-                    <div>
-                      <p>Setup</p>
-                    </div>
-                  </div>
+              <div class="flex-1">
+                <div class="setup"></div>
+                <div class="setup-content">
                   <div class="mt-numRows"></div>
                   <div class="mt-numCols"></div>
-                  <div class="tc-container-row">
-                    <p class="tc-item">Number of parts on tray</p>
+                  <div class="flex-row gap-4 items-center">
+                    <p class="my-3">Number of parts on tray</p>
                     <div class="mt-numParts"></div>
                   </div>
-                </div>
-
-                <div class="tc-settings-view-flex-container">
-
-                  <div class="tc-container-row">
-                    <p class="tc-item">Current part</p>
+                  <div class="flex-row gap-4 items-center">
+                    <p class="my-3">Current part</p>
                     <div class="mt-currentPart"></div>
                   </div>
-                  <div class="tc-container-row">
-                    <p class="tc-item">Simulate Machine</p>
+                  <div class="flex-row gap-4 items-center">
+                    <p class="my-3">Simulate Machine</p>
                     <div class="checkbox-sim tc-item"></div>
                   </div>
                 </div>
               </div>
-            </div>
-
-            <div class="tc-cols-2">
-              <div>
+            
+              <div class="flex-1">
                 <img src="${imgTray}" alt="Tray" class="tc-settingview-img" />
               </div>
             </div>
           </div>
+        
+          <div id="basic-control"></div>
+    
+          </div>
         </div>
 
-
-        <div class="tc-row">
-          <div class="tc-cols-1 tc-infobox">
-           
-            <div><p>BASIC CONTROL</p></div> 
-            <div class="box"> 
-              <div class="btn-start"></div>
-              <div class="switch-motors"></div>
-              <div class="radio-opmode"></div>
-            </div>
-
-        </div>
       </div>
     `;
   }
 }
 
-var tComponentStyle = document.createElement('style');
-tComponentStyle.innerHTML = `
+SettingsView.loadCssClassFromString(/*css*/ `
 
 .tc-settingview-img {
   width: 300px;
@@ -121,16 +119,4 @@ tComponentStyle.innerHTML = `
   padding: 0px 50px;
 }
 
-.tc-settings-view-flex-container {
-  width: 100%;
-
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  margin-right: 100px;
-}
-
-`;
-
-var ref = document.querySelector('script');
-ref.parentNode.insertBefore(tComponentStyle, ref);
+`);

@@ -18,7 +18,7 @@ export default class SignalExamples extends TComponents.Component_A {
       this._signal = await API.SIGNAL.getSignal(signals[0]);
     } catch (e) {
       this.error = true;
-      TComponents.Popup_A.danger('SignalComponents', [e.message, e.description]);
+      TComponents.Popup_A.danger('SignalExamples', [e.message, e.description]);
     }
   }
 
@@ -37,7 +37,9 @@ export default class SignalExamples extends TComponents.Component_A {
         callback: this.cbLoadConfig.bind(this),
         label: 'Load example configuration',
       }),
-      signalComponents: new SignalComponents(this.find('.signal-components'), this._signalSelected),
+      signalComponents: new SignalComponents(this.find('.signal-components'), {
+        signal: this._signalSelected,
+      }),
     };
 
     // console.log('😎😎😎😎😎 - SignalExamples finished rendering...');
@@ -50,7 +52,7 @@ export default class SignalExamples extends TComponents.Component_A {
   }
 
   markup() {
-    return `
+    return /*html*/ `
     <div class="signal-example-view">
       <div class="tc-row">
         <div class="tc-cols-1 tc-infobox">
@@ -104,7 +106,6 @@ export default class SignalExamples extends TComponents.Component_A {
   async cbConfirmLoadConfiguration(action) {
     if (action === 'ok') {
       let url = `${configPath}/${configName}.cfg`;
-      console.log('💥', url);
       const action = 'replace';
       try {
         await API.CONFIG.loadConfiguration(url, action);
@@ -117,8 +118,7 @@ export default class SignalExamples extends TComponents.Component_A {
   }
 }
 
-var componentStyle = document.createElement('style');
-componentStyle.innerHTML = `
+SignalExamples.loadCssClassFromString(/*css*/ `
 
 .signal-example-view {
   min-height: 320px;
@@ -128,7 +128,4 @@ componentStyle.innerHTML = `
   min-height: 100px;
   min-width: 300px;
 }
-  `;
-
-var ref = document.querySelector('script');
-ref.parentNode.insertBefore(componentStyle, ref);
+  `);
