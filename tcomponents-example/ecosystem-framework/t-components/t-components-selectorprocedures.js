@@ -40,7 +40,7 @@ export class SelectorProcedures_A extends Dropdown_A {
      */
     this._props;
 
-    this.initPropsDependencies = ['module', 'isInUse', 'filter'];
+    this.initPropsDep(['module', 'isInUse', 'filter']);
   }
 
   /**
@@ -51,11 +51,11 @@ export class SelectorProcedures_A extends Dropdown_A {
    */
   defaultProps() {
     return {
-      module: null,
+      module: '',
       isInUse: false,
       selected: '',
       label: '',
-      addNoSelection: true,
+      addNoSelection: false,
       filter: '',
     };
   }
@@ -63,11 +63,7 @@ export class SelectorProcedures_A extends Dropdown_A {
   async onInit() {
     try {
       if (!this.task) this.task = await API.RAPID.getTask();
-      const procs = await this.task.searchProcedures(
-        this._props.module,
-        this._props.isInUse,
-        this._props.filter
-      );
+      const procs = await this.task.searchProcedures(this._props.module, this._props.isInUse, this._props.filter);
 
       this._updateItemList(procs.map((p) => p.name));
     } catch (e) {
@@ -86,6 +82,6 @@ export class SelectorProcedures_A extends Dropdown_A {
    * @memberof TComponents.SelectorProcedures_A
    */
   async updateSearch(module, filter) {
-    this.setProps({ module, filter });
+    await this.setProps({ module, filter }, null, true);
   }
 }

@@ -4,7 +4,7 @@ import { Popup_A } from './t-components-popup.js';
 import { SelectorEthernetIPDevices_A } from './t-components-selectorsethernetip.js';
 
 /**
- * @typedef SignalEditProps
+ * @typedef TComponents.SignalEditProps
  * @prop {string | object} signal - Signal name, or API.CONFIG.SIGNAL.Signal object
  */
 
@@ -13,7 +13,7 @@ import { SelectorEthernetIPDevices_A } from './t-components-selectorsethernetip.
  * @class TComponents.SignalEdit_A
  * @extends TComponents.Component_A
  * @param {HTMLElement} parent - DOM element in which this component is to be inserted
- * @param {SignalEditProps} props
+ * @param {TComponents.SignalEditProps} props
  * @example
  * // index.html
  * ...
@@ -61,7 +61,7 @@ export class SignalEdit_A extends Component_A {
      */
     this._props;
 
-    this.initPropsDependencies = ['signal'];
+    this.initPropsDep('signal');
   }
 
   /**
@@ -76,10 +76,7 @@ export class SignalEdit_A extends Component_A {
 
   async onInit() {
     try {
-      this._signal =
-        typeof this._props.signal === 'string'
-          ? await API.SIGNAL.getSignal(this._props.signal)
-          : this._props.signal;
+      this._signal = typeof this._props.signal === 'string' ? await API.SIGNAL.getSignal(this._props.signal) : this._props.signal;
     } catch (e) {
       Popup_A.error(e);
     }
@@ -139,7 +136,7 @@ export class SignalEdit_A extends Component_A {
           <div class="flex-row justify-end">
             <div class="modal-signal-update tc-ok"></div>
           </div>
-          
+
         </form>
        `;
   }
@@ -148,7 +145,7 @@ export class SignalEdit_A extends Component_A {
    * Prop: signal - Signal name, or API.CONFIG.SIGNAL.Signal object
    * @alias signal
    * @type {string | object}
-   * @memberof SignalEdit_A
+   * @memberof TComponents.SignalEdit_ASignalEdit_A
    */
   get signal() {
     return this._props.signal;
@@ -162,6 +159,7 @@ export class SignalEdit_A extends Component_A {
    * Add a external handler function that may require to be updated after signal configuration change
    * @alias onUpdate
    * @param {Function} handler
+   * @memberof TComponents.SignalEdit_A
    */
   onUpdate(handler) {
     const cbUpdate = async function () {
@@ -195,9 +193,7 @@ export class SignalEdit_A extends Component_A {
       found = await API.DEVICE.find({ device: attr.device, map: attr.map, type: attr.type });
       if (found) {
         this._btnUpdate.enabled = false;
-        return found.name !== attr.name
-          ? `Device "${attr.device}", Map "${attr.map}" already used by "${found.name}"`
-          : null;
+        return found.name !== attr.name ? `Device "${attr.device}", Map "${attr.map}" already used by "${found.name}"` : null;
       } else {
         this._btnUpdate.enabled = true;
         return null;

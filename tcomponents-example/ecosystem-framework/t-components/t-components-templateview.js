@@ -36,6 +36,12 @@ export class TemplateView_A extends Component_A {
      */
     this._props;
 
+    /**
+     * Used to specify which component input properties shall trigger [init]{@link TComponents.Component_A} when their value
+     * is changed, i.e. by using {@link TComponents.Base_A#setProps setProps}.
+     */
+    this.initPropsDep('delay');
+
     this.btnFPComp = new FPComponents.Button_A();
     this.btnFPComp.text = `FPComponent button`;
   }
@@ -47,12 +53,6 @@ export class TemplateView_A extends Component_A {
    * @returns {TComponents.TemplateViewProps}
    */
   defaultProps() {
-    /**
-     * Used to specify which component input properties shall trigger [init]{@link TComponents.Component_A} when their value
-     * is changed, i.e. by using {@link TComponents.Base_A#setProps setProps}.
-     */
-    this.initPropsDependencies = ['delay'];
-
     return { name: 'Template Component', delay: 0 };
   }
 
@@ -78,10 +78,10 @@ export class TemplateView_A extends Component_A {
   mapComponents() {
     return {
       btnTComp: new Button_A(this.find('.tc-example-btn'), {
-        callback: () => {
+        onClick: () => {
           Popup_A.message('I am a TComponent');
         },
-        label: `TComponent button`,
+        text: `TComponent button`,
       }),
     };
   }
@@ -138,7 +138,7 @@ TemplateView_A.loadCssClassFromString(/*css*/ `
   text-align: center;
   text-transform: uppercase;
   font-weight: bold;
-  color: #91a7ff; 
+  color: #91a7ff;
   text-decoration: underline overline;
 }
   `);

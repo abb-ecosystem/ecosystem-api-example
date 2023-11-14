@@ -2,7 +2,7 @@ import { Component_A } from './t-components-component.js';
 
 /**
  * @typedef TComponents.DigitalProps
- * @prop {Function} [callback] Function to be called when indicator is pressed
+ * @prop {Function} [onClick] Function to be called when indicator is pressed
  * @prop {string} [label] Label text
  */
 
@@ -21,7 +21,7 @@ import { Component_A } from './t-components-component.js';
  *
  * // index.js
  *  const btnExecute = new Digital_A(document.querySelector('.digital-container'), {
- *     callback: (value) => {
+ *     onClick: (value) => {
  *       console.log('state changed to ${value}');
  *     },
  *     label: 'Signal indicator',
@@ -47,14 +47,13 @@ export class Digital_A extends Component_A {
    */
   defaultProps() {
     return {
-      callback: null,
+      onClick: null,
     };
   }
 
   onRender() {
-    this._dig.desc = this._props.label;
     this._dig.onclick = this.cbOnClick.bind(this);
-    if (this._props.callback) this.onClick(this._props.callback);
+    if (this._props.onClick) this.onClick(this._props.onClick);
     this._dig.attachToElement(this.find('.tc-digital-container'));
   }
 
@@ -62,25 +61,6 @@ export class Digital_A extends Component_A {
     return /*html*/ `
           <div class="tc-digital-container flex"></div>
         `;
-  }
-
-  /**
-   * Component label text
-   * @alias label
-   * @type {string}
-   * @memberof TComponents.Digital_A
-   */
-  get label() {
-    this._dig.desc = this._props.label;
-    return this._dig.desc;
-  }
-
-  /**
-   * @protected
-   */
-  set label(text) {
-    this._props.label = text;
-    this._dig.desc = text;
   }
 
   /**
@@ -101,22 +81,22 @@ export class Digital_A extends Component_A {
   }
 
   /**
-   * Adds a callback funciton to the component. This will be called after the button is pressed and released
+   * Adds a callback funciton to the component. This will be called after the indicator is pressed and released
    * @alias onClick
    * @memberof TComponents.Digital_A
-   * @param   {function}  func    The callback function which is called when the button is pressed
+   * @param   {Function}  func    The callback function which is called when the indicator is pressed
    */
   onClick(func) {
     this.on('click', func);
   }
 
   /**
-   * Callback function which is called when the button is pressed, it trigger any function registered with {@link onClick() onClick}
+   * Callback function which is called when the indicator is pressed, it trigger any function registered with {@link onClick() onClick}
    * @alias cbOnClick
    * @memberof TComponents.Digital_A
    * @param   {any}  value
-   * @private
    * @async
+   * @private
    */
   async cbOnClick(value) {
     this.trigger('click', value);

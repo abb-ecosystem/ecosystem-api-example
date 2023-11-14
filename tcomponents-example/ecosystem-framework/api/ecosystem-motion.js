@@ -7,7 +7,6 @@ export const factoryApiMotion = function (mot) {
    */
   mot.MOTION = new (function () {
     let ccounter = null;
-    let jogMonitor = null;
     let jogStop = false;
 
     /**
@@ -56,21 +55,27 @@ export const factoryApiMotion = function (mot) {
      * @prop {number} y
      * @prop {number} z
      * @memberof API.MOTION
-     *
+     */
+
+    /**
      * @typedef Rot
      * @prop {number} q1
      * @prop {number} q2
      * @prop {number} q3
      * @prop {number} q4
      * @memberof API.MOTION
-     *
+     */
+
+    /**
      * @typedef RobConf
      * @prop {number} cf1
      * @prop {number} cf4
      * @prop {number} cf6
      * @prop {number} cfx
      * @memberof API.MOTION
-     *
+     */
+
+    /**
      * @typedef ExtAx
      * @prop {number}  eax_a
      * @prop {number}  eax_b
@@ -79,11 +84,31 @@ export const factoryApiMotion = function (mot) {
      * @prop {number}  eax_e
      * @prop {number}  eax_f
      * @memberof API.MOTION
-     *
+     */
+
+    /**
      * @typedef RobTarget
      * @prop {Trans} trans
      * @prop {Rot} rot
      * @prop {RobConf} robconf
+     * @prop {ExtAx} extax
+     * @memberof API.MOTION
+     */
+
+    /**
+     * @typedef RobAx
+     * @prop {number} rax_1
+     * @prop {number} rax_2
+     * @prop {number} rax_3
+     * @prop {number} rax_4
+     * @prop {number} rax_5
+     * @prop {number} rax_6
+     * @memberof API.MOTION
+     */
+
+    /**
+     * @typedef JointTarget
+     * @prop {RobAx} robax
      * @prop {ExtAx} extax
      * @memberof API.MOTION
      */
@@ -95,7 +120,9 @@ export const factoryApiMotion = function (mot) {
      * @prop {COORDS} [coords]
      * @prop {JOGMODE} [jogMode]
      * @prop {JogData} [jogData]
-     * @prop {RobTarget} [robtarget]
+     * @prop {RobTarget} [robTarget]
+     * @prop {JointTarget} [jointTarget]
+     * @prop {boolean} [doJoint]
      * @memberof API.MOTION
      */
 
@@ -112,8 +139,12 @@ export const factoryApiMotion = function (mot) {
       coords = this.COORDS.Current,
       jogMode = this.JOGMODE.GoToPos,
       jogData = [500, 500, 500, 500, 500, 500],
-      robtarget = null,
+      robTarget = null,
+      jointTarget = null,
+      doJoint = false,
     }) {
+      console.log('🚀 executeJogging:', tool, wobj, coords, jogMode, jogData, robTarget, jointTarget, doJoint);
+
       let state = null;
       try {
         jogStop = true;
@@ -121,13 +152,12 @@ export const factoryApiMotion = function (mot) {
         state = await API.RWS.getMastershipState('motion');
 
         await prepareJogging(tool, wobj, coords, jogMode);
-        await doJogging(jogData, robtarget);
+
+        if (doJoint && jointTarget !== null) await doJogging(jogData, jointTarget, false, true);
+        else await doJogging(jogData, robTarget, false, false);
         await API.RWS.releaseMastership('motion');
       } catch (err) {
-        if (
-          state === (await API.RWS.getMastershipState('motion')) &&
-          (state === API.RWS.MASTERSHIP.Remote || state === API.RWS.MASTERSHIP.Local)
-        )
+        if (state === (await API.RWS.getMastershipState('motion')) && (state === API.RWS.MASTERSHIP.Remote || state === API.RWS.MASTERSHIP.Local))
           await API.RWS.releaseMastership('motion');
         console.log(`Motion Mastership: ${state}`);
         return API.rejectWithStatus('Execute jogging failed.', err);
@@ -161,19 +191,21 @@ export const factoryApiMotion = function (mot) {
      * @memberof API.MOTION
      * @private
      * @param {API.MOTION.JogData} jogData
-     * @param {API.MOTION.RobTarget} robtarget
-     * @param {boolean} once
+     * @param {API.MOTION.RobTarget | API.MOTION.JointTarget} target
+     * @param {boolean} once - If true, send jog command only once
+     * @param {boolean} doJoint	- If true, target is a JointTarget
      * @returns {undefined |Promise<{}>} - Undefined or reject Promise if fails.
      */
-    const doJogging = async function (jogData, robtarget = null, once = false) {
+    const doJogging = async function (jogData, target = null, once = false, doJoint = false) {
       jogStop = false;
       let opMode = await API.CONTROLLER.getOperationMode();
       let ctrlState = await API.CONTROLLER.getControllerState();
       if (ctrlState === API.CONTROLLER.STATE.MotorsOn && opMode === API.CONTROLLER.OPMODE.ManualR) {
         while (!jogStop) {
           try {
-            if (robtarget !== null) {
-              await API.RWS.MOTIONSYSTEM.setRobotPositionTarget(robtarget);
+            if (target !== null) {
+              if (doJoint) await API.RWS.MOTIONSYSTEM.setRobotPositionJoint(target);
+              else await API.RWS.MOTIONSYSTEM.setRobotPositionTarget(target);
             }
             await API.RWS.MOTIONSYSTEM.jog(jogData, ccounter);
 
@@ -186,9 +218,7 @@ export const factoryApiMotion = function (mot) {
         }
       } else {
         jogStop = true;
-        return API.rejectWithStatus(
-          `Missing conditions to jog: CtrlState - ${ctrlState}, OpMode - ${opMode}`
-        );
+        return API.rejectWithStatus(`Missing conditions to jog: CtrlState - ${ctrlState}, OpMode - ${opMode}`);
       }
     };
 
@@ -257,13 +287,13 @@ export const factoryApiMotion = function (mot) {
      * Sets the active tool to the specified value
      * @alias getTool
      * @memberof API.MOTION
-     * @param {string} value - Name of the tool
+     * @param {string} tool - Name of the tool
      * @returns {Promise<object>} - Object containing current position of the robot
      */
-    this.setTool = async function (value) {
+    this.setTool = async function (tool) {
       try {
         await API.RWS.requestMastership('motion');
-        await API.RWS.MOTIONSYSTEM.setMechunit({ tool: value });
+        await API.RWS.MOTIONSYSTEM.setMechunit({ tool });
         await API.RWS.releaseMastership('motion');
       } catch (e) {
         return API.rejectWithStatus('Set tool failed.', e);

@@ -1,7 +1,7 @@
 import { Menu_A } from './t-components-menu.js';
 
 /**
- * @typedef HamburgerProps
+ * @typedef TComponents.HamburgerProps
  * @prop {string} [title] - Set this attribute to any string to display a title next to the
  * hamburger menu icon when the menu is open. Set this attribute to false (default) to hide
  * the menu when closed, and only display the hamburger menu icon.
@@ -28,10 +28,6 @@ import { Menu_A } from './t-components-menu.js';
  * @param {TComponents.HamburgerProps} [props]
  */
 export class Hamburger_A extends Menu_A {
-  /**
-   * @param {HTMLElement} parent - HTMLElement that is going to be the parent of the component
-   * @param {HamburgerProps} props
-   */
   constructor(parent, props) {
     super(parent, props);
 
@@ -39,30 +35,36 @@ export class Hamburger_A extends Menu_A {
      * @type {TComponents.HamburgerProps}
      */
     this._props;
+  }
 
-    this.hamburgerMenu = new FPComponents.Hamburgermenu_A();
-    // moved to render as workaround
-    // this.hamburgerMenu.title = this._props.title;
-    // this.hamburgerMenu.alwaysVisible = this._props.alwaysVisible;
-    // this.hamburgerMenu.onchange = this.cbOnChange.bind(this);
+  onInit() {
+    this._props.views.forEach((view) => {
+      if (!view.hasOwnProperty('image')) view['image'] = '';
+    });
+    super.onInit();
   }
   defaultProps() {
     return { alwaysVisible: true };
   }
 
   onRender() {
+    this.hamburgerMenu = new FPComponents.Hamburgermenu_A();
     this.hamburgerMenu.attachToElement(this.container);
     this.hamburgerMenu.title = this._props.title;
     this.hamburgerMenu.alwaysVisible = this._props.alwaysVisible;
     this.hamburgerMenu.onchange = this.cbOnChange.bind(this);
 
+    this.container.dataset.view = 'true';
     this.views.forEach(({ name, content, image, active, id }) => {
       const dom = this._getDom(content, id);
-      this.viewId.set(this.hamburgerMenu.addView(name, dom, image, active), name);
+      this.viewId.set(this.hamburgerMenu.addView(name, dom, image ? image : undefined, active), name);
     });
+    this.find('.fp-components-hamburgermenu-a-menu__container').style.setProperty('z-index', '3');
+    this.find('.fp-components-hamburgermenu-a-button-container').style.setProperty('z-index', '3');
+    this.find('.fp-components-hamburgermenu-a-container').style.alignItems = 'normal';
+    this.find('.fp-components-hamburgermenu-a-container').classList.add('hamburger__container');
+    this.find('.fp-components-hamburgermenu-a-container__content').classList.add('hamburger__container', 'flex-col', 'justify-stretch');
 
-    this.find('.fp-components-hamburgermenu-a-menu__container').style.setProperty('z-index', '1');
-    this.find('.fp-components-hamburgermenu-a-button-container').style.setProperty('z-index', '1');
     // this.find('.fp-components-hamburgermenu-a-container__content').style.setProperty(
     //   'overflow',
     //   'visible'
@@ -74,14 +76,23 @@ export class Hamburger_A extends Menu_A {
     this.container.classList.add('hamburger-base-style');
   }
 
+  /**
+   * Add a new view to the hamburger menu. If image is no passed, a empty string will be assigned to the image property
+   * @alias addView
+   * @memberof TComponents.Hamburger_A
+   * @param  {TComponents.View}  view   View object
+   */
+  addView(newView) {
+    if (!newView.hasOwnProperty['image']) newView['image'] = '';
+    super.addView(newView);
+  }
+
   get activeView() {
     return this.viewId.get(this.hamburgerMenu.activeView);
   }
 
   set activeView(name) {
-    this.hamburgerMenu.activeView = [...this.viewId.entries()].filter(
-      ([_, value]) => value === name
-    )[0][0];
+    this.hamburgerMenu.activeView = [...this.viewId.entries()].filter(([_, value]) => value === name)[0][0];
   }
 }
 
@@ -93,5 +104,9 @@ Hamburger_A.loadCssClassFromString(/*css*/ `
   border-top: none;
   border-buttom: none;
   border-right: none;
+}
+
+.hamburger__container {
+  max-width: inherit;
 }
 `);

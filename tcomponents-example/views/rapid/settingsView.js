@@ -48,13 +48,13 @@ export default class SettingsView extends TComponents.Component_A {
 
   onRender() {
     const setup = new TComponents.LayoutInfobox_A(this.find('.setup'), {
-      label: 'Setup',
+      title: 'Setup',
       content: { children: this.find('.setup-content') },
     });
     setup.render();
 
     const basicControl = new TComponents.LayoutInfobox_A(this.find('#basic-control'), {
-      label: 'Basic control',
+      title: 'Basic control',
       content: {
         children: [this.child.btnStart, this.child.switchMotors, this.child.radioOpMode],
         classNames: 'justify-start',

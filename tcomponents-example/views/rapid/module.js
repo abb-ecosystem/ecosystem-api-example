@@ -1,6 +1,6 @@
 export default class Module extends TComponents.Component_A {
   constructor(parent, path, name, isSysmodule = true) {
-    super(parent, { options: { async: true } });
+    super(parent, { options: { async: false } });
     this.path = path.replace(/\:$/, '');
     this.name = name;
     this.extension = isSysmodule ? '.sysx' : '.modx';

@@ -1,6 +1,10 @@
 import API from './ecosystem-base.js';
 
 export const factoryApiFile = function (f) {
+  /**
+   * @alias API.FILESYSTEM
+   * @namespace
+   */
   f.FILESYSTEM = new (function () {
     const fixPath = function (path) {
       return `${path.replace(/^HOME/, '$HOME').replace(/\:$/, '')}/`;
@@ -47,9 +51,7 @@ export const factoryApiFile = function (f) {
      * @param  {string} file Name of the file
      */
     this.getFile = async function (path, file) {
-      console.log(path);
       let url = `${path.replace(/\:$/, '').replace(/^HOME/, '$HOME')}/${file}`;
-      console.log(url);
       try {
         let f = await RWS.FileSystem.getFile(url);
         return await f.getContents();
@@ -58,6 +60,14 @@ export const factoryApiFile = function (f) {
       }
     };
 
+    /**
+     * Get a list of files objects including name and content
+     * @alias getFiles
+     * @memberof API.FILESYSTEM
+     * @param  {string} path Path to the file, including file name
+     * @param  {string} file Name of the file
+     * @returns {Promise<object[]>} - Array of file objects [ {name, content}]
+     */
     this.getFiles = async function (path) {
       const directory = await _getDirectory(path);
       const directoryContent = await directory.getContents();
@@ -81,6 +91,20 @@ export const factoryApiFile = function (f) {
       return API.rejectWithStatus('Error while updating file content');
     };
 
+    this.createDirectory = async function (directoryPath) {
+      let dir = directoryPath.replace(/\:$/, '').replace(/^HOME/, '$HOME');
+      try {
+        return await RWS.FileSystem.createDirectory(dir);
+      } catch (e) {
+        if (e && e.httpStatus && e.httpStatus.code == 409) {
+          // the directory is already created
+        } else {
+          console.error(e);
+          return API.rejectWithStatus(`Creating ${directoryPath} directory failed`, e);
+        }
+      }
+    };
+
     this.createNewFile = async function (directoryPath, fileName, data, overwrite = false) {
       try {
         const directory = await _getDirectory(directoryPath);
@@ -89,10 +113,7 @@ export const factoryApiFile = function (f) {
 
         if (fileExists) {
           if (overwrite) await this.updateFile(directoryPath, fileName, data);
-          else
-            throw new Error(
-              `Create new file failed since file already exists and overwrite equals false.`
-            );
+          else throw new Error(`Create new file failed since file already exists and overwrite equals false.`);
         } else {
           const setContentStatus = await newFile.setContents(data);
           if (setContentStatus) {
@@ -123,9 +144,7 @@ export const factoryApiFile = function (f) {
       const srcFile = RWS.FileSystem.createFileObject(source);
       const destFile = RWS.FileSystem.createFileObject(destination);
       if ((await destFile.fileExists()) && !overwrite) {
-        return API.rejectWithStatus(
-          `Copy file failed since destination file already exists and overwrite equals false.`
-        );
+        return API.rejectWithStatus(`Copy file failed since destination file already exists and overwrite equals false.`);
       }
       return await srcFile.copy(destination, overwrite, false);
     };

@@ -45,7 +45,7 @@ export class VarIncrDecr_A extends Component_A {
      */
     this._props;
 
-    this.initPropsDependencies = ['module', 'variable'];
+    this.initPropsDep(['module', 'variable']);
   }
 
   /**
@@ -88,12 +88,12 @@ export class VarIncrDecr_A extends Component_A {
         readOnly: this._props.readOnly,
       }),
       incrValue: new Button_A(this.find('.tc-varincrdecr-incr'), {
-        callback: this.cbIncr.bind(this),
-        label: '+',
+        onClick: this.cbIncr.bind(this),
+        text: '+',
       }),
       decrValue: new Button_A(this.find('.tc-varincrdecr-decr'), {
-        callback: this.cbDecr.bind(this),
-        label: '-',
+        onClick: this.cbDecr.bind(this),
+        text: '-',
       }),
     };
   }
@@ -181,7 +181,7 @@ export class VarIncrDecr_A extends Component_A {
    */
   async cbIncr() {
     try {
-      let cv = Number.parseInt(await this._var.getValue());
+      let cv = Number.parseFloat(await this._var.getValue());
       cv += this._props.steps;
       this._var.setValue(cv);
     } catch (e) {
@@ -198,7 +198,7 @@ export class VarIncrDecr_A extends Component_A {
    */
   async cbDecr() {
     try {
-      let cv = Number.parseInt(await this._var.getValue());
+      let cv = Number.parseFloat(await this._var.getValue());
       cv -= this._props.steps;
       this._var.setValue(cv);
     } catch (e) {

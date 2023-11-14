@@ -4,10 +4,15 @@ export default class Variable extends TComponents.Component_A {
    *
    * @param {HTMLElement} parent - DOM element in which this component is to be inserted
    */
-  constructor(parent, module = null) {
-    super(parent, { options: { async: false } });
-    this._module = module;
-    this._esNumber = 'esNumber';
+  constructor(parent, props) {
+    super(parent, props);
+  }
+
+  defaultProps() {
+    return {
+      module: '',
+      variable: 'esNumber',
+    };
   }
 
   async onInit() {
@@ -21,54 +26,66 @@ export default class Variable extends TComponents.Component_A {
   mapComponents() {
     return {
       varCtrl: new TComponents.InputVariable_A(this.find('.var-ctrl'), {
-        module: this._module,
-        variable: this._esNumber,
-        label: this._esNumber,
+        module: this._props.module,
+        variable: this._props.variable,
+        label: 'Control',
+        labelPos: 'left',
+        useBorder: false,
       }),
       varInd: new TComponents.InputVariable_A(this.find('.var-ind'), {
-        module: this._module,
-        variable: this._esNumber,
-        label: this._esNumber,
+        module: this._props.module,
+        variable: this._props.variable,
+        label: 'Indicator',
+        labelPos: 'left',
+        useBorder: false,
       }),
       varIncrDecrInd: new TComponents.VarIncrDecr_A(this.find('.var-incr-decr-ind'), {
-        module: this._module,
-        variable: this._esNumber,
+        module: this._props.module,
+        variable: this._props.variable,
         readOnly: false,
       }),
       varIncrDecrCtrl: new TComponents.VarIncrDecr_A(this.find('.var-incr-decr-ctrl'), {
-        module: this._module,
-        variable: this._esNumber,
+        module: this._props.module,
+        variable: this._props.variable,
         readOnly: true,
       }),
       toggleBtn: new TComponents.Button_A(this.find('.toggle-view'), {
-        callback: () => {
-          if (this.child.toggleBtn.label === 'hide') {
+        onClick: () => {
+          if (this.child.toggleBtn.text === 'hide') {
             this.child.varIncrDecrCtrl.hide();
             this.child.varIncrDecrInd.hide();
             this.child.varCtrl.hide();
             this.child.varInd.hide();
-            this.child.toggleBtn.text = this.child.toggleBtn.label = 'show';
+            this.child.toggleBtn.text = this.child.toggleBtn.text = 'show';
           } else {
             this.child.varIncrDecrCtrl.show();
             this.child.varIncrDecrInd.show();
             this.child.varCtrl.show();
             this.child.varInd.show();
-            this.child.toggleBtn.text = this.child.toggleBtn.label = 'hide';
+            this.child.toggleBtn.text = this.child.toggleBtn.text = 'hide';
           }
         },
-        label: 'hide',
+        text: 'hide',
       }),
       stepsSelector: new TComponents.Dropdown_A(this.find('.steps-selector'), {
-        itemList: [1, 5, 10, 50, 100],
+        itemList: [1, 1.2, 5, 10, 50, 100],
         selected: 1,
         label: 'steps',
       }),
       selector: new TComponents.SelectorVariables_A(this.find('.dd-menu'), {
-        module: this._module,
+        module: this._props.module,
       }),
       getBtn: new TComponents.Button_A(this.find('.get-btn'), {
-        callback: this.cbOnClick.bind(this),
-        label: 'Get value',
+        onClick: this.cbOnClick.bind(this),
+        text: 'Get value',
+      }),
+      varsLayout: new TComponents.LayoutInfobox_A(this.find('.var-view-subscribe'), {
+        title: 'Variable elements',
+        content: { children: this.find('.var-view-subscribe-content') },
+      }),
+      getVarsLayout: new TComponents.LayoutInfobox_A(this.find('.get-var-view'), {
+        title: 'Getting a Rapid variable value',
+        content: { children: this.find('.get-var-view-content') },
       }),
     };
   }
@@ -79,14 +96,16 @@ export default class Variable extends TComponents.Component_A {
     this.swUseContainer.desc = 'use border';
     this.swUseContainer.onchange = (value) => {
       if (value) {
-        // this.child.varInd.useBorder();
+        this.child.varInd.setProps({ useBorder: true });
+        this.child.varCtrl.setProps({ useBorder: true });
         this.child.varIncrDecrInd.cssBox();
         this.child.varIncrDecrCtrl.css({
           border: '3px double',
           margin: '5px',
         });
       } else {
-        // this.child.varInd.useBorder(false);
+        this.child.varInd.setProps({ useBorder: false });
+        this.child.varCtrl.setProps({ useBorder: false });
         this.child.varIncrDecrInd.cssBox(false);
         this.child.varIncrDecrCtrl.css('');
       }
@@ -122,45 +141,29 @@ export default class Variable extends TComponents.Component_A {
   markup() {
     return /*html*/ `
     <div class="tc-container">
-      <div class="tc-row var-view-subscribe">
-        <div class="tc-cols-1 tc-infobox">
-          <div><p> Subscription to variables</p></div> 
-          <div class="tc-row">
-            <div class="tc-cols-2 ">
-              <div class="tc-row">
-                <div class="tc-cols-2 ">
-                  <div class="tc-container-row">      
-                    <div class="tc-item box"> 
-                      <div class="var-ind center"></div>
-                      <div class="var-ctrl center"></div>
-                      <div class="var-incr-decr-ind center"></div>
-                      <div class="var-incr-decr-ctrl center"></div>
-                    </div>
-                  </div>
-                </div>  
-                <div class="tc-cols-2 ">
-                  
-                </div>
-              </div>
+      <div class="var-view-subscribe flex-col justify-stretch">
+        <div class="var-view-subscribe-content">
+          <div class=" flex-row justify-stretch">
+
+            <div class="flex-col items-center"> 
+              <div class="var-ind center"></div>
+              <div class="var-ctrl center"></div>
+              <div class="var-incr-decr-ind center"></div>
+              <div class="var-incr-decr-ctrl center"></div>
             </div>
-            <div class="tc-cols-2 ">
-              <div>
-                <div class="tc-container-row">      
-                  <div class="tc-item box"> 
-                    <div class="use-border tc-item"></div>     
-                    <div class="en-view tc-item"></div> 
-                    <div class="toggle-view tc-item"></div>
-                    <div class="steps-selector tc-item"></div>
-                  </div>
-                </div>
-              </div>              
+
+            <div class="flex-col content-center"> 
+              <div class="use-border tc-item"></div>     
+              <div class="en-view tc-item"></div> 
+              <div class="toggle-view tc-item"></div>
+              <div class="steps-selector tc-item"></div>
             </div>
+
           </div>
         </div>
       </div>
-      <div class="tc-row">
-        <div class="tc-cols-1 tc-infobox">
-          <div><p>Getting a Rapid variable value</p></div>
+      <div class="get-var-view">
+        <div class="get-var-view-content">
           <p>Please select a varialbe and press the button to get its value.</p>
           <h4>Variables:</h4>
           <div class="tc-container-row">
@@ -175,14 +178,14 @@ export default class Variable extends TComponents.Component_A {
   }
 
   async cbOnClick() {
-    this._variable = await this.task.getValue(this._module, this.child.selector.selected);
+    this._variable = await this.task.getValue(this._props.module, this.child.selector.selected);
 
     this.showVar.innerHTML = '';
     this.showVar.appendChild(this.generateTable(this._variable));
   }
 
   async cbOnSelection(selection) {
-    this._variable = await this.task.getValue(this._module, selection);
+    this._variable = await this.task.getValue(this._props.module, selection);
   }
 
   generateTable(obj) {
@@ -229,7 +232,7 @@ export default class Variable extends TComponents.Component_A {
 Variable.loadCssClassFromString(/*css*/ `
 
 .var-view-subscribe {
-  min-height: 350px;
+  min-height: 380px;
 }
 
 `);

@@ -23,10 +23,8 @@ export class OpMode_A extends Component_A {
 
   async onInit() {
     try {
-      this.initOpMode = await RWS.Controller.getOperationMode();
-      const opModeSub = RWS.Controller.getMonitor('operation-mode');
-      opModeSub.addCallbackOnChanged(this.OpModeChanged.bind(this));
-      await opModeSub.subscribe();
+      this.initOpMode = await API.CONTROLLER.getOperationMode();
+      API.CONTROLLER.monitorOperationMode(this.OpModeChanged.bind(this));
     } catch (e) {
       this.error = true;
       Popup_A.error(e, `TComponents.OpMode_A`);
@@ -66,12 +64,12 @@ export class OpMode_A extends Component_A {
 
   async cbOpModeAuto() {
     this.radioMan.checked = false;
-    await RWS.Controller.setOperationMode('automatic'); //Sets controller to automatic mode
+    API.CONTROLLER.setOpModeAutomatic();
   }
 
   async cbOpModeMan() {
     this.radioAuto.checked = false;
-    await RWS.Controller.setOperationMode('manual'); //Sets controller to manual mode
+    API.CONTROLLER.setOperationMode();
   }
 }
 

@@ -52,11 +52,6 @@ namespace API.MOTION {
 }
 
 namespace API.RAPID {
-  export enum EXEC {
-    Running = 'running',
-    Stopped = 'stopped',
-  }
-
   export enum MODULETYPE {
     Program = 'program',
     System = 'system',

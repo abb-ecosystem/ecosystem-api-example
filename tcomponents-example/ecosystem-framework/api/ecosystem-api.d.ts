@@ -1,4 +1,5 @@
 /// <reference path="API-enums.ts" />
+/// <reference path="../../rws-api/RWS.d.ts" />
 
 declare namespace API {
   let ECOSYSTEM_API_VERSION: string;
@@ -91,6 +92,7 @@ declare namespace API {
     let isManual: boolean;
     function monitorOperationMode(callback?: Function): Promise<any>;
     function monitorControllerState(callback?: Function): Promise<any>;
+    function setOpMode(mode: API.CONTROLLER.OPMODE): Promise<void>;
     function setOpModeManual(): Promise<void>;
     function setOpModeAutomatic(): Promise<void>;
     function getOperationMode(): Promise<string>;
@@ -161,10 +163,7 @@ declare namespace API {
       blocked?: boolean;
     }
 
-    function search(
-      filter: filterSignalSearch,
-      onlyName: boolean
-    ): Promise<string[] | SIGNAL.Signal[]>;
+    function search(filter: filterSignalSearch, onlyName: boolean): Promise<string[] | SIGNAL.Signal[]>;
 
     function searchByName(name: string): Promise<string | string[]>;
     function searchByCategory(category: string): Promise<string | string[]>;
@@ -191,12 +190,9 @@ declare namespace API {
 
     function updateFile(directoryPath: string, fileName: string, data: string): Promise<any>;
 
-    function createNewFile(
-      directoryPath: string,
-      fileName: string,
-      data: string,
-      overwrite?: boolean
-    ): Promise<any>;
+    function createDirectory(directoryPath: string): Promise<any>;
+
+    function createNewFile(directoryPath: string, fileName: string, data: string, overwrite?: boolean): Promise<any>;
 
     function fileExists(directoryPath: string, fileName: string): Promise<boolean>;
 
@@ -208,17 +204,22 @@ declare namespace API {
   namespace MOTION {
     type JogData = [number, number, number, number, number, number];
 
-    type Trans = {
+    type Pos = {
       x: number;
       y: number;
       z: number;
     };
 
-    type Rot = {
+    type Orient = {
       q1: number;
       q2: number;
       q3: number;
       q4: number;
+    };
+
+    type Pose = {
+      trans: Pos;
+      rot: Orient;
     };
 
     type RobConf = {
@@ -238,10 +239,25 @@ declare namespace API {
     };
 
     interface RobTarget {
-      trans: Trans;
-      rot: Rot;
+      trans: Pos;
+      rot: Orient;
       robconf: RobConf;
       extax: ExtAx;
+    }
+
+    interface LoadData {
+      mass: number;
+      cog: Pos;
+      aom: Orient;
+      ix: number;
+      iy: number;
+      iz: number;
+    }
+
+    interface ToolData {
+      robhold: boolean;
+      tframe: Pose;
+      tload: LoadData;
     }
 
     type RobAx = {
@@ -264,7 +280,9 @@ declare namespace API {
       coords?: COORDS;
       jogMode?: JOGMODE;
       jogData?: number[];
-      robtarget?: RobTarget;
+      robTarget?: RobTarget;
+      jointTarget?: JointTarget;
+      doJoint?: boolean;
     }
 
     function executeJogging(props: executeJoggingProps): Promise<any>;
@@ -278,19 +296,11 @@ declare namespace API {
   }
 
   namespace RAPID {
-    let executionState: EXEC;
-
     function monitorExecutionState(callback: Function): Promise<any>;
 
     interface startExecutionProps {
       regainMode?: 'continue' | 'regain' | 'clear' | 'enter_consume';
-      execMode?:
-        | 'continue'
-        | 'step_over'
-        | 'step_out'
-        | 'step_backwards'
-        | 'step_to_last'
-        | 'step_to_motion';
+      execMode?: 'continue' | 'step_over' | 'step_out' | 'step_backwards' | 'step_to_last' | 'step_to_motion';
       cycleMode?: 'forever' | 'as_is' | 'once';
       condition?: 'none' | 'call_chain';
       stopAtBreakpoint?: boolean;
@@ -317,20 +327,22 @@ declare namespace API {
       filter?: string;
     }
 
-    type RapidDataType = 'num' | 'dnum' | 'string' | 'bool';
+    type RapidDataType = 'num' | 'dnum' | 'string' | 'bool' | 'robtarget' | 'tooldata' | 'wobjdata';
 
     type VariableSymbolType = 'constant' | 'variable' | 'persistent';
     type RoutineSymbolType = 'procedure' | 'function' | 'trap';
 
     interface filterVariables {
       name?: string;
-      symbolType: VariableSymbolType;
-      dataType: RapidDataType;
+      symbolType?: VariableSymbolType;
+      dataType?: RapidDataType;
     }
     interface filterRoutines {
       name?: string;
       symbolType: RoutineSymbolType;
     }
+
+    function searchTasks(filter: string, caseSensitive?: boolean): string[];
     class Task {
       public name: string;
 
@@ -360,8 +372,7 @@ declare namespace API {
 
     class Variable {
       protected var: object;
-
-      constructor(variable: string, props: VariableProps);
+      constructor(variable: RWS.Rapid.Data, props: VariableProps);
       getValue(): Promise<string | number | boolean>;
       setValue(v: any): Promise<any>;
 
@@ -443,15 +454,24 @@ declare namespace API {
       }
       function setMechunit(props: SetMechunitProps): Promise<any>;
       function setRobotPositionTarget(r: MOTION.RobTarget);
+      function setRobotPositionJoint(j: MOTION.JointTarget);
       function jog(jogdata: MOTION.JogData, ccount: number): Promise<any>;
       function getChangeCount(): number;
-      function getRobTarget(
-        tool?: string,
-        wobj?: string,
-        coords?: MOTION.COORDS,
-        mechunit?: string
-      ): Promise<MOTION.RobTarget>;
-      function getJointTarget(mechunit: string): Promise<MOTION.JointTarget>;
+      function getRobTarget(tool?: string, wobj?: string, coords?: MOTION.COORDS, mechunit?: string): Promise<MOTION.RobTarget>;
+      function getJointTarget(mechunit?: string): Promise<MOTION.JointTarget>;
+
+      interface JointsSolutionProps {
+        mechUnit?: string;
+        robTarget: API.MOTION.RobTarget;
+        toolData?: API.MOTION.ToolData;
+      }
+
+      interface JointsFromCartesianProps extends JointsSolutionProps {
+        jointTarget: API.MOTION.JointTarget;
+      }
+
+      function getAllJointsSolution(props: JointsSolutionProps): Promise<any>;
+      function getJointsFromCartesian(props: JointsFromCartesianProps): Promise<any>;
     }
 
     namespace RAPID {

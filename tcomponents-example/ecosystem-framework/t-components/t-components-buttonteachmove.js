@@ -7,6 +7,7 @@ import { ButtonTeach_A } from './t-components-buttonteach.js';
  * @prop {string} variable - Rapid variable to subpscribe to
  * @prop {string} module - Module containig the rapid variable
  * @prop {string} [label] Label text
+ * @prop {string} [labelPos] Label position (top, bottom, left, right)
  */
 
 /**
@@ -75,13 +76,8 @@ export class ButtonTeachMove_A extends Component_A {
           <div class="tc-btnteachmove-location tc-btnteachmove-location-row">
             <div class="tc-button-teachmove-teach tc-button-teachmove-btn tc-item"></div>
             <div class="tc-button-teachmove-move tc-button-teachmove-btn tc-item"></div>
-            <p>${this._props.label}</p>
           </div>
         `;
-  }
-
-  set label(label) {
-    this.setProps({ label });
   }
 
   get variable() {
@@ -108,7 +104,6 @@ ButtonTeachMove_A.loadCssClassFromString(/*css*/ `
   flex-direction: column;
   height: 100px;
   width: max-content;
-  /* justify-content: space-around; */
   align-items: flex-start;
 }
 
@@ -116,13 +111,10 @@ ButtonTeachMove_A.loadCssClassFromString(/*css*/ `
   flex-direction: row;
   height: auto;
   align-items: center;
-
-  margin-right: 10px;
 }
 
 .tc-button-teachmove-btn {
   font-size: 14px;
-  /* margin-left: 5px; */
   padding-left: 0 !important
 }
 

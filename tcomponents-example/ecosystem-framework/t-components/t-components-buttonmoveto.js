@@ -44,11 +44,11 @@ export class ButtonMoveTo_A extends Button_A {
      */
     this._props;
 
-    this.initPropsDependencies = ['module', 'variable'];
+    this.initPropsDep(['module', 'variable']);
 
     this._value = null;
     this._isJogging = false;
-    if (!this.label) this.label = 'Move to';
+    if (this._props.text === this._getAllDefaultProps().text) this._props.text = 'Move to';
   }
 
   /**
@@ -74,23 +74,21 @@ export class ButtonMoveTo_A extends Button_A {
     }
     try {
       this.task = await API.RAPID.getTask();
+
       this._value = await this.task.getValue(this._props.module, this._props.variable);
     } catch (e) {
       this.error = true;
 
-      Popup_A.warning(`Move to button`, [
-        `Error when gettin variable ${this._props.variable}`,
-        e.message,
-      ]);
+      Popup_A.warning(`Move to button`, [`Error when gettin variable ${this._props.variable}`, e.message]);
     }
   }
 
   onRender() {
     super.onRender();
     const elemBtnMove = this.container;
-    elemBtnMove.addEventListener('pointerdown', this.move.bind(this));
-    elemBtnMove.addEventListener('pointerup', this.stop.bind(this));
-    elemBtnMove.addEventListener('pointerleave', this.stop.bind(this));
+    this.addEventListener(elemBtnMove, 'pointerdown', this.move.bind(this));
+    this.addEventListener(elemBtnMove, 'pointerup', this.stop.bind(this));
+    this.addEventListener(elemBtnMove, 'pointerleave', this.stop.bind(this));
   }
 
   /**
@@ -110,7 +108,7 @@ export class ButtonMoveTo_A extends Button_A {
         let props = {
           jogMode: API.MOTION.JOGMODE.GoToPos,
           jogData: jogData,
-          robtarget: this._value,
+          robTarget: this._value,
         };
         if (this._props.tool) props = Object.assign({ props }, { tool: this._props.tool });
         if (this._props.wobj) props = Object.assign({ props }, { wobj: this._props.wobj });

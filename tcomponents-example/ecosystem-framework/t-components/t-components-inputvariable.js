@@ -42,7 +42,7 @@ export class InputVariable_A extends Input_A {
      */
     this._props;
 
-    this.initPropsDependencies = ['module', 'variable'];
+    this.initPropsDep(['module', 'variable']);
   }
 
   /**
@@ -70,10 +70,14 @@ export class InputVariable_A extends Input_A {
       if (!this.task) this.task = await API.RAPID.getTask();
       this.varElement = await this.task.getVariable(this._props.module, this._props.variable);
       this.varElement.onChanged(this.cbUpdateInputField.bind(this));
-      this.text = await this.varElement.getValue();
+
+      const value = await this.varElement.getValue();
+      this.isArray = Array.isArray(value);
+
+      this.text = this.isArray ? JSON.stringify(value) : value;
       // this._props.desciption || (this.description = `Variable type: ${this.varElement.type}`);
       if (this.varElement.type === 'num' || this.varElement.type === 'dnum')
-        this.regex = /^-?[0-9]+(\.[0-9]+)?$/;
+        this.regex = this.isArray ? /^(\[.*\]|-?\d+(\.\d+)?)$/ : /^-?[0-9]+(\.[0-9]+)?$/;
       if (this.varElement.type === 'bool') this.regex = /^([Tt][Rr][Uu][Ee]|[Ff][Aa][Ll][Ss][Ee])$/;
     } catch (e) {
       this.error = true;
@@ -128,7 +132,9 @@ export class InputVariable_A extends Input_A {
         if (value.toLowerCase() === 'true') await this.varElement.setValue(true);
         else if (value.toLowerCase() === 'false') await this.varElement.setValue(false);
         else throw new Error('Boolean value not recognized');
-      } else await this.varElement.setValue(value);
+      } else {
+        await this.varElement.setValue(value);
+      }
     } catch (e) {
       console.error(e);
       Popup_A.error(e, 'TComponents.InputVariable_A.cbOnChange');
@@ -143,7 +149,7 @@ export class InputVariable_A extends Input_A {
    * @private
    */
   async cbUpdateInputField(value) {
-    this.text = value;
+    this.text = this.isArray ? JSON.stringify(value) : value;
     this.trigger('change' + this.compId, value);
   }
 }

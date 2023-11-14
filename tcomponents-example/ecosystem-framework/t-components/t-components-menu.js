@@ -30,15 +30,9 @@ import { Component_A } from './t-components-component.js';
  * @param {TComponents.MenuProps} [props]
  */
 export class Menu_A extends Component_A {
-  /**
-   * @brief
-   * @param {HTMLElement} parent - HTMLElement that is going to be the parent of the component
-   * @param {TComponents.MenuProps} props
-   */
   constructor(parent, props) {
     super(parent, props);
 
-    this.views = [];
     this.viewId = new Map();
     this.requireMarkup = [];
 
@@ -47,12 +41,7 @@ export class Menu_A extends Component_A {
      */
     this._props;
 
-    if (this._props.onChange) this.on('change', this._props.onChange);
-    if (this._props.views.length > 0) {
-      this._props.views.forEach((view) => {
-        this.addView(view);
-      });
-    }
+    this.initPropsDep('views');
   }
 
   /**
@@ -63,6 +52,17 @@ export class Menu_A extends Component_A {
    */
   defaultProps() {
     return { title: 'Menu', onChange: null, views: [] };
+  }
+
+  onInit() {
+    this.views = [];
+    if (this._props.onChange) this.on('change', this._props.onChange);
+    if (this._props.views.length > 0) {
+      this._props.views.forEach((view) => {
+        view['id'] = this._processContent(view.content);
+        this.views.push(view);
+      });
+    }
   }
 
   mapComponents() {
@@ -78,6 +78,7 @@ export class Menu_A extends Component_A {
   }
 
   onRender() {
+    this.viewId.clear();
     this.views.forEach(({ name, content, image, active, id }) => {
       const dom = this._getDom(content, id);
       id = {};
@@ -85,6 +86,28 @@ export class Menu_A extends Component_A {
     });
 
     this.container.classList.add('tc-container');
+  }
+
+  markup() {
+    return /*html*/ `
+    ${this.views.filter(({ id }) => id !== null).reduce((html, { id }) => html + `<div id="${id}"></div>`, '')}
+    `;
+  }
+
+  /**
+   * This attribute represents the currently active view in the form of a view identifier object.
+   * Set this attribute to another view identifier object to switch view programmatically
+   * @alias addView
+   * @memberof TComponents.Menu_A
+   * @param  {TComponents.View}  view   View object
+   */
+  addView(newView) {
+    const views = [...this._props.views, newView];
+    this.setProps({ views });
+  }
+
+  get viewList() {
+    return [...this.viewId.values()];
   }
 
   _getDom(content, id) {
@@ -99,37 +122,6 @@ export class Menu_A extends Component_A {
     return dom;
   }
 
-  markup() {
-    return /*html*/ `
-    ${this.views
-      .filter(({ id }) => id !== null)
-      .reduce((html, { id }) => html + `<div id="${id}"></div>`, '')}
-    `;
-  }
-
-  /**
-   * This attribute represents the currently active view in the form of a view identifier object.
-   * Set this attribute to another view identifier object to switch view programmatically
-   * @alias addView
-   * @memberof TComponents.Menu_A
-   * @param  {TComponents.View}  view   View object
-   */
-  addView({ name, content, image = '', active = false }) {
-    const id = this._processContent(content);
-    this.views.push({ name, content, image, active, id });
-  }
-
-  // removeView(view) {
-  //   const index = this.views.indexOf(view);
-  //   if (index > -1) {
-  //     this.views.splice(index, 1);
-  //   }
-  // }
-
-  get viewList() {
-    return [...this.viewId.values()];
-  }
-
   _processContent(content) {
     let id = null;
     if (Component_A._isTComponent(content)) {
@@ -137,16 +129,11 @@ export class Menu_A extends Component_A {
         id = content.compId + '__container';
       }
     } else if (typeof content === 'string') {
-      // const elementId = content.replace(/^#/, '');
-      // content = elementId.startsWith('.')
-      //   ? document.querySelector(elementId)
-      //   : document.getElementById(elementId);
-
       const elementId = content;
       content = document.getElementById(`${elementId}`);
 
       if (!content) {
-        throw new Error(`Could not find element with id: ${elementId} in the DOM. 
+        throw new Error(`Could not find element with id: ${elementId} in the DOM.
         Try adding view as Element or Component_A instance to the Hamburger menu.`);
       }
     } else if (!Component_A._isHTMLElement(content)) {

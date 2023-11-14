@@ -24,6 +24,7 @@ export default class SignalConfigurator extends TComponents.Component_A {
 
   mapComponents() {
     const editSignal = new TComponents.SignalEdit_A(this.find('.edit-window'));
+    editSignal.forceUpdate();
 
     return {
       inputSignalContainer: new SignalContainer(this.find('#signal-container-input'), {

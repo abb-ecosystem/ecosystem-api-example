@@ -8,7 +8,7 @@ import state from './services/processing-queue.js';
  */
 
 /**
- * Base class for handling component properties
+ * Base class for handling objects
  * @class TComponents.Base_A
  * @memberof TComponents
  * @extends TComponents.Eventing_A
@@ -23,22 +23,10 @@ export class Base_A extends Eventing_A {
     this.initialized = false;
     this.noCheck = [];
 
-    this.initPropsDependencies = [];
+    this._initPropsDependencies = [];
 
     this._props = this._getAllProps(props);
     this._prevProps = Object.assign({}, this._props);
-  }
-
-  /**
-   * @alias props
-   * @memberof Base_A
-   */
-  get props() {
-    return this.getProps();
-  }
-
-  set props(props) {
-    this.setProps(props);
   }
 
   /**
@@ -66,6 +54,26 @@ export class Base_A extends Eventing_A {
   }
 
   /**
+   * Register the properties that trigger an onInit when changed with setProps().
+   * Input value is a string or array of strings with the name of the corresponding props
+   * @alias initPropsDep
+   * @initPropsDep
+   * @memberof TComponents.Base_A
+   * @protected
+   * @example
+   *     this.initPropsDep(['module', 'variable']);
+   */
+  initPropsDep(props) {
+    if (typeof props === 'string') {
+      props = [props];
+    } else if (!Array.isArray(props)) {
+      throw new Error('The new value should be a string or an array of strings.');
+    }
+
+    this._initPropsDependencies = [...this._initPropsDependencies, ...props];
+  }
+
+  /**
    * Method used to update one ore multiple component input properties. A change of property using this method
    * will trigger at least a {@link render()} call, If at least one of the given properties is listed in
    * the {@link initPropsDependencies} array, then a {@link init()} before the {@link render()}.
@@ -76,8 +84,7 @@ export class Base_A extends Eventing_A {
    * @public
    * @returns {boolean} - true if the component has been updated, false otherwise
    */
-  setProps(newProps, onRender = null) {
-    // const { props, modified } = this._updateProps(newProps, this._prevProps);
+  async setProps(newProps, onRender = null, sync = false) {
     const { props, modified } = this._updateProps(newProps, this._props);
 
     /**
@@ -88,13 +95,17 @@ export class Base_A extends Eventing_A {
      */
     this._props = props;
 
-    if (modified && this.initialized) {
-      // if onRender is a function, register event listener to be executed after render
-      if (onRender && typeof onRender === 'function') this.once('render', onRender);
+    // if onRender is a function, register event listener to be executed after render
+    if (onRender && typeof onRender === 'function') this.once('render', onRender);
 
-      // Put the update in the queue so that every rendering is done synchronously
-      // one after the other
-      state.q.push(this._componentDidUpdate.bind(this));
+    if (modified && this.initialized) {
+      if (sync) {
+        await this._componentDidUpdate();
+      } else {
+        // Put the update in the queue so that every rendering is done synchronously
+        // one after the other
+        state.q.push(this._componentDidUpdate.bind(this));
+      }
 
       return true;
     }
@@ -115,9 +126,38 @@ export class Base_A extends Eventing_A {
     return Base_A._deepClone(this._props);
   }
 
+  /**
+   * Abstract function for asynchronous initialization of the component. This function is overwriten  at {@link TComponents.Component_A}
+   * @alias init
+   * @memberof TComponents.Base_A
+   * @async
+   * @abstract
+   * @protected
+   * @returns {Promise<object>} The TComponents instance on which this method was called.
+   */
   async init() {}
 
+  /**
+   * Abstract function for DOM rendering. This function is overwriten  at {@link TComponents.Component_A}
+   * @alias render
+   * @memberof TComponents.Base_A
+   * @abstract
+   * @protected
+   * @async
+   */
   async render() {}
+
+  /**
+   * @alias props
+   * @memberof Base_A
+   */
+  get props() {
+    return this.getProps();
+  }
+
+  set props(props) {
+    this.setProps(props);
+  }
 
   /**
    *
@@ -171,12 +211,7 @@ export class Base_A extends Eventing_A {
 
     let props = Object.keys(prevProps).reduce((acc, key) => {
       if (newProps.hasOwnProperty(key)) {
-        if (
-          !Array.isArray(prevProps[key]) &&
-          !this.noCheck.includes(key) &&
-          typeof prevProps[key] === 'object' &&
-          prevProps[key] !== null
-        ) {
+        if (!Array.isArray(prevProps[key]) && !this.noCheck.includes(key) && typeof prevProps[key] === 'object' && prevProps[key] !== null) {
           const nestedProps = this._updateProps(newProps[key], prevProps[key], restError);
           modified = modified || nestedProps.modified;
           acc[key] = nestedProps.props;
@@ -220,9 +255,7 @@ export class Base_A extends Eventing_A {
       return false;
     }
 
-    const isDepsDiff =
-      this.initPropsDependencies &&
-      checkDepsDiff(this.initPropsDependencies, this._props, this._prevProps);
+    const isDepsDiff = this._initPropsDependencies && checkDepsDiff(this._initPropsDependencies, this._props, this._prevProps);
 
     // Update previous props
     this._prevProps = Object.assign({}, this._props);
@@ -236,7 +269,7 @@ export class Base_A extends Eventing_A {
   }
 
   /**
-   * @alias _compereProps
+   * @alias _equalProps
    * @memberof TComponents.Base_A
    * @static
    * @param {object} newProps
@@ -288,6 +321,11 @@ export class Base_A extends Eventing_A {
       for (let i = 0; i < obj.length; i++) {
         clone[i] = Base_A._deepClone(obj[i]);
       }
+    } else if (obj instanceof HTMLElement) {
+      clone = obj.cloneNode(true);
+      if (obj.id && clone.id) {
+        clone.id = API.generateUUID(); // Replace generateUniqueID() with your own logic to generate a unique ID
+      }
     } else {
       // clone = Object.create(Object.getPrototypeOf(obj));
       clone = {};
@@ -301,77 +339,4 @@ export class Base_A extends Eventing_A {
 
     return clone;
   }
-
-  /**
-   * Creates a Proxy wrapping the component (this). Also the given {@link props} paramenter is wrapped with a proxy.
-   * @param {object} props Gets the component internal {@link props (this._props)} to wrap them with a proxy.
-   * @private
-   * @returns {object} Proxy containing the component itself.
-   */
-  // _observerProps(props) {
-  //   const outerHandler = {
-  //     set: function (target, property, value, receiver) {
-  //       let rerender = false;
-  //       if (property === 'props') {
-  //         const { props, modified } = this._updateProps(value, target[property], true);
-  //         rerender = modified;
-
-  //         // console.log('😀', `outerHandler - SET ${property} to `, props);
-
-  //         value = new Proxy(props, innerHandler);
-  //       }
-  //       const ret = Reflect.set(target, property, value, receiver);
-
-  //       if (property === 'props' && rerender && this.initialized) {
-  //         console.log(`PROPERTY ${property} CHANGED TO ${JSON.stringify(value)}, LETS RERENDER`);
-  //         state.q.push(this._componentDidUpdate.bind(this));
-  //       }
-
-  //       return ret;
-  //     }.bind(this),
-  //   };
-
-  //   const innerHandler = {
-  //     get: function (target, property, receiver) {
-  //       const value = Reflect.get(target, property, receiver);
-
-  //       if (typeof value === 'object' && value !== null) {
-  //         return new Proxy(value, innerHandler);
-  //       }
-  //       return value;
-  //     },
-
-  //     set: function (target, property, value, receiver) {
-  //       let rerender = false;
-
-  //       if (typeof value !== 'function' && this.initialized) {
-  //         if (value !== target[property]) {
-  //           rerender = true;
-  //         }
-  //       }
-
-  //       const ret = Reflect.set(target, property, value, receiver);
-
-  //       if (rerender && this.initialized && value !== 'object') {
-  //         console.log(
-  //           `ONE PROPERTY ${property} CHANGED TO ${JSON.stringify(
-  //             value
-  //           )}, RERENDERING... ${JSON.stringify(target)}`
-  //         );
-  //         state.q.push(this._componentDidUpdate.bind(this));
-  //       }
-
-  //       return ret;
-  //     }.bind(this),
-  //   };
-
-  //   const proxy = new Proxy(this, outerHandler);
-  //   proxy._props = new Proxy(props, innerHandler);
-
-  //   return proxy;
-  // }
-
-  // static isNonEmptyObject(value) {
-  //   return typeof value === 'object' && value !== null && Object.keys(value).length > 0;
-  // }
 }

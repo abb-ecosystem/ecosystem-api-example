@@ -1,9 +1,15 @@
 import API from '../api/index.js';
 import { Base_A } from './t-components-base.js';
 
+const maxGap = 16;
+const maxPadding = 16;
+const maxMargin = 16;
+
 /**
  * Load a CSS file
+ * @alias tComponentsLoadCSS
  * @param {string} href - path of css file
+ * @memberof TComponents
  */
 function tComponentsLoadCSS(href) {
   let head = document.getElementsByTagName('head')[0];
@@ -19,6 +25,7 @@ tComponentsLoadCSS('ecosystem-framework/t-components/t-components.css');
 /**
  * @typedef TComponents.ComponentProps
  * @prop {string} [label] Label text
+ * @prop {string} [labelPos] Label position: "top|bottom|left|right"
  * @prop {object} [options] Set of options to modify the behaviour of the component
  * - async : if true, the subcomponents are instantiated asynchronously and onRender is executed inmediatelly without
  * waiting for the subcomponents to finish.
@@ -48,13 +55,11 @@ export class Component_A extends Base_A {
     this._props;
 
     if (!Component_A._isHTMLElement(parent) && parent !== null)
-      throw new Error(
-        `HTML parent element not detected. Set parent input argument to null if you want to attach the component later.`
-      );
+      throw new Error(`HTML parent element not detected. Set parent input argument to null if you want to attach the component later.`);
 
     this.compId = `${this.constructor.name}_${API.generateUUID()}`;
 
-    this.child = {};
+    this.child = null;
 
     /**
      * Parent HTML element where the component is attached to.
@@ -63,11 +68,15 @@ export class Component_A extends Base_A {
     this.container = document.createElement('div');
     this.container.id = this.compId;
     this.container.classList.add('t-component');
+    this.parentComponentId = '';
 
     this.template = null;
     this._initCalled = false;
     this._enabled = true;
-    this._parentComponent = '';
+
+    this._deinstallFunction = null;
+    this._eventListeners = new Map();
+    this._fUpdate = false;
   }
 
   /**
@@ -77,7 +86,7 @@ export class Component_A extends Base_A {
    * @returns {TComponents.ComponentProps}
    */
   defaultProps() {
-    return { label: '' };
+    return { label: '', labelPos: 'top' };
   }
 
   /**
@@ -91,6 +100,8 @@ export class Component_A extends Base_A {
   async init() {
     try {
       this.trigger('before:init', this);
+
+      if (typeof this._deinstallFunction === 'function') this._deinstallFunction();
       /**
        * Parent HTML element where the component is attached to.
        */
@@ -114,7 +125,7 @@ export class Component_A extends Base_A {
       this.enabled = true;
 
       try {
-        await this.onInit();
+        this._deinstallFunction = await this.onInit();
       } catch (e) {
         console.error(e);
         this.error = true;
@@ -158,6 +169,13 @@ export class Component_A extends Base_A {
 
     if (this._props.label) {
       this.label = this._props.label;
+      if (this._props.labelPos === 'top' || this._props.labelPos === 'bottom') {
+        this.container.classList.add('flex-col');
+        this.container.classList.remove('flex-row', 'gap-2', 'items-center');
+      } else {
+        this.container.classList.remove('flex-col');
+        this.container.classList.add('flex-row', 'gap-2', 'items-center');
+      }
     }
 
     this.parent && this.attachToElement(this.parent);
@@ -203,55 +221,58 @@ export class Component_A extends Base_A {
    * @async
    */
   async initChildrenComponents() {
-    let arrAll = [];
+    const newChildren = this.mapComponents();
+    const toDispose = [];
+    if (Object.keys(newChildren).length === 0) return;
 
-    // check if this.child has been initialized
-    if (JSON.stringify(this.child)) {
-      // if not, initialize it
-      this.child = this.mapComponents();
+    // Initialize this.child if it's not already initialized
+    if (!this.child) {
+      this.child = newChildren;
     } else {
-      // if yes, check if the children this._props have changed
-      const newChildren = this.mapComponents();
-      if (Object.keys(newChildren).length === 0) return;
+      for (const key in newChildren) {
+        const newChild = newChildren[key];
+        const oldChild = this.child[key];
 
-      Object.keys(this.child).forEach((key) => {
-        if (!Base_A._equalProps(this.child[key]._props, newChildren[key]._props)) {
-          this.child[key] = newChildren[key];
+        if (Component_A._isTComponent(oldChild)) {
+          const shouldUpdate = !Base_A._equalProps(oldChild._props, newChild._props) || oldChild._fUpdate;
+
+          if (shouldUpdate) {
+            // If the properties are not equal or if _fUpdate is true,
+            // Ensure old child is properly distroyed
+            toDispose.push(oldChild);
+            //replace the existing child
+            this.child[key] = newChild;
+          } else {
+            // If the properties are equal and _fUpdate is false, just attach the old child to the new DOM element
+            oldChild.attachToElement(newChild.parent);
+            newChild.destroy();
+          }
         } else {
-          this.child[key].attachToElement(newChildren[key].parent);
+          // If not a TComponent, replace the existing child anyway
+          this.child[key] = newChild;
         }
-      });
+      }
     }
 
-    if (Object.keys(this.child).length === 0) return;
+    const arrAll = Object.entries(this.child).reduce((acc, [key, value]) => {
+      if (value instanceof Promise) throw new Error(`Promise detected but not expected at ${this.compId}--mapComponent element ${key}...`);
 
-    const [arrSync, arrAsync] = Object.entries(this.child).reduce(
-      (acc, [key, value]) => {
-        if (value instanceof Promise)
-          throw new Error(
-            `Promise detected but not expected at ${this.compId} mapComponent element ${key}...`
-          );
-
-        const sortComponent = (value) => {
-          if (value instanceof Component_A) {
-            value._parentComponent = this.compId;
-            value._props.options.async ? acc[0].push(value) : acc[1].push(value);
-          }
-        };
-
-        if (Array.isArray(value)) {
-          value.forEach((v) => {
-            sortComponent(v);
-          });
-        } else {
-          sortComponent(value);
+      const sortComponent = (value) => {
+        if (value instanceof Component_A) {
+          value.parentComponentId = this.compId;
+          acc.push(value);
         }
-        return acc;
-      },
-      [[], []]
-    );
+      };
 
-    arrAll = [...arrSync, ...arrAsync];
+      if (Array.isArray(value)) {
+        value.forEach((v) => {
+          sortComponent(v);
+        });
+      } else {
+        sortComponent(value);
+      }
+      return acc;
+    }, []);
 
     const initChildren = function () {
       return arrAll.map((child) => {
@@ -260,6 +281,9 @@ export class Component_A extends Base_A {
     };
 
     const status = this._props.options.async ? initChildren() : await Promise.all(initChildren());
+
+    // clean up the replaced old children objects
+    toDispose.forEach((child) => child.destroy());
 
     // status.forEach((result) => {
     //   if (result.status === 'rejected') console.error(result.reason);
@@ -283,10 +307,44 @@ export class Component_A extends Base_A {
    * @alias markup
    * @memberof TComponents.Component_A
    * @param {object} self - The TComponents instance on which this method was called.
+   * @abstract
    * @returns {string}
    */
   markup(self) {
     return /*html*/ '';
+  }
+
+  addEventListener(element, eventType, listener, options) {
+    element.addEventListener(eventType, listener, options);
+
+    if (!this._eventListeners.has(element)) {
+      this._eventListeners.set(element, []);
+    }
+    this._eventListeners.get(element).push({ eventType, listener });
+  }
+
+  removeAllEventListeners() {
+    if (!this._eventListeners) return;
+    this._eventListeners.forEach((entry, element) => {
+      element.removeEventListener(entry.eventType, entry.listener);
+    });
+    this._eventListeners.clear();
+  }
+
+  destroy() {
+    // clean reference to attached callbacks
+    this.cleanUpEvents();
+
+    // deinstall function (returned by onInit method)
+    if (this._deinstallFunction && typeof this._deinstallFunction === 'function') this._deinstallFunction();
+
+    if (this.container.parentElement) this.container.parentElement.removeChild(this.container);
+    this.removeAllEventListeners();
+    if (this.child) {
+      Object.keys(this.child).forEach((key) => {
+        if (Component_A._isTComponent(key)) this.child[key].destroy();
+      });
+    }
   }
 
   /**
@@ -301,9 +359,20 @@ export class Component_A extends Base_A {
 
   set label(text) {
     this._props.label = text;
-    let pLabel = document.createElement('p');
-    pLabel.innerHTML = this._props.label;
-    this.container.insertBefore(pLabel, this.container.firstChild);
+  }
+
+  _markupWithLabel() {
+    return /*html*/ `
+        ${Component_A.mIf(
+          this._props.label && (this._props.labelPos === 'top' || this._props.labelPos === 'left'),
+          /*html*/ `<p>${this._props.label}</p>`
+        )}
+        ${this.markup(this)}
+        ${Component_A.mIf(
+          this._props.label && (this._props.labelPos === 'bottom' || this._props.labelPos === 'right'),
+          /*html*/ `<p>${this._props.label}</p>`
+        )}
+    `;
   }
 
   /**
@@ -426,9 +495,7 @@ export class Component_A extends Base_A {
    * @param {boolean} enable - if true, the component is framed, if false, not frame is shown
    */
   cssBox(enable = true) {
-    enable
-      ? this.container.classList.add('tc-container-box')
-      : this.container.classList.remove('tc-container-box');
+    enable ? this.container.classList.add('tc-container-box') : this.container.classList.remove('tc-container-box');
   }
 
   /**
@@ -467,9 +534,7 @@ export class Component_A extends Base_A {
    */
   cssAddClass(selector, classNames, all = false) {
     if (!selector || !classNames) return;
-    let arrClassNames = Array.isArray(classNames)
-      ? classNames
-      : [...classNames.replace(/^\s/g, '').split(' ')];
+    let arrClassNames = Array.isArray(classNames) ? classNames : [...classNames.replace(/^\s/g, '').split(' ')];
 
     // check if array is empty
     if (arrClassNames.length === 0) return;
@@ -479,10 +544,7 @@ export class Component_A extends Base_A {
     if (selector === 'this') this.container.classList.add(...arrClassNames);
     else {
       const el = all ? this.all(selector) : this.find(selector);
-      if (el)
-        Array.isArray(el)
-          ? el.forEach((el) => el.classList.add(...arrClassNames))
-          : el.classList.add(...arrClassNames);
+      if (el) Array.isArray(el) ? el.forEach((el) => el.classList.add(...arrClassNames)) : el.classList.add(...arrClassNames);
     }
   }
 
@@ -496,9 +558,7 @@ export class Component_A extends Base_A {
    */
   cssRemoveClass(selector, classNames, all = false) {
     if (!selector || !classNames) return;
-    let arrClassNames = Array.isArray(classNames)
-      ? classNames
-      : [...classNames.replace(/^\s/g, '').split(' ')];
+    let arrClassNames = Array.isArray(classNames) ? classNames : [...classNames.replace(/^\s/g, '').split(' ')];
 
     // check if array is empty
     if (arrClassNames.length === 0) return;
@@ -508,11 +568,18 @@ export class Component_A extends Base_A {
     if (selector === 'this') this.container.classList.remove(...arrClassNames);
     else {
       const el = all ? this.all(selector) : this.find(selector);
-      if (el)
-        Array.isArray(el)
-          ? el.forEach((el) => el.classList.remove(...arrClassNames))
-          : el.classList.remove(...arrClassNames);
+      if (el) Array.isArray(el) ? el.forEach((el) => el.classList.remove(...arrClassNames)) : el.classList.remove(...arrClassNames);
     }
+  }
+
+  /**
+   * Force a rerender when a component is handled inside the mapComponents method of a higher order component.
+   * Normally this happens only when the props has changed. If this function is called inside a component.
+   * @alias forceUpdate
+   * @private
+   */
+  forceUpdate() {
+    this._fUpdate = true;
   }
 
   _handleData(data) {
@@ -524,7 +591,7 @@ export class Component_A extends Base_A {
 
   _createTemplate() {
     this.template = document.createElement('template');
-    this.template.innerHTML = this.markup(this);
+    this.template.innerHTML = this._markupWithLabel();
   }
 
   /**
@@ -541,12 +608,7 @@ export class Component_A extends Base_A {
   static _hasChildOwnProperty(obj, property, result = []) {
     if (typeof obj === 'object' && obj !== null) {
       for (const val of Object.values(obj)) {
-        if (
-          typeof val === 'object' &&
-          val !== null &&
-          val !== obj &&
-          !Component_A._isHTMLElement(val)
-        ) {
+        if (typeof val === 'object' && val !== null && val !== obj && !Component_A._isHTMLElement(val)) {
           if (val.hasOwnProperty(property)) {
             result.push(val);
           }
@@ -564,7 +626,6 @@ export class Component_A extends Base_A {
    * @static
    * @param {any} o Oject to check
    * @returns {boolean} true if entry is an TComponent, false otherwise
-   * @private
    */
   static _isTComponent(o) {
     return o instanceof Component_A;
@@ -577,16 +638,11 @@ export class Component_A extends Base_A {
    * @static
    * @param {any} o
    * @returns {boolean} true if entry is an HTMLElement, false otherwise
-   * @private
    */
   static _isHTMLElement(o) {
     return typeof HTMLElement === 'object'
       ? o instanceof HTMLElement //DOM2
-      : o &&
-          typeof o === 'object' &&
-          o !== null &&
-          o.nodeType === 1 &&
-          typeof o.nodeName === 'string';
+      : o && typeof o === 'object' && o !== null && o.nodeType === 1 && typeof o.nodeName === 'string';
   }
 
   static loadCssClassFromString(css) {
@@ -602,6 +658,56 @@ export class Component_A extends Base_A {
   }
 
   static mFor(array, markup) {
-    return array.map((item) => markup(item)).join('');
+    return array.map((item, index) => markup(item, index)).join('');
   }
 }
+
+const generatePaddingStyles = () => {
+  let styles = '';
+  for (let i = 1; i <= maxPadding; i++) {
+    const paddingValue = (i * 0.25).toFixed(2); // Calculate padding value based on class number.
+    styles += `
+      .pl-${i} { padding-left: ${paddingValue}rem; /* ${i * 4}px */ }
+      .pr-${i} { padding-right: ${paddingValue}rem; /* ${i * 4}px */ }
+      .pt-${i} { padding-top: ${paddingValue}rem; /* ${i * 4}px */ }
+      .pb-${i} { padding-bottom: ${paddingValue}rem; /* ${i * 4}px */ }
+    `;
+  }
+  return styles;
+};
+
+function generateMarginStyles() {
+  let styles = '';
+
+  for (let i = 1; i <= maxMargin; i++) {
+    const value = i * 0.25;
+    styles += `
+      .ml-${i} { margin-left: ${value}rem; /* ${i * 4}px */ }
+      .mr-${i} { margin-right: ${value}rem; /* ${i * 4}px */ }
+      .mt-${i} { margin-top: ${value}rem; /* ${i * 4}px */ }
+      .mb-${i} { margin-bottom: ${value}rem; /* ${i * 4}px */ }
+    `;
+  }
+
+  return styles;
+}
+
+function generateGapStyles() {
+  let styles = '';
+
+  for (let i = 0; i <= maxGap; i++) {
+    const value = i * 0.25;
+    styles += `
+      .flex-row.gap-${i} > * + * { margin-left: ${value}rem; /* ${i * 4}px */ }
+      .flex-col.gap-${i} > * + * { margin-top: ${value}rem; /* ${i * 4}px */ }
+    `;
+  }
+
+  return styles;
+}
+
+Component_A.loadCssClassFromString(/*css*/ `
+  ${generatePaddingStyles()}
+  ${generateMarginStyles()}
+  ${generateGapStyles()}
+`);

@@ -1,49 +1,48 @@
-import API from '../api/index.js';
 import { Popup_A } from './t-components-popup.js';
 import { Button_A } from './t-components-button.js';
 
 /**
- * @typedef TComponents.ButtonRebootProps
- * @prop {boolean} confirm - Popup an confirmation message before restarting
+ * @typedef TComponents.ButtonCloseProps
+ * @prop {boolean} confirm - Popup a confirmation message before closing
  * @prop {function|null} [callback] - Function to be called when button is pressed
  * @prop {string|null} [icon] - Path to image file
  * @prop {string} [label] - label text
  */
 
 /**
- * Button to restart the controller.
- * @class TComponents.ButtonReboot_A
+ * Button to close this WebApp.
+ * @class TComponents.ButtonClose_A
  * @extends TComponents.Button_A
  * @param {HTMLElement} parent - HTMLElement that is going to be the parent of the component
- * @param {TComponents.ButtonRebootProps} props -
+ * @param {TComponents.ButtonCloseProps} props -
  * @example
  * // index.html
  * ...
- * &lt;div class="btn-reboot"&gt;&lt;/div&gt;
+ * &lt;div class="btn-close"&gt;&lt;/div&gt;
  * ...
  *
  * // index.js
- * const btnReboot = new ButtonReboot_A(document.querySelector('.btn-reboot'), {
+ * const btnClose = new ButtonClose_A(document.querySelector('.btn-close'), {
  *  confirm: true
  * });
- * btnRebbot.render();
+ * btnClose.render();
  */
-export class ButtonReboot_A extends Button_A {
+export class ButtonClose_A extends Button_A {
   constructor(parent, props = {}) {
     super(parent, props);
 
     /**
-     * @type {TComponents.ButtonRebootProps}
+     * @type {TComponents.ButtonCloseProps}
      */
 
-    if (this._props.text === this._getAllDefaultProps().text) this._props.text = 'Reboot';
+    if (!this._props.label) this._props.label = 'Close App';
   }
 
   /**
    * Returns class properties default values. Notice that parent properties are not included.
    * @alias defaultProps
-   * @memberof TComponents.ButtonReboot_A
-   * @returns {TComponents.ButtonRebootProps}
+   * @memberof TComponents.ButtonClose_A
+   * @returns {TComponents.ButtonCloseProps}
    */
   defaultProps() {
     return { confirm: false };
@@ -52,38 +51,38 @@ export class ButtonReboot_A extends Button_A {
   async onInit() {
     // await super.onInit();
 
-    this.onClick(this.reboot.bind(this));
+    this.onClick(this.close.bind(this));
     this.highlight = true;
   }
 
   /**
-   * Restarts the controller
-   * @alias reboot
-   * @memberof TComponents.ButtonReboot_A
+   * Closes this webapp
+   * @alias close
+   * @memberof TComponents.ButtonClose_A
    * @private
    */
-  async reboot() {
+  async close() {
     try {
       if (this._props.confirm) {
         Popup_A.confirm(
-          'Reboot',
-          `You are about to reboot the controller.
+          'Close',
+          `You are about to close this App.
                Do you want to proceed?`,
           async (value) => {
             if (value === 'ok') {
               try {
-                await API.CONTROLLER.restart();
+                App.Interaction.closeApp();
               } catch (e) {
-                Popup_A.error(e, 'TComponents.Reboot_A ');
+                Popup_A.error(e, 'TComponents.Close_A ');
               }
             }
-          }
+          },
         );
       } else {
-        await API.CONTROLLER.restart();
+        App.Interaction.closeApp();
       }
     } catch (e) {
-      Popup_A.error(e, 'TComponents.Reboot_A ');
+      Popup_A.error(e, 'TComponents.Close_A ');
     }
   }
 }

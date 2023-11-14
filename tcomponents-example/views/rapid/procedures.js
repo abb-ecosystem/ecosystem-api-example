@@ -3,8 +3,8 @@ import Module from './module.js';
 import { moduleName, modulePath } from '../../constants/common.js';
 
 export default class Procedure extends TComponents.Component_A {
-  constructor(parent, module = null) {
-    super(parent, { options: { async: true } });
+  constructor(parent) {
+    super(parent);
     this.checkboxIsSR = new FPComponents.Checkbox_A();
     this._isSR = false;
   }
@@ -23,7 +23,7 @@ export default class Procedure extends TComponents.Component_A {
   mapComponents() {
     return {
       module: new TComponents.LayoutInfobox_A(this.find('.module-container'), {
-        label: 'Modules',
+        title: 'Modules',
         content: { children: new Module(null, modulePath, moduleName) },
       }),
       modSelector: new TComponents.SelectorModules_A(this.find('.module-dropdown'), {
@@ -36,7 +36,7 @@ export default class Procedure extends TComponents.Component_A {
       btnProcedure: new TComponents.ButtonProcedure_A(this.find('.exe-btn'), {
         procedure: '',
         userLevel: this._isSR,
-        label: 'Execute',
+        text: 'Execute',
       }),
       selectCycleMode: new TComponents.SelectorAlias_A(this.find('.cycle-mode'), {
         // label: 'Cycle mode:',
@@ -47,7 +47,7 @@ export default class Procedure extends TComponents.Component_A {
         ],
       }),
       layout: new TComponents.LayoutInfobox_A(this.find('.procedure-container'), {
-        label: 'Procedures',
+        title: 'Procedures',
         content: { children: this.find('.procedure-content') },
       }),
     };

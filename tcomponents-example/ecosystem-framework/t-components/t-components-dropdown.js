@@ -29,6 +29,7 @@ export class Dropdown_A extends Component_A {
      * @type {TComponents.DropdownProps}
      */
     this._props;
+    this.initPropsDep('addNoSelection');
 
     this._dropDownMenu = new FPComponents.Dropdown_A();
   }
@@ -45,16 +46,21 @@ export class Dropdown_A extends Component_A {
     return { itemList: [], selected: '', addNoSelection: false, label: '' };
   }
 
+  onInit() {
+    this._updateItemList(this._props.itemList);
+  }
+
   onRender() {
     if (this._props.itemList.length === 0) this._dropDownMenu.enabled = false;
 
-    this._dropDownMenu.model = { items: this._props.itemList };
+    this._dropDownMenu.model = { items: this._props.itemList.length > 0 ? this._props.itemList : [''] };
     this._dropDownMenu.onselection = this.cbOnSelection.bind(this);
     const foundSelected = this._props.itemList.indexOf(this._props.selected);
     this._dropDownMenu.selected = foundSelected === -1 ? 0 : foundSelected;
     this._dropDownMenu.attachToElement(this.find('.tc-dropdown-container'));
 
     this.find('.fp-components-dropdown').style.setProperty('min-height', '40px');
+    this.container.style.minWidth = '80px';
   }
 
   /**
@@ -63,10 +69,10 @@ export class Dropdown_A extends Component_A {
    * @protected
    */
   _updateItemList(ilist) {
-    let itemList = this._props.addNoSelection ? [''] : [];
+    let itemList = this._props.addNoSelection && ilist[0] !== '' ? [''] : [];
     itemList = itemList.concat(ilist);
-
     let selected = this._props.selected === '' ? itemList[0] : this._props.selected;
+
     this.setProps({ itemList, selected });
   }
 
@@ -83,8 +89,10 @@ export class Dropdown_A extends Component_A {
    * @param {number}  index - Index of selected item
    * @param {string}  selection - Selected item
    * @private
+   * @todo Currently only one function is possible. Change the method to accept multiple callbacks
    */
   cbOnSelection(index, selection) {
+    this._props.selected = selection;
     this.trigger('selection', selection);
   }
 
@@ -93,6 +101,7 @@ export class Dropdown_A extends Component_A {
    * @alias onSelection
    * @memberof TComponents.Dropdown_A
    * @param {function} func
+   * @todo Currently only one function is possible. Change the method to accept multiple callbacks
    */
   onSelection(func) {
     this.on('selection', func);
@@ -123,14 +132,12 @@ export class Dropdown_A extends Component_A {
   }
 
   set items(itemList) {
-    // if (!items || (Array.isArray(items) && data.length === 0)) return;
-
     this._dropDownMenu.model = { items: itemList };
-    if (
-      !this._props.itemList.includes(this._dropDownMenu.model.items[this._dropDownMenu.selected])
-    ) {
+    if (!this._props.itemList.includes(this._dropDownMenu.model.items[this._dropDownMenu.selected])) {
       this._props.selected = this._dropDownMenu.model.items[0];
       this._dropDownMenu.selected = 0;
+    } else {
+      this._props.selected = this._dropDownMenu.model.items[this._dropDownMenu.selected];
     }
   }
 }

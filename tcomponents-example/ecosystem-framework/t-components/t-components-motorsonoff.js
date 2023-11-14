@@ -37,9 +37,7 @@ export class MotorsOnOff_A extends Component_A {
       await API.CONTROLLER.monitorOperationMode(this.cbOpModeStateChanged.bind(this));
 
       // check for initial state
-      (await execution.getValue()) === 0
-        ? (this.imgInit = imgMotorsOff)
-        : (this.imgInit = imgMotorsOn);
+      (await execution.getValue()) === 0 ? (this.imgInit = imgMotorsOff) : (this.imgInit = imgMotorsOn);
 
       if (this.imgInit === imgMotorsOff) this._switch.active = false;
       else this._switch.active = true;

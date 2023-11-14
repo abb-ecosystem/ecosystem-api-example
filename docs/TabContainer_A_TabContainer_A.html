@@ -57,6 +57,8 @@
             
                 <li data-name="TComponents.ButtonAlignProps"><a href="TComponents.html#.ButtonAlignProps">ButtonAlignProps</a></li>
             
+                <li data-name="TComponents.ButtonCloseProps"><a href="TComponents.html#.ButtonCloseProps">ButtonCloseProps</a></li>
+            
                 <li data-name="TComponents.ButtonMoveToProps"><a href="TComponents.html#.ButtonMoveToProps">ButtonMoveToProps</a></li>
             
                 <li data-name="TComponents.ButtonProcedureProps"><a href="TComponents.html#.ButtonProcedureProps">ButtonProcedureProps</a></li>
@@ -75,8 +77,6 @@
             
                 <li data-name="TComponents.DropdownProps"><a href="TComponents.html#.DropdownProps">DropdownProps</a></li>
             
-                <li data-name="TComponents.HamburgerProps"><a href="TComponents.html#.HamburgerProps">HamburgerProps</a></li>
-            
                 <li data-name="TComponents.InputProps"><a href="TComponents.html#.InputProps">InputProps</a></li>
             
                 <li data-name="TComponents.InputVariableProps"><a href="TComponents.html#.InputVariableProps">InputVariableProps</a></li>
@@ -87,8 +87,6 @@
             
                 <li data-name="TComponents.ModalWindowProps"><a href="TComponents.html#.ModalWindowProps">ModalWindowProps</a></li>
             
-                <li data-name="TComponents.RapidStartStopProps"><a href="TComponents.html#.RapidStartStopProps">RapidStartStopProps</a></li>
-            
                 <li data-name="TComponents.SelectorAliasProps"><a href="TComponents.html#.SelectorAliasProps">SelectorAliasProps</a></li>
             
                 <li data-name="TComponents.SelectorModulesProps"><a href="TComponents.html#.SelectorModulesProps">SelectorModulesProps</a></li>
@@ -96,6 +94,8 @@
                 <li data-name="TComponents.SelectorProceduresProps"><a href="TComponents.html#.SelectorProceduresProps">SelectorProceduresProps</a></li>
             
                 <li data-name="TComponents.SelectorSignalsProps"><a href="TComponents.html#.SelectorSignalsProps">SelectorSignalsProps</a></li>
+            
+                <li data-name="TComponents.SelectorTasksProps"><a href="TComponents.html#.SelectorTasksProps">SelectorTasksProps</a></li>
             
                 <li data-name="TComponents.SelectorVariablesProps"><a href="TComponents.html#.SelectorVariablesProps">SelectorVariablesProps</a></li>
             
@@ -190,7 +190,9 @@
             
                 <li data-name="monitorControllerState"><a href="API.CONTROLLER.html">monitorControllerState</a></li>
             
-                <li data-name="setOperationMode"><a href="API.CONTROLLER.html">setOperationMode</a></li>
+                <li data-name="setOpMode"><a href="API.CONTROLLER.html">setOpMode</a></li>
+            
+                <li data-name="setOpModeManual"><a href="API.CONTROLLER.html">setOpModeManual</a></li>
             
                 <li data-name="setOpModeAutomatic"><a href="API.CONTROLLER.html">setOpModeAutomatic</a></li>
             
@@ -325,7 +327,7 @@
             
             <span class="subtitle">Typedefs</span>
             
-                <li data-name="API.MOTION.RobTarget"><a href="API.MOTION.html#.RobTarget">RobTarget</a></li>
+                <li data-name="API.MOTION.JointTarget"><a href="API.MOTION.html#.JointTarget">JointTarget</a></li>
             
                 <li data-name="API.MOTION.executeJoggingProps"><a href="API.MOTION.html#.executeJoggingProps">executeJoggingProps</a></li>
             
@@ -365,8 +367,6 @@
             
             <span class="subtitle">Members</span>
             
-                <li data-name="EXEC"><a href="API.RAPID.html">EXEC</a></li>
-            
                 <li data-name="MODULETYPE"><a href="API.RAPID.html">MODULETYPE</a></li>
             
                 <li data-name="getVariable"><a href="API.RAPID.html">getVariable</a></li>
@@ -392,6 +392,8 @@
             <ul class="methods itemMembers">
             
             <span class="subtitle">Methods</span>
+            
+                <li data-name="searchTasks"><a href="API.RAPID.html">searchTasks</a></li>
             
                 <li data-name="monitorExecutionState"><a href="API.RAPID.html">monitorExecutionState</a></li>
             
@@ -477,11 +479,19 @@
             
                 <li data-name="setRobotPositionTarget"><a href="API.RWS.MOTIONSYSTEM.html">setRobotPositionTarget</a></li>
             
+                <li data-name="setRobotPositionJoint"><a href="API.RWS.MOTIONSYSTEM.html">setRobotPositionJoint</a></li>
+            
                 <li data-name="jog"><a href="API.RWS.MOTIONSYSTEM.html">jog</a></li>
             
                 <li data-name="getRobTarget"><a href="API.RWS.MOTIONSYSTEM.html">getRobTarget</a></li>
             
                 <li data-name="getRobTarget"><a href="API.RWS.MOTIONSYSTEM.html">getRobTarget</a></li>
+            
+                <li data-name="getRobTarget"><a href="API.RWS.MOTIONSYSTEM.html">getRobTarget</a></li>
+            
+                <li data-name="getAllJointsSolution"><a href="API.RWS.MOTIONSYSTEM.html">getAllJointsSolution</a></li>
+            
+                <li data-name="getJointsFromCartesian"><a href="API.RWS.MOTIONSYSTEM.html">getJointsFromCartesian</a></li>
             
             </ul>
             <ul class="events itemMembers">
@@ -560,9 +570,17 @@
             
                 <li data-name="defaultProps"><a href="TComponents.VarIncrDecr_A.html">defaultProps</a></li>
             
+                <li data-name="TComponents.Base_A.Base_A#initPropsDep"><a href="TComponents.Base_A.html#.Base_A#initPropsDep">Base_A#initPropsDep</a></li>
+            
                 <li data-name="setProps"><a href="TComponents.Base_A.html">setProps</a></li>
             
                 <li data-name="getProps"><a href="TComponents.Base_A.html">getProps</a></li>
+            
+                <li data-name="init"><a href="TComponents.Component_A.html">init</a></li>
+            
+                <li data-name="render"><a href="TComponents.Component_A.html">render</a></li>
+            
+                <li data-name="TComponents.Base_A._compereProps"><a href="TComponents.Base_A.html#._compereProps">_compereProps</a></li>
             
             </ul>
             <ul class="events itemMembers">
@@ -578,8 +596,6 @@
             <ul class="members itemMembers">
             
             <span class="subtitle">Members</span>
-            
-                <li data-name="label"><a href="TComponents.Switch_A.html">label</a></li>
             
                 <li data-name="TComponents.Button_A#parent"><a href="TComponents.Button_A.html#parent">parent</a></li>
             
@@ -598,6 +614,8 @@
                 <li data-name="defaultProps"><a href="TComponents.VarIncrDecr_A.html">defaultProps</a></li>
             
                 <li data-name="onClick"><a href="TComponents.TemplateView_A.html">onClick</a></li>
+            
+                <li data-name="cbOnClick"><a href="TComponents.Digital_A.html">cbOnClick</a></li>
             
             </ul>
             <ul class="events itemMembers">
@@ -633,6 +651,37 @@
                 <li data-name="align"><a href="TComponents.ButtonAlign_A.html">align</a></li>
             
                 <li data-name="stop"><a href="TComponents.ButtonMoveTo_A.html">stop</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="TComponents.ButtonClose_A">
+            <span class="title">
+                <a href="TComponents.ButtonClose_A.html">TComponents.ButtonClose_A</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            <span class="subtitle">Members</span>
+            
+                <li data-name="TComponents.ButtonClose_A#parent"><a href="TComponents.ButtonClose_A.html#parent">parent</a></li>
+            
+                <li data-name="TComponents.ButtonClose_A#error"><a href="TComponents.ButtonClose_A.html#error">error</a></li>
+            
+                <li data-name="TComponents.ButtonClose_A#enabled"><a href="TComponents.ButtonClose_A.html#enabled">enabled</a></li>
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="defaultProps"><a href="TComponents.VarIncrDecr_A.html">defaultProps</a></li>
             
             </ul>
             <ul class="events itemMembers">
@@ -705,6 +754,8 @@
             <span class="subtitle">Methods</span>
             
                 <li data-name="defaultProps"><a href="TComponents.VarIncrDecr_A.html">defaultProps</a></li>
+            
+                <li data-name="cbOnClick"><a href="TComponents.Digital_A.html">cbOnClick</a></li>
             
             </ul>
             <ul class="events itemMembers">
@@ -853,7 +904,7 @@
             
                 <li data-name="TComponents.Component_A#enabled"><a href="TComponents.Component_A.html#enabled">enabled</a></li>
             
-                <li data-name="label"><a href="TComponents.Switch_A.html">label</a></li>
+                <li data-name="label"><a href="TComponents.Component_A.html">label</a></li>
             
                 <li data-name="enabled"><a href="TComponents.Popup_A.html">enabled</a></li>
             
@@ -899,6 +950,10 @@
             
                 <li data-name="cssRemoveClass"><a href="TComponents.Component_A.html">cssRemoveClass</a></li>
             
+                <li data-name="TComponents.Component_A._isTComponent"><a href="TComponents.Component_A.html#._isTComponent">_isTComponent</a></li>
+            
+                <li data-name="TComponents.Component_A._isHTMLElement"><a href="TComponents.Component_A.html#._isHTMLElement">_isHTMLElement</a></li>
+            
             </ul>
             <ul class="events itemMembers">
             
@@ -938,25 +993,6 @@
             </ul>
         </li>
     
-        <li class="item" data-name="Container_A#Container_A">
-            <span class="title">
-                <a href="Container_A_Container_A.html">Container_A#Container_A</a>
-                
-            </span>
-            <ul class="members itemMembers">
-            
-            </ul>
-            <ul class="typedefs itemMembers">
-            
-            </ul>
-            <ul class="methods itemMembers">
-            
-            </ul>
-            <ul class="events itemMembers">
-            
-            </ul>
-        </li>
-    
         <li class="item" data-name="TComponents.Digital_A">
             <span class="title">
                 <a href="TComponents.Digital_A.html">TComponents.Digital_A</a>
@@ -965,8 +1001,6 @@
             <ul class="members itemMembers">
             
             <span class="subtitle">Members</span>
-            
-                <li data-name="label"><a href="TComponents.Switch_A.html">label</a></li>
             
                 <li data-name="active"><a href="TComponents.Digital_A.html">active</a></li>
             
@@ -987,6 +1021,10 @@
                 <li data-name="defaultProps"><a href="TComponents.VarIncrDecr_A.html">defaultProps</a></li>
             
                 <li data-name="onClick"><a href="TComponents.TemplateView_A.html">onClick</a></li>
+            
+                <li data-name="cbOnClick"><a href="TComponents.Digital_A.html">cbOnClick</a></li>
+            
+                <li data-name="cbOnClick"><a href="TComponents.Digital_A.html">cbOnClick</a></li>
             
             </ul>
             <ul class="events itemMembers">
@@ -1054,6 +1092,8 @@
             
                 <li data-name="trigger"><a href="API.Events.html">trigger</a></li>
             
+                <li data-name="cleanup"><a href="TComponents.Eventing_A.html">cleanup</a></li>
+            
             </ul>
             <ul class="events itemMembers">
             
@@ -1069,32 +1109,11 @@
             
             <span class="subtitle">Members</span>
             
-                <li data-name="activeView"><a href="TComponents.Hamburger_A.html">activeView</a></li>
-            
                 <li data-name="TComponents.Hamburger_A#parent"><a href="TComponents.Hamburger_A.html#parent">parent</a></li>
             
                 <li data-name="TComponents.Hamburger_A#error"><a href="TComponents.Hamburger_A.html#error">error</a></li>
             
                 <li data-name="TComponents.Hamburger_A#enabled"><a href="TComponents.Hamburger_A.html#enabled">enabled</a></li>
-            
-            </ul>
-            <ul class="typedefs itemMembers">
-            
-            </ul>
-            <ul class="methods itemMembers">
-            
-            </ul>
-            <ul class="events itemMembers">
-            
-            </ul>
-        </li>
-    
-        <li class="item" data-name="Hamburger_A#Hamburger_A">
-            <span class="title">
-                <a href="Hamburger_A_Hamburger_A.html">Hamburger_A#Hamburger_A</a>
-                
-            </span>
-            <ul class="members itemMembers">
             
             </ul>
             <ul class="typedefs itemMembers">
@@ -1180,36 +1199,36 @@
             
                 <li data-name="defaultProps"><a href="TComponents.VarIncrDecr_A.html">defaultProps</a></li>
             
+                <li data-name="cbOnChange"><a href="TComponents.SwitchVariable_A.html">cbOnChange</a></li>
+            
+                <li data-name="cbUpdateInputField"><a href="TComponents.InputVariable_A.html">cbUpdateInputField</a></li>
+            
             </ul>
             <ul class="events itemMembers">
             
             </ul>
         </li>
     
-        <li class="item" data-name="LayoutInfobox_A">
+        <li class="item" data-name="TComponents.LayoutInfobox_A">
             <span class="title">
-                <a href="LayoutInfobox_A.html">LayoutInfobox_A</a>
+                <a href="TComponents.LayoutInfobox_A.html">TComponents.LayoutInfobox_A</a>
                 
             </span>
             <ul class="members itemMembers">
             
             <span class="subtitle">Members</span>
             
-                <li data-name="LayoutInfobox_A#parent"><a href="LayoutInfobox_A.html#parent">parent</a></li>
+                <li data-name="TComponents.LayoutInfobox_A#parent"><a href="TComponents.LayoutInfobox_A.html#parent">parent</a></li>
             
-                <li data-name="LayoutInfobox_A#error"><a href="LayoutInfobox_A.html#error">error</a></li>
+                <li data-name="TComponents.LayoutInfobox_A#error"><a href="TComponents.LayoutInfobox_A.html#error">error</a></li>
             
-                <li data-name="LayoutInfobox_A#enabled"><a href="LayoutInfobox_A.html#enabled">enabled</a></li>
+                <li data-name="TComponents.LayoutInfobox_A#enabled"><a href="TComponents.LayoutInfobox_A.html#enabled">enabled</a></li>
             
             </ul>
             <ul class="typedefs itemMembers">
             
             </ul>
             <ul class="methods itemMembers">
-            
-            <span class="subtitle">Methods</span>
-            
-                <li data-name="LayoutInfobox_A#defaultProps"><a href="LayoutInfobox_A.html#defaultProps">defaultProps</a></li>
             
             </ul>
             <ul class="events itemMembers">
@@ -1240,28 +1259,11 @@
             
             <span class="subtitle">Methods</span>
             
+                <li data-name="addView"><a href="TComponents.Menu_A.html">addView</a></li>
+            
                 <li data-name="defaultProps"><a href="TComponents.VarIncrDecr_A.html">defaultProps</a></li>
             
                 <li data-name="addView"><a href="TComponents.Menu_A.html">addView</a></li>
-            
-            </ul>
-            <ul class="events itemMembers">
-            
-            </ul>
-        </li>
-    
-        <li class="item" data-name="Menu_A#Menu_A">
-            <span class="title">
-                <a href="Menu_A_Menu_A.html">Menu_A#Menu_A</a>
-                
-            </span>
-            <ul class="members itemMembers">
-            
-            </ul>
-            <ul class="typedefs itemMembers">
-            
-            </ul>
-            <ul class="methods itemMembers">
             
             </ul>
             <ul class="events itemMembers">
@@ -1436,34 +1438,30 @@
             </ul>
         </li>
     
-        <li class="item" data-name="TComponents.SelectorAlias_A">
+        <li class="item" data-name="TComponents.SelectorVariables_A">
             <span class="title">
-                <a href="TComponents.SelectorAlias_A.html">TComponents.SelectorAlias_A</a>
+                <a href="TComponents.SelectorVariables_A.html">TComponents.SelectorVariables_A</a>
                 
             </span>
             <ul class="members itemMembers">
             
             <span class="subtitle">Members</span>
             
-                <li data-name="selected"><a href="TComponents.SelectorAlias_A.html">selected</a></li>
+                <li data-name="TComponents.SelectorVariables_A#parent"><a href="TComponents.SelectorVariables_A.html#parent">parent</a></li>
             
-                <li data-name="items"><a href="TComponents.SelectorAlias_A.html">items</a></li>
+                <li data-name="TComponents.SelectorVariables_A#error"><a href="TComponents.SelectorVariables_A.html#error">error</a></li>
             
-                <li data-name="TComponents.SelectorAlias_A#parent"><a href="TComponents.SelectorAlias_A.html#parent">parent</a></li>
-            
-                <li data-name="TComponents.SelectorAlias_A#error"><a href="TComponents.SelectorAlias_A.html#error">error</a></li>
-            
-                <li data-name="TComponents.SelectorAlias_A#enabled"><a href="TComponents.SelectorAlias_A.html#enabled">enabled</a></li>
+                <li data-name="TComponents.SelectorVariables_A#enabled"><a href="TComponents.SelectorVariables_A.html#enabled">enabled</a></li>
             
             </ul>
             <ul class="typedefs itemMembers">
             
-            <span class="subtitle">Typedefs</span>
-            
-                <li data-name="TComponents.SelectorAlias_A.ItemMap"><a href="TComponents.SelectorAlias_A.html#.ItemMap">ItemMap</a></li>
-            
             </ul>
             <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="updateSearch"><a href="TComponents.SelectorVariables_A.html">updateSearch</a></li>
             
             </ul>
             <ul class="events itemMembers">
@@ -1590,6 +1588,33 @@
             <span class="subtitle">Methods</span>
             
                 <li data-name="updateSearch"><a href="TComponents.SelectorVariables_A.html">updateSearch</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="TComponents.SelectorTasks_A">
+            <span class="title">
+                <a href="TComponents.SelectorTasks_A.html">TComponents.SelectorTasks_A</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            <span class="subtitle">Members</span>
+            
+                <li data-name="TComponents.SelectorTasks_A#parent"><a href="TComponents.SelectorTasks_A.html#parent">parent</a></li>
+            
+                <li data-name="TComponents.SelectorTasks_A#error"><a href="TComponents.SelectorTasks_A.html#error">error</a></li>
+            
+                <li data-name="TComponents.SelectorTasks_A#enabled"><a href="TComponents.SelectorTasks_A.html#enabled">enabled</a></li>
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
             
             </ul>
             <ul class="events itemMembers">
@@ -1731,8 +1756,6 @@
             <ul class="members itemMembers">
             
             <span class="subtitle">Members</span>
-            
-                <li data-name="label"><a href="TComponents.Switch_A.html">label</a></li>
             
                 <li data-name="TComponents.Switch_A#parent"><a href="TComponents.Switch_A.html#parent">parent</a></li>
             
@@ -1886,8 +1909,6 @@
             <ul class="members itemMembers">
             
             <span class="subtitle">Members</span>
-            
-                <li data-name="TComponents.TemplateView_A#initPropsDependencies"><a href="TComponents.TemplateView_A.html#initPropsDependencies">initPropsDependencies</a></li>
             
                 <li data-name="TComponents.TemplateView_A#parent"><a href="TComponents.TemplateView_A.html#parent">parent</a></li>
             
@@ -2165,7 +2186,7 @@
     
         
         <div class="tag-source">
-            t-components/t-components-tabcontainer.js, line 41
+            t-components/t-components-tabcontainer.js, line 39
         </div>
         
     </div>
@@ -2320,7 +2341,7 @@
         
 
         <footer>
-            Documentation generated by <a target="_blank" href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.2</a> on Mon Jul 03 2023 11:18:15 GMT+0200 (Mitteleuropäische Sommerzeit)
+            Documentation generated by <a target="_blank" href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.2</a> on Thu Nov 09 2023 15:32:06 GMT+0100 (Mitteleuropäische Normalzeit)
         </footer>
     </div>
 </div>

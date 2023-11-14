@@ -34,11 +34,7 @@ export default class App extends TComponents.Component_A {
         this.error = true;
         TComponents.Popup_A.confirm(
           `Required signals not yet loaded on the controller`,
-          [
-            'Youl can load a demo singal configuration.',
-            'A system restart will be executed.',
-            'Do you want to proceed?',
-          ],
+          ['Youl can load a demo singal configuration.', 'A system restart will be executed.', 'Do you want to proceed?'],
           this.cbConfirmLoadConfiguration.bind(this)
         );
       }
@@ -49,31 +45,23 @@ export default class App extends TComponents.Component_A {
   }
 
   mapComponents() {
-    return this.error
-      ? {}
-      : {
-          rapidView: new RapidView(null),
-          tComponents: new TComponentsView(null),
-          trayView: new TrayView(
-            this.find('#motion-view'),
-            'Tray Configuration',
-            moduleName,
-            'esTray01',
-            'esTray02',
-            'esTray03',
-            'esTray04',
-            'esTrayGrip',
-            'esTrayApproach',
-            'esTrayExit'
-          ),
-          ioView: new IoView(null),
-          about: new About(null),
-        };
-  }
+    if (this.error) return {};
 
-  async onRender() {
-    if (this.error) return;
-    this.container.classList.add('tc-container');
+    const rapidView = new RapidView(null);
+    const tComponents = new TComponentsView(null);
+    const trayView = new TrayView(this.find('#motion-view'), {
+      name: 'Tray Configuration',
+      module: moduleName,
+      tray1: 'esTray01',
+      tray2: 'esTray02',
+      tray3: 'esTray03',
+      tray4: 'esTray04',
+      trayGrip: 'esTrayGrip',
+      trayApproach: 'esTrayApproach',
+      trayExit: 'esTrayExit',
+    });
+    const ioView = new IoView(null);
+    const about = new About(null);
 
     /**
      * TAB CONTAINER
@@ -81,15 +69,36 @@ export default class App extends TComponents.Component_A {
     const tabContainer = new TComponents.TabContainer_A(this.find('#tab-container'), {
       // hiddenTabs: true,
       views: [
-        { name: 'RAPID', content: this.child.rapidView },
-        { name: 'Motion', content: this.child.trayView },
-        { name: 'Digital IOs', content: this.child.ioView },
-        { name: 'TComponents', content: this.child.tComponents },
-        { name: 'About', content: this.child.about },
+        { name: 'RAPID', content: rapidView },
+        { name: 'Motion', content: trayView },
+        { name: 'Digital IOs', content: ioView },
+        { name: 'TComponents', content: tComponents },
+        { name: 'About', content: about },
       ],
+      onPlus: () => {
+        const el = document.createElement('div');
+        el.innerHTML = 'Hello world!';
+        console.log('TabContainer onPlus: ', el);
+        tabContainer.addTab({ name: 'new tab', content: el });
+        // tabContainer.render();
+      },
+      plusEnabled: true,
       options: { async: false },
     });
-    tabContainer.render();
+
+    return {
+      rapidView,
+      tComponents,
+      trayView,
+      ioView,
+      about,
+      tabContainer,
+    };
+  }
+
+  async onRender() {
+    if (this.error) return;
+    this.container.classList.add('tc-container');
   }
 
   markup() {

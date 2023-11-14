@@ -13,13 +13,16 @@ export class Eventing_A {
    * @alias on
    * @memberof TComponents.Eventing_A
    * @param {string} eventName - name of the triggering event
-   * @param {function} callback -function to be called when event is triggered
+   * @param {function} callback - function to be called when event is triggered
+   * @param {boolean} [strict] - if true (default), checking wether the function has been added is done by function object comparison,
+   * otherwise the comparison is done only by function.name
    */
-  on(eventName, callback) {
+  on(eventName, callback, strict = true) {
     if (typeof callback !== 'function') throw new Error('callback is not a valid function');
     const handlers = this.events[eventName] || [];
-    if (handlers.includes(callback)) return;
 
+    if (handlers.some((cb) => cb.name === callback.name) && !strict) return;
+    if (handlers.includes(callback)) return;
     handlers.push(callback);
     this.events[eventName] = handlers;
   }
@@ -46,7 +49,7 @@ export class Eventing_A {
   }
 
   /**
-   * Callback function to be called  only once when an event is triggered, then it is removed from the queue
+   * Callback function to be called when an event is triggered only once, then it is removed
    * @alias once
    * @memberof TComponents.Eventing_A
    * @param {string} eventName - name of the triggering event
@@ -82,5 +85,22 @@ export class Eventing_A {
     handlers.forEach((callback) => {
       callback(...data);
     });
+  }
+
+  /**
+   * Clean up all registered events
+   * @alias cleanUpEvents
+   * @memberof TComponents.Eventing_A
+   *
+   */
+  cleanUpEvents() {
+    for (const eventName in this.events) {
+      if (this.events.hasOwnProperty(eventName)) {
+        const handlers = this.events[eventName];
+        handlers.forEach((callback) => {
+          this.off(eventName, callback);
+        });
+      }
+    }
   }
 }

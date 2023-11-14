@@ -1,25 +1,47 @@
 import { imgTray } from '../../constants/images.js';
 import { imgPickStragety } from '../../constants/images.js';
 
+/**
+ * @typedef TrayViewProps
+ * @prop {string} [name] Title of the infobox
+ * @prop {string} [module] Module to find the tray robtarget variables
+ * @prop {string} [tray1] Variable name of the first corner of the tray
+ * @prop {string} [tray2] Variable name of the second corner of the tray
+ * @prop {string} [tray3] Variable name of the third corner of the tray
+ * @prop {string} [tray4] Variable name of the fourth corner of the tray
+ * @prop {string} [trayGrip] Variable name of the grip position
+ * @prop {string} [trayApproach] Variable name of the approach position
+ * @prop {string} [trayExit] Variable name of the exit position
+ */
+
 export default class TrayView extends TComponents.Component_A {
-  constructor(parent, name, module, tray1, tray2, tray3, tray4, trayGrip, trayApproach, trayExit) {
-    super(parent, { options: { async: false } });
-    this._module = module;
-    this._tray1 = tray1;
-    this._tray2 = tray2;
-    this._tray3 = tray3;
-    this._tray4 = tray4;
-    this._trayGrip = trayGrip;
-    this._trayApproach = trayApproach;
-    this._trayExit = trayExit;
-    this.name = name;
+  constructor(parent, props = {}) {
+    super(parent, props);
 
     this.locArray = [
-      { item: this._tray1, alias: 'Corner 1' },
-      { item: this._tray2, alias: 'Corner 2' },
-      { item: this._tray3, alias: 'Corner 3' },
-      { item: this._tray4, alias: 'Corner 4' },
+      { item: this._props.tray1, alias: 'Corner 1' },
+      { item: this._props.tray2, alias: 'Corner 2' },
+      { item: this._props.tray3, alias: 'Corner 3' },
+      { item: this._props.tray4, alias: 'Corner 4' },
     ];
+  }
+
+  /**
+   *
+   * @returns {TrayViewProps}
+   */
+  defaultProps() {
+    return {
+      name: 'Tray Configuration',
+      module: null,
+      tray1: null,
+      tray2: null,
+      tray3: null,
+      tray4: null,
+      trayGrip: null,
+      trayApproach: null,
+      trayExit: null,
+    };
   }
 
   async onInit() {
@@ -31,33 +53,37 @@ export default class TrayView extends TComponents.Component_A {
     return {
       selectorRobTarget: new TComponents.SelectorAlias_A(this.find('.target-select'), {
         label: 'Select a corner',
-        selected: this._tray1,
+        selected: this._props.tray1,
         itemMap: this.locArray,
       }),
-      trayPose01: new TComponents.ButtonTeachMove_A(this.find('.tray-position-1'), {
-        variable: this._tray1,
-        module: this._module,
+      trayPose: new TComponents.ButtonTeachMove_A(this.find('.tray-position-1'), {
+        variable: this._props.tray1,
+        module: this._props.module,
         label: this.locArray[0].alias,
+        labelPos: 'right',
       }),
       trayPoseGrip: new TComponents.ButtonTeachMove_A(this.find('.tray-position-grip'), {
-        variable: this._trayGrip,
-        module: this._module,
+        variable: this._props.trayGrip,
+        module: this._props.module,
         label: 'Grip Location',
+        labelPos: 'right',
       }),
       trayPoseApproach: new TComponents.ButtonTeachMove_A(this.find('.tray-position-approach'), {
-        variable: this._trayApproach,
-        module: this._module,
+        variable: this._props.trayApproach,
+        module: this._props.module,
         label: 'Approach Location',
+        labelPos: 'right',
       }),
       trayPoseExit: new TComponents.ButtonTeachMove_A(this.find('.tray-position-exit'), {
-        variable: this._trayExit,
-        module: this._module,
+        variable: this._props.trayExit,
+        module: this._props.module,
         label: 'Exit Location',
+        labelPos: 'right',
       }),
       btnTestPick: new TComponents.ButtonProcedure_A(this.find('.tray-btn-test-pick'), {
         procedure: 'es_testPickStrategy',
         userLevel: false,
-        label: 'test',
+        text: 'test',
         stopOnRelease: true,
       }),
       selectorTool: new TComponents.SelectorVariables_A(this.find('.tool-select'), {
@@ -71,7 +97,7 @@ export default class TrayView extends TComponents.Component_A {
         filter: { dataType: 'wobjdata' },
       }),
       align: new TComponents.ButtonAlign_A(this.find('.align-tool'), {
-        label: 'Align tool',
+        text: 'Align tool',
         selector: true,
       }),
     };
@@ -81,7 +107,7 @@ export default class TrayView extends TComponents.Component_A {
     this.cssBox(true);
 
     this.child.selectorRobTarget.onSelection(async (item, alias) => {
-      this.child.trayPose01.setProps({ variable: item, label: alias });
+      this.child.trayPose.setProps({ variable: item, label: alias });
     });
     this.child.selectorTool.onSelection(async (value) => {
       await API.MOTION.setTool(value);
@@ -98,7 +124,7 @@ export default class TrayView extends TComponents.Component_A {
         <div class="tc-row">
           <div class="tc-cols-1 tc-infobox">
             <div>
-              <p>${this.name}</p>
+              <p>${this._props.name}</p>
             </div>
           </div>
         </div>
@@ -166,23 +192,3 @@ TrayView.loadCssClassFromString(/*css*/ `
 }
 
 `);
-
-// var tComponentStyle = document.createElement('style');
-// tComponentStyle.innerHTML = `
-
-// .tc-trayview-img {
-//   width: 250px;
-//   height: auto;
-//   padding: 0px 50px;
-// }
-
-// .tc-trayview-img-pick-strategy {
-//   width: 250px;
-//   height: 200px;
-//   padding: 0px 50px;
-// }
-
-// `;
-
-// var ref = document.querySelector('script');
-// ref.parentNode.insertBefore(tComponentStyle, ref);

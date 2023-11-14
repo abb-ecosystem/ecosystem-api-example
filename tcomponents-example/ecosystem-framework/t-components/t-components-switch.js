@@ -2,8 +2,7 @@ import { Component_A } from './t-components-component.js';
 
 /**
  * @typedef TComponents.SwitchProps
- * @prop {Function} [callback] Function to be called when button is pressed
- * @prop {string} [label] Label text
+ * @prop {Function} [onChange] Function to be called when button is pressed
  */
 
 /**
@@ -21,7 +20,7 @@ import { Component_A } from './t-components-component.js';
  *
  * // index.js
  *  const switch = new Switch_A(document.querySelector('.switch-container'), {
- *     callback: () => {
+ *     onChange: () => {
  *       console.log('switch was toggled');
  *     },
  *     label: 'Toggle',
@@ -47,30 +46,18 @@ export class Switch_A extends Component_A {
    * @returns {TComponents.SwitchProps}
    */
   defaultProps() {
-    return { callback: null, label: '' };
+    return { onChange: null };
   }
 
   onRender() {
-    this._switch.desc = this._props.label;
+    // this._switch.desc = this._props.label;
     this._switch.onchange = this.cbOnChange.bind(this);
-    if (this._props.callback) this.onChange(this._props.callback);
-    this._switch.attachToElement(this.container);
+    if (this._props.onChange) this.onChange(this._props.onChange);
+    this._switch.attachToElement(this.find('.tc-switch'));
   }
 
-  /**
-   * Component label text
-   * @alias label
-   * @type {string}
-   * @memberof TComponents.Switch_A
-   */
-  get label() {
-    this._switch.desc = this._props.label;
-    return this._switch.desc;
-  }
-
-  set label(label) {
-    this.setProps({ label });
-    this._switch.desc = label;
+  markup() {
+    return /*html*/ `<div class="tc-switch"></div>`;
   }
 
   /**
@@ -115,7 +102,7 @@ export class Switch_A extends Component_A {
    * Adds a callback funciton to the component. This will be called after the button is pressed and released
    * @alias onChange
    * @memberof TComponents.Switch_A
-   * @param   {function}  func    The callback function which is called when the button is pressed
+   * @param   {Function}  func    The callback function which is called when the button is pressed
    */
   onChange(func) {
     this.on('change', func);

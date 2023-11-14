@@ -5,7 +5,7 @@ import { SignalIndicator_A } from './t-components-signalindicator.js';
 import { SwitchSignal_A } from './t-components-switchsignal.js';
 
 /**
- * @typedef SignalViewProps
+ * @typedef TComponents.SignalViewProps
  * @prop {string | object} signal - Signal name, or API.CONFIG.SIGNAL.Signal object
  * @prop {boolean} [control] - To enable/disable the precense of a swith
  * @prop {boolean} [edit] - To enable/disable the editing button
@@ -16,7 +16,7 @@ import { SwitchSignal_A } from './t-components-switchsignal.js';
  * @class TComponents.SignalView_A
  * @extends TComponents.Component_A
  * @param {HTMLElement} parent - DOM element in which this component is to be inserted
- * @param {SignalViewProps} props
+ * @param {TComponents.SignalViewProps} props
  *
  * @example
  * // index.html
@@ -63,7 +63,7 @@ export class SignalView_A extends Component_A {
      */
     this._props;
 
-    this.initPropsDependencies = ['signal'];
+    this.initPropsDep('signal');
 
     this._id = `signal-view-${API.generateUUID()}`;
   }
@@ -85,10 +85,7 @@ export class SignalView_A extends Component_A {
     }
 
     try {
-      this._signal =
-        typeof this._props.signal === 'string'
-          ? await API.SIGNAL.getSignal(this._props.signal)
-          : this._props.signal;
+      this._signal = typeof this._props.signal === 'string' ? await API.SIGNAL.getSignal(this._props.signal) : this._props.signal;
 
       this._signal.modified ? (this.modified = true) : (this.modified = false);
     } catch (e) {
@@ -114,16 +111,12 @@ export class SignalView_A extends Component_A {
   }
 
   onRender() {
-    this._props.edit
-      ? this.find(`.tc-edit-btn`).classList.remove('tc-hidden')
-      : this.find(`.tc-edit-btn`).classList.add('tc-hidden');
+    this._props.edit ? this.find(`.tc-edit-btn`).classList.remove('tc-hidden') : this.find(`.tc-edit-btn`).classList.add('tc-hidden');
 
     this._device = this.find(`.tc-signal-view-device`);
     this._btnEdit = this.find(`.tc-edit-btn`);
     this._msg = this.find(`.${this._id}`).querySelector('.message');
-    this.modified
-      ? this._msg.classList.add('tc-warning')
-      : this._msg.classList.remove('tc-warning');
+    this.modified ? this._msg.classList.add('tc-warning') : this._msg.classList.remove('tc-warning');
   }
 
   /**
@@ -136,15 +129,9 @@ export class SignalView_A extends Component_A {
           <div class="${_id} tc-container-row ">
             <div class="tc-signal-view-ind tc-signalview-ind tc-item"></div>
             <div class="tc-signal-view-switch tc-signalview-switch tc-item"></div>
-            <p class="tc-signalview-name tc-item">${
-              this._props.signal && _signal ? _signal.name : 'No signal detected'
-            }</p>
-            <p class="tc-signal-view-device tc-signalview-device tc-item message">${
-              this._props.signal && _signal.device ? _signal.device : ''
-            }</p>
-            <p class="tc-signal-view-device tc-signalview-map tc-item message">${
-              this._props.signal && _signal.map ? _signal.map : ''
-            }</p>
+            <p class="tc-signalview-name tc-item">${this._props.signal && _signal ? _signal.name : 'No signal detected'}</p>
+            <p class="tc-signal-view-device tc-signalview-device tc-item message">${this._props.signal && _signal.device ? _signal.device : ''}</p>
+            <p class="tc-signal-view-device tc-signalview-map tc-item message">${this._props.signal && _signal.map ? _signal.map : ''}</p>
             <button class="tc-signal-view-edit btn tc-edit-btn tc-edit-icon"
               data-name="${this._props.signal && _signal.name}"
               data-type="${this._props.signal && _signal.type}"
@@ -214,15 +201,9 @@ export class SignalView_A extends Component_A {
   }
 
   updateAttributes(attr) {
-    this._device &&
-      (this._device.textContent = `${attr.Device ? attr.Device : ''}: ${
-        attr.DeviceMap ? attr.DeviceMap : ''
-      }`);
+    this._device && (this._device.textContent = `${attr.Device ? attr.Device : ''}: ${attr.DeviceMap ? attr.DeviceMap : ''}`);
 
-    if (
-      this._btnEdit.dataset.device !== attr.Device ||
-      this._btnEdit.dataset.map !== attr.DeviceMap
-    ) {
+    if (this._btnEdit.dataset.device !== attr.Device || this._btnEdit.dataset.map !== attr.DeviceMap) {
       this.modified = true;
       // this._msg.classList.add('tc-warning');
       // this._device.classList.add('tc-warning');

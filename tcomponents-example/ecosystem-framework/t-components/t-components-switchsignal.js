@@ -38,7 +38,7 @@ export class SwitchSignal_A extends Switch_A {
      */
     this._props;
 
-    this.initPropsDependencies = ['signal'];
+    this.initPropsDep('signal');
   }
 
   /**
@@ -48,7 +48,7 @@ export class SwitchSignal_A extends Switch_A {
    * @returns {TComponents.SwitchSignalProps}
    */
   defaultProps() {
-    return { signal: null };
+    return { signal: '' };
   }
 
   async onInit() {
@@ -59,9 +59,7 @@ export class SwitchSignal_A extends Switch_A {
 
     try {
       this._signal =
-        typeof this._props.signal === 'string'
-          ? await API.SIGNAL.getSignal(this._props.signal)
-          : this._props.signal;
+        typeof this._props.signal === 'string' ? await API.SIGNAL.getSignal(this._props.signal) : this._props.signal;
       this._switch.active = await this._signal.getValue();
       this._signal.onChanged(this.cbUpdateSwitch.bind(this));
       this._signal.subscribe();

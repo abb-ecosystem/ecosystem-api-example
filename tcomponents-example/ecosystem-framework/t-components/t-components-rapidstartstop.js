@@ -49,8 +49,7 @@ export class RapidStartStop_A extends Component_A {
   async onInit() {
     // subscribe to executionState
     try {
-      var executionState = RWS.Rapid.getMonitor('execution');
-      executionState.addCallbackOnChanged((eventData) => {
+      API.RAPID.monitorExecutionState((eventData) => {
         if (eventData == 'stopped') {
           if (this._props.indicator) this.find('.tc-rapid-feedback').src = imgStop;
           this.child.btnStart.enabled = true;
@@ -61,9 +60,6 @@ export class RapidStartStop_A extends Component_A {
           this.child.btnStop.enabled = true;
         }
       });
-      // var rapidstate = await RWS.Rapid.getExecutionState();
-      // console.log(rapidstate);
-      executionState.subscribe(true);
     } catch (e) {
       this.error = true;
       Popup_A.danger('Subscribe to failed. >>>', [e.message, e.description]);
@@ -73,13 +69,13 @@ export class RapidStartStop_A extends Component_A {
   mapComponents() {
     return {
       btnStart: new Button_A(this.find('.tc-btn-start'), {
-        callback: this.cbStart.bind(this),
-        label: 'Play',
+        onClick: this.cbStart.bind(this),
+        text: 'Play',
         icon: imgPlayIcon,
       }),
       btnStop: new Button_A(this.find('.tc-btn-stop'), {
-        callback: this.cbStop.bind(this),
-        label: 'Stop',
+        onClick: this.cbStop.bind(this),
+        text: 'Stop',
         icon: imgStopIcon,
       }),
     };
@@ -91,11 +87,7 @@ export class RapidStartStop_A extends Component_A {
     return /*html*/ `
 
           <div class="tc-container-row tc-item">
-          ${
-            this._props.indicator
-              ? `<img src="${imgStop}" style="width:36px ;height:36px;" class="tc-rapid-feedback tc-item"> </img>`
-              : ''
-          }
+          ${this._props.indicator ? `<img src="${imgStop}" style="width:36px ;height:36px;" class="tc-rapid-feedback tc-item"> </img>` : ''}
             <div class="tc-btn-start tc-item"></div>
             <div class="tc-btn-stop tc-item"></div>
           </div>

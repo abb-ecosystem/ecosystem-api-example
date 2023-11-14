@@ -29,7 +29,7 @@ import { Button_A } from './t-components-button.js';
  *    document.querySelector('#button-move-up'),{
  *    module: 'Wizard',
  *    variable: 'UpLimit',
- *    callback: async function (value) {
+ *    onClick: async function (value) {
  *      Set_Pos(value);
  *    },
  *    label: 'Up',
@@ -45,7 +45,7 @@ export class ButtonVariable_A extends Button_A {
      */
     this._props;
 
-    this.initPropsDependencies = ['module', 'variable'];
+    this.initPropsDep(['module', 'variable']);
   }
 
   /**
@@ -70,14 +70,14 @@ export class ButtonVariable_A extends Button_A {
       }
 
       if (!this.task) this.task = await API.RAPID.getTask(this._props.task);
-      this.varElement = await API.RAPID.getVariable(
-        this.task.name,
-        this._props.module,
-        this._props.variable
-      );
+      this.varElement = await API.RAPID.getVariable(this.task.name, this._props.module, this._props.variable);
     } catch (e) {
       Popup_A.error(e, `TComponents.ButtonVariable_A onInit failed.`);
     }
+
+    return () => {
+      this.varElement.unsubscribe();
+    };
   }
 
   /**

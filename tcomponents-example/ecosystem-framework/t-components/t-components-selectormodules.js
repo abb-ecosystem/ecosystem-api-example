@@ -39,7 +39,7 @@ export class SelectorModules_A extends Dropdown_A {
      */
     this._props;
 
-    this.initPropsDependencies = ['isInUse', 'filter'];
+    this.initPropsDep(['isInUse', 'filter']);
   }
 
   /**
@@ -49,7 +49,7 @@ export class SelectorModules_A extends Dropdown_A {
    * @returns {TComponents.SelectorModulesProps}
    */
   defaultProps() {
-    return { isInUse: false, selected: '', label: '', addNoSelection: true, filter: '' };
+    return { isInUse: false, selected: '', label: '', addNoSelection: false, filter: '' };
   }
 
   async onInit() {
@@ -70,6 +70,6 @@ export class SelectorModules_A extends Dropdown_A {
    * @memberof TComponents.SelectorModules_A
    */
   async updateSearch(filter = '') {
-    this.setProps({ filter });
+    await this.setProps({ filter }, null, true);
   }
 }

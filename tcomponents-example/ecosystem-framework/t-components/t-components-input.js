@@ -2,7 +2,7 @@ import { Component_A } from './t-components-component.js';
 
 /**
  * @typedef TComponents.InputProps
- * @prop {Function} [callback] Function to be called when button is pressed
+ * @prop {Function} [onChange] Function to be called when button is pressed
  * @prop {string} [label] Label text
  * @prop {boolean} [readOnly] Set to true to use the input field only to display but no to edit values
  * @prop {string} [description] Label to be displayed under the input field when open the keyboard editor
@@ -50,7 +50,7 @@ export class Input_A extends Component_A {
    */
   defaultProps() {
     return {
-      callback: null,
+      onChange: null,
       readOnly: false,
       description: '',
       useBorder: true,
@@ -63,8 +63,8 @@ export class Input_A extends Component_A {
   onRender() {
     this._inputField.label = this._props.description;
     this._props.readOnly || (this._inputField.onchange = this.cbOnChange.bind(this));
-    if (this._props.callback) this.onChange(this._props.callback);
-    this._inputField.attachToElement(this.container);
+    if (this._props.onChange) this.onChange(this._props.onChange);
+    this._inputField.attachToElement(this.find('.tc-input'));
 
     if (this._props.readOnly) {
       const el = this.container.querySelector('.fp-components-input');
@@ -74,6 +74,11 @@ export class Input_A extends Component_A {
       const el = this.container.querySelector('.fp-components-input');
       el.style.borderStyle = 'none';
     }
+    this.container.style.minWidth = '80px';
+  }
+
+  markup() {
+    return /*html*/ `<div class="tc-input"></div>`;
   }
 
   /**
@@ -177,7 +182,7 @@ export class Input_A extends Component_A {
    * Adds a callback function that will be called when the RAPID variable value changes
    * @alias onChange
    * @memberof TComponents.Input_A
-   * @param {function} func
+   * @param {Function} func
    */
   onChange(func) {
     this.on('change', func);

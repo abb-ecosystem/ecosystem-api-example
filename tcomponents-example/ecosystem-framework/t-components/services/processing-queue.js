@@ -51,10 +51,6 @@ export function createProcessingQueue(onHandleItem, onHandleTimeout, timeout = 5
   return api;
 }
 
-/**
- * Setup of processing queue
- */
-
 const handleUpdate = async function (func, args) {
   await func.apply(this, args);
 };

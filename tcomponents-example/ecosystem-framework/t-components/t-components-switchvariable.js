@@ -27,7 +27,7 @@ import { Popup_A } from './t-components-popup.js';
  *   module: this._module,
  *   variable: this._variableBool,
  *   label: 'SwitchVariable_A',
- *   callback: () => {
+ *   onChange: () => {
  *     console.log('SwitchVariable_A changed...');
  *   },
  * });
@@ -42,7 +42,7 @@ export class SwitchVariable_A extends Switch_A {
      */
     this._props;
 
-    this.initPropsDependencies = ['variable', 'module'];
+    this.initPropsDep(['variable', 'module']);
   }
 
   /**
@@ -68,10 +68,7 @@ export class SwitchVariable_A extends Switch_A {
       this.varElement.onChanged(this.cbUpdateSwitch.bind(this));
       this._switch.active = await this.varElement.getValue();
 
-      if (this.varElement.type !== 'bool')
-        throw new Error(
-          `TComponents.SwitchVariable_A : ${this._props.variable} is not a bool variable`
-        );
+      if (this.varElement.type !== 'bool') throw new Error(`TComponents.SwitchVariable_A : ${this._props.variable} is not a bool variable`);
     } catch (e) {
       this.error = true;
       Popup_A.error(e);
@@ -111,6 +108,7 @@ export class SwitchVariable_A extends Switch_A {
    * @alias cbOnChange
    * @memberof TComponents.SwitchVariable_A
    * @async
+   * @private
    */
   async cbOnChange(value) {
     try {
@@ -126,6 +124,7 @@ export class SwitchVariable_A extends Switch_A {
    * @alias cbUpdateSwitch
    * @memberof TComponents.SwitchVariable_A
    * @async
+   * @private
    */
   cbUpdateSwitch(value) {
     this._switch.active = value;

@@ -1,8 +1,8 @@
 import { Component_A } from './t-components-component.js';
 
 /**
- * @typedef ContainerProps
- * @prop {TComponents.Component_A | HTMLElement | TComponents.Component_A[] |HTMLElement[]} [children]
+ * @typedef TComponents.ContainerProps
+ * @prop {TComponents.Component_A | HTMLElement | TComponents.Component_A[] | HTMLElement[]} [children]
  * @prop {boolean} [box] If true, the container will have a box around it
  * @prop {string} [width] Width of the container. Defautls to 'auto'
  * @prop {string} [height] Height of the container. Defautls to 'auto'
@@ -22,24 +22,21 @@ import { Component_A } from './t-components-component.js';
  * @param {TComponents.ContainerProps} [props]
  */
 export class Container_A extends Component_A {
-  /**
-   * @param {HTMLElement} parent - HTMLElement that is going to be the parent of the component
-   * @param {TComponents.ContainerProps} [props]
-   */
   constructor(parent, props = {}) {
     super(parent, props);
     this._children = new Map();
+
+    this.initPropsDep('children');
   }
 
   defaultProps() {
-    this.initPropsDependencies = ['children'];
     return {
       children: [],
       row: false,
       box: false,
       width: 'auto',
       height: 'auto',
-      classNames: ['items-start', 'justify-start'],
+      classNames: ['flex-col', 'justify-stretch'],
       id: '',
     };
   }
@@ -47,20 +44,16 @@ export class Container_A extends Component_A {
   async onInit() {
     this._children.clear();
 
-    const childrenArray = Array.isArray(this._props.children)
-      ? this._props.children
-      : [this._props.children ? this._props.children : []];
+    const childrenArray = Array.isArray(this._props.children) ? this._props.children : [this._props.children ? this._props.children : []];
 
     childrenArray.forEach((child, idx) => {
       if (typeof child === 'string') {
         // chekc if child has # and remove it
         const elementId = child.replace(/^#/, '');
-        child = elementId.startsWith('.')
-          ? document.querySelector(elementId)
-          : document.getElementById(elementId);
+        child = elementId.startsWith('.') ? document.querySelector(elementId) : document.getElementById(elementId);
         if (!child) {
           throw new Error(`Container_A: Could not find element with selector/id: ${elementId} in the DOM.
-            Check the selector or if inside a TComponent, then try adding the child as Element or Component_A instance, 
+            Check the selector or if inside a TComponent, then try adding the child as Element or Component_A instance,
             since this may not be yet available in the DOM.`);
         }
 
@@ -86,8 +79,8 @@ export class Container_A extends Component_A {
   }
 
   onRender() {
-    this.container.dataset.id = this._props.id ? this._props.id : '';
-    this.container.dataset.container = 'true';
+    this.container.dataset.containerId = this._props.id ? this._props.id : this.compId;
+    this.container.dataset.tcContainer = 'true';
 
     this._children.forEach((id, child) => {
       if (Component_A._isTComponent(child)) {
@@ -105,8 +98,7 @@ export class Container_A extends Component_A {
       't-component__container',
       // `${this._props.row ? 'flex-row' : 'flex-col'}`,
     ]);
-    if (this._props.classNames)
-      this.cssAddClass('this', this._props.classNames ? this._props.classNames : 'flex-col');
+    if (this._props.classNames) this.cssAddClass('this', this._props.classNames ? this._props.classNames : 'flex-col');
 
     this.container.style.width = this._props.width;
     this.container.style.height = this._props.height;
@@ -145,3 +137,11 @@ export class Container_A extends Component_A {
     else this.cssAddClass('.child__container', className, true);
   }
 }
+
+Container_A.loadCssClassFromString(/*css*/ `
+.t-component__container {
+  max-width: inherit;
+  max-height: inherit;
+}
+
+`);

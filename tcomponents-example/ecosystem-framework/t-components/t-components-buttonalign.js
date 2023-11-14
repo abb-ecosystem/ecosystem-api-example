@@ -15,7 +15,7 @@ import { Dropdown_A } from './t-components-dropdown.js';
  */
 
 /**
- * Button to align the tool center point with respect to the coordinate system provided within the {@link TComponents.ButtonAlignProps}.
+ * Button to jog the robot to a position provided by a RAPID robtarget variable.
  * If the {@link TComponents.ButtonAlignProps.selector} is set to true, a coordinate selector element will be added to the button.
  * @class TComponents.ButtonAlign_A
  * @extends TComponents.Button_A
@@ -39,7 +39,7 @@ export class ButtonAlign_A extends Button_A {
     super(parent, props);
 
     this._isJogging = false;
-    if (!this.label) this.label = 'Align';
+    if (!this._props.text) this._props.text = 'Align';
   }
 
   /**
@@ -72,12 +72,13 @@ export class ButtonAlign_A extends Button_A {
     super.onRender();
 
     const elemBtnMove = this.find('.btn-align__btn');
-    elemBtnMove.addEventListener('pointerdown', this.align.bind(this));
-    elemBtnMove.addEventListener('pointerup', this.stop.bind(this));
-    elemBtnMove.addEventListener('pointerleave', this.stop.bind(this));
+    this.addEventListener(elemBtnMove, 'pointerdown', this.align.bind(this));
+    this.addEventListener(elemBtnMove, 'pointerup', this.stop.bind(this));
+    this.addEventListener(elemBtnMove, 'pointerleave', this.stop.bind(this));
 
     // relocating the fpcomponent button inside the markup
-    this.container.removeChild(this.container.querySelector('.fp-components-button'));
+    const btnEl = this.container.querySelector('.fp-components-button');
+    if (btnEl) this.container.removeChild(btnEl);
     this._btn.attachToElement(this.find('.btn-align__btn'));
   }
 
@@ -161,7 +162,7 @@ ButtonAlign_A.loadCssClassFromString(
   `
 .tc-btn-align .btn-align__coords {
   min-width: 136px;
-} 
+}
 
 `
 );

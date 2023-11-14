@@ -40,10 +40,11 @@ export class ButtonTeach_A extends Button_A {
      */
     this._props;
 
-    this.initPropsDependencies = ['module', 'variable'];
+    this.initPropsDep(['module', 'variable']);
 
     this._value = null;
-    if (!this.label) this.label = 'Teach';
+
+    if (this._props.text === this._getAllDefaultProps().text) this._props.text = 'Teach';
   }
 
   /**
@@ -72,10 +73,7 @@ export class ButtonTeach_A extends Button_A {
       this.onClick(this.teach.bind(this));
     } catch (e) {
       this._btn.enabled = false;
-      Popup_A.warning(`Teach button`, [
-        `Error when gettin variable ${this._props.variable}`,
-        e.message,
-      ]);
+      Popup_A.warning(`Teach button`, [`Error when gettin variable ${this._props.variable}`, e.message]);
     }
   }
 

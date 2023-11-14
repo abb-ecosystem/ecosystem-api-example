@@ -14,8 +14,11 @@ export default class SignalExamples extends TComponents.Component_A {
   async onInit() {
     try {
       const devices = await API.DEVICE.searchEthernetIPDevices();
+      this._deviceSelected = devices[0];
+      this._filter = { device: this._deviceSelected };
       const signals = await API.SIGNAL.search(this._filter, true);
-      this._signal = await API.SIGNAL.getSignal(signals[0]);
+      this._signalSelected = signals[0];
+      this._signal = await API.SIGNAL.getSignal(this._signalSelected);
     } catch (e) {
       this.error = true;
       TComponents.Popup_A.danger('SignalExamples', [e.message, e.description]);
@@ -34,15 +37,13 @@ export default class SignalExamples extends TComponents.Component_A {
         label: 'Select a signal:',
       }),
       btnLoad: new TComponents.Button_A(this.find('.load-btn'), {
-        callback: this.cbLoadConfig.bind(this),
-        label: 'Load example configuration',
+        onClick: this.cbLoadConfig.bind(this),
+        text: 'Load example configuration',
       }),
       signalComponents: new SignalComponents(this.find('.signal-components'), {
         signal: this._signalSelected,
       }),
     };
-
-    // console.log('😎😎😎😎😎 - SignalExamples finished rendering...');
   }
 
   onRender() {
@@ -76,22 +77,22 @@ export default class SignalExamples extends TComponents.Component_A {
   }
 
   async cbDeviceSelector(selected) {
+    if (this._deviceSelected === selected) return;
     this._deviceSelected = selected;
     this._filter = {
       device: selected,
     };
 
-    await this.child.signalSelector.updateSearch(this._filter, false);
-    if (this.child.signalSelector.selected)
-      this._signal = await API.SIGNAL.getSignal(this.child.signalSelector.selected);
+    await this.child.signalSelector.updateSearch(this._filter);
+    const items = this.child.signalSelector.items;
+
+    if (this.child.signalSelector.selected) this._signal = await API.SIGNAL.getSignal(this.child.signalSelector.selected);
     this._signalSelected = this.child.signalSelector.selected;
-    // this.render();
+    this.child.signalComponents.signal = this._signalSelected;
   }
 
   async cbSignalSelector(selected) {
     this._signalSelected = selected;
-    console.log('😃', selected);
-
     this.child.signalComponents.signal = selected;
   }
 

@@ -1,10 +1,8 @@
 import { Menu_A } from './t-components-menu.js';
+import { Component_A } from './t-components-component.js';
 
 /**
- * @typedef TabContainerProps
- * @prop {string} [title] - Set this attribute to any string to display a title next to the
- * hamburger menu icon when the menu is open. Set this attribute to false (default) to hide
- * the menu when closed, and only display the hamburger menu icon.
+ * @typedef TComponents.TabContainerProps
  * @prop {Function} [onChange] Set this attribute to a callback function that should
  * be called when a new view becomes active, i.e. the container has switched view to another content element.
  * The oldViewId and newViewId parameters are both view identifier objects which respectively identify the
@@ -34,17 +32,14 @@ import { Menu_A } from './t-components-menu.js';
  * @param {TComponents.TabContainerProps} [props]
  */
 export class TabContainer_A extends Menu_A {
-  /**
-   * @param {HTMLElement} parent - HTMLElement that is going to be the parent of the component
-   * @param {TabContainerProps} props
-   */
   constructor(parent, props) {
     super(parent, props);
+  }
 
-    this.tabContainer = new FPComponents.Tabcontainer_A();
-    this.tabContainer.onchange = this.cbOnChange.bind(this);
-    if (this._props.onPlus) this.tabContainer.onplus = this.cbOnPlus.bind(this);
-    this.tabContainer.onuserclose = this.cbOnUserClose.bind(this);
+  async onInit() {
+    await super.onInit();
+    if (this._props.onPlus) this.on('plus', this._props.onPlus);
+    if (this._props.onUserClose) this.on('userclose', this._props.onPlus);
   }
 
   defaultProps() {
@@ -57,14 +52,50 @@ export class TabContainer_A extends Menu_A {
   }
 
   onRender() {
-    this.views.forEach(({ name, content, id }) => {
-      const dom = this._getDom(content, id);
-      this.viewId.set(this.tabContainer.addTab(name, dom), name);
-    });
+    this.tabContainer = new FPComponents.Tabcontainer_A();
+    this.tabContainer.onchange = this.cbOnChange.bind(this);
+    this.tabContainer.onplus = this.cbOnPlus.bind(this);
+    this.tabContainer.onuserclose = this.cbOnUserClose.bind(this);
+
+    this._onRenderView();
+
     this.tabContainer.plusEnabled = this._props.plusEnabled;
     this.tabContainer.hiddenTabs = this._props.hiddenTabs;
     this.tabContainer.attachToElement(this.container);
+
     this.container.classList.add('tc-container');
+
+    this.container.removeEventListener('click', this._handleTabClick);
+    this.addEventListener(this.container, 'click', this._handleTabClick, true);
+  }
+
+  _handleTabClick(e) {
+    // Check if the clicked element is a tab
+    const tabElement = e.target.closest('.fp-components-tabcontainer-tabbar');
+    if (tabElement) {
+      // Trigger the custom event on the container element
+      const customEvent = new CustomEvent('tabclick', {
+        detail: {
+          tabElement: tabElement,
+        },
+        bubbles: true,
+        cancelable: true,
+      });
+      e.target.dispatchEvent(customEvent);
+    }
+  }
+
+  _onRenderView() {
+    this.viewId.clear();
+    this.views.forEach(({ name, content, id }) => {
+      const dom = this._getDom(content, id);
+      id = this.tabContainer.addTab(name, dom);
+      this.viewId.set(id, name);
+    });
+  }
+
+  getProps() {
+    return this._props;
   }
 
   /**
@@ -78,9 +109,7 @@ export class TabContainer_A extends Menu_A {
   }
 
   removeTab(name) {
-    this.tabContainer.removeTab(
-      [...this.viewId.entries()].filter(([_, value]) => value === name)[0][0]
-    );
+    this.tabContainer.removeTab([...this.viewId.entries()].filter(([_, value]) => value === name)[0][0]);
   }
 
   cbOnPlus() {
@@ -130,9 +159,9 @@ export class TabContainer_A extends Menu_A {
   }
 
   set activeTab(name) {
-    this.tabContainer.activeTab = [...this.viewId.entries()].filter(
-      ([_, value]) => value === name
-    )[0][0];
+    const tab = [...this.viewId.entries()].filter(([_, value]) => value === name);
+
+    this.tabContainer.activeTab = tab[0][0];
   }
 }
 

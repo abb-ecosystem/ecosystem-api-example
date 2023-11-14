@@ -40,7 +40,7 @@ export class SelectorVariables_A extends Dropdown_A {
      */
     this._props;
 
-    this.initPropsDependencies = ['module', 'isInUse', 'filter'];
+    this.initPropsDep(['module', 'isInUse', 'filter']);
   }
 
   /**
@@ -52,11 +52,12 @@ export class SelectorVariables_A extends Dropdown_A {
   defaultProps() {
     // this.noCheck = ['filter']
     return {
-      module: null,
+      itemList: [],
+      module: '',
       isInUse: false,
       selected: '',
       label: '',
-      addNoSelection: true,
+      addNoSelection: false,
       filter: { name: '', symbolType: '', dataType: '' },
     };
   }
@@ -64,11 +65,7 @@ export class SelectorVariables_A extends Dropdown_A {
   async onInit() {
     try {
       if (!this.task) this.task = await API.RAPID.getTask();
-      const vars = await this.task.searchVariables(
-        this._props.module,
-        this._props.isInUse,
-        this._props.filter
-      );
+      const vars = await this.task.searchVariables(this._props.module, this._props.isInUse, this._props.filter);
       this._updateItemList(vars.map((v) => v.name));
     } catch (e) {
       this.error = true;
@@ -88,6 +85,6 @@ export class SelectorVariables_A extends Dropdown_A {
    * @memberof TComponents.SelectorVariables_A
    */
   async updateSearch(module, filter = {}) {
-    this.setProps({ module, filter });
+    await this.setProps({ module, filter }, null, true);
   }
 }

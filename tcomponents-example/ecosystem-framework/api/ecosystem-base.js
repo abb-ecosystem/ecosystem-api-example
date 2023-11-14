@@ -2,6 +2,7 @@
  * API Namespace
  * @namespace API
  */
+
 // @ts-ignore
 const factoryApiBase = function (es) {
   /**
@@ -10,7 +11,7 @@ const factoryApiBase = function (es) {
    * @constant
    * @type {number}
    */
-  es.ECOSYSTEM_API_VERSION = '0.7';
+  es.ECOSYSTEM_API_VERSION = '0.8';
 
   const TIMEOUT_SEC = 5;
   es.verbose = false;
@@ -21,7 +22,7 @@ const factoryApiBase = function (es) {
    * @private
    */
   es.init = async () => {
-    // await API.CONTROLLER._init();
+    // await API.CONTROLLER._init()
 
     function buildErrorArray(e) {
       const errArr = [];
@@ -109,8 +110,7 @@ const factoryApiBase = function (es) {
       } else if (item.hasOwnProperty('message')) {
         r = JSON.parse(JSON.stringify(item));
         r.message = msg;
-        if (typeof item.message === 'string' && item.message.length > 0)
-          r.message += ` >>> ${item.message}`;
+        if (typeof item.message === 'string' && item.message.length > 0) r.message += ` >>> ${item.message}`;
       }
     } catch (error) {
       r = {};
@@ -202,8 +202,7 @@ const factoryApiBase = function (es) {
   es.generateUUID = () => {
     // Public Domain/MIT
     var d = new Date().getTime(); //Timestamp
-    var d2 =
-      (typeof performance !== 'undefined' && performance.now && performance.now() * 1000) || 0; //Time in microseconds since page-load or 0 if unsupported
+    var d2 = (typeof performance !== 'undefined' && performance.now && performance.now() * 1000) || 0; //Time in microseconds since page-load or 0 if unsupported
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
       var r = Math.random() * 16; //random number between 0 and 16
       if (d > 0) {
@@ -313,12 +312,12 @@ const factoryApiBase = function (es) {
       if (!handlers || handlers.length === 0) {
         return;
       }
-
       handlers.forEach((callback) => {
         callback(data);
       });
     }
   };
+  es._events = new es.Events();
 
   /**
    * @alias API.CONTROLLER
@@ -356,8 +355,8 @@ const factoryApiBase = function (es) {
 
     /**
      * @memberof API.CONTROLLER
-     * @param {string} res
-     * @param {function} func
+     * @param {RWS.Controller.MonitorResources} res
+     * @param {Function} func
      * @returns {Promise<{}>}
      * @private
      */
@@ -380,42 +379,44 @@ const factoryApiBase = function (es) {
      * @param {function} [callback] - Callback function called when operation mode changes
      */
     this.monitorOperationMode = async function (callback = null) {
-      try {
-        if (typeof callback !== 'function' && callback !== null)
-          throw new Error('callback is not a valid function');
-        /**
-         * @alias opMode
-         * @memberof API.CONTROLLER
-         * @property {boolean} opMode Stores the operation mode.
-         * This property is available only after calling API.CONTROLLER.monitorController()
-         */
-        this.opMode = await RWS.Controller.getOperationMode();
-        /**
-         * @alias isManual
-         * @memberof API.CONTROLLER
-         * @property {boolean} isManual true if operation mode is manual reduced, false otherwise
-         * This property is available only after calling API.CONTROLLER.monitorController()
-         */
-        this.isManual = this.opMode === API.CONTROLLER.OPMODE.ManualR ? true : false;
+      if (this.opMode === undefined) {
+        try {
+          /**
+           * @alias opMode
+           * @memberof API.CONTROLLER
+           * @property {boolean} opMode Stores the operation mode.
+           * This property is available only after calling API.CONTROLLER.monitorController()
+           */
+          this.opMode = await RWS.Controller.getOperationMode();
+          /**
+           * @alias isManual
+           * @memberof API.CONTROLLER
+           * @property {boolean} isManual true if operation mode is manual reduced, false otherwise
+           * This property is available only after calling API.CONTROLLER.monitorController()
+           */
+          this.isManual = this.opMode === API.CONTROLLER.OPMODE.ManualR ? true : false;
 
-        /**
-         * @alias isAuto
-         * @memberof API.CONTROLLER
-         * @property {boolean} isAuto true if operation mode is manual reduced, false otherwise
-         * This property is available only after calling API.CONTROLLER.monitorController()
-         */
-        this.isAuto = this.opMode === API.CONTROLLER.OPMODE.Auto ? true : false;
-        const cbOpMode = function (data) {
-          this.opMode = data;
-          data === API.CONTROLLER.OPMODE.ManualR ? (this.isManual = true) : (this.isManual = false);
-          data === API.CONTROLLER.OPMODE.Auto ? (this.isAuto = true) : (this.isAuto = false);
-          callback && callback(data);
-          API.verbose && console.log(this.opMode);
-        };
-        subscribeRes('operation-mode', cbOpMode.bind(this));
-      } catch (e) {
-        return API.rejectWithStatus('Failed to subscribe operation mode', e);
+          /**
+           * @alias isAuto
+           * @memberof API.CONTROLLER
+           * @property {boolean} isAuto true if operation mode is manual reduced, false otherwise
+           * This property is available only after calling API.CONTROLLER.monitorController()
+           */
+          this.isAuto = this.opMode === API.CONTROLLER.OPMODE.Auto ? true : false;
+          const cbOpMode = function (data) {
+            this.opMode = data;
+            data === API.CONTROLLER.OPMODE.ManualR ? (this.isManual = true) : (this.isManual = false);
+            data === API.CONTROLLER.OPMODE.Auto ? (this.isAuto = true) : (this.isAuto = false);
+            es._events.trigger('op-mode', data);
+            API.verbose && console.log(this.opMode);
+          };
+          subscribeRes(RWS.Controller.MonitorResources.operationMode, cbOpMode.bind(this));
+        } catch (e) {
+          return API.rejectWithStatus('Failed to subscribe operation mode', e);
+        }
       }
+
+      es._events.on('op-mode', callback);
     };
 
     /**
@@ -427,34 +428,35 @@ const factoryApiBase = function (es) {
      * @param {function} [callback] - Callback function called when controller state changes
      */
     this.monitorControllerState = async function (callback) {
-      try {
-        if (typeof callback !== 'function' && callback !== null)
-          throw new Error('callback is not a valid function');
-        /**
-         * @alias ctrlState
-         * @memberof API.CONTROLLER
-         * @property {string} ctrlState the current state of the controller.
-         * This property is available only after calling API.CONTROLLER.monitorController()
-         */
-        this.ctrlState = await RWS.Controller.getControllerState();
-        /**
-         * @alias isMotOn
-         * @memberof API.CONTROLLER
-         * @property {boolean} isMotOn true if motors are on, false otherwise
-         * This property is available only after calling API.CONTROLLER.monitorController()
-         */
-        this.isMotOn = this.ctrlState === API.CONTROLLER.STATE.MotorsOn ? true : false;
-        const cbControllerState = function (data) {
-          this.ctrlState = data;
+      if (this.ctrlState === undefined) {
+        try {
+          /**
+           * @alias ctrlState
+           * @memberof API.CONTROLLER
+           * @property {string} ctrlState the current state of the controller.
+           * This property is available only after calling API.CONTROLLER.monitorController()
+           */
+          this.ctrlState = await RWS.Controller.getControllerState();
+          /**
+           * @alias isMotOn
+           * @memberof API.CONTROLLER
+           * @property {boolean} isMotOn true if motors are on, false otherwise
+           * This property is available only after calling API.CONTROLLER.monitorController()
+           */
+          this.isMotOn = this.ctrlState === API.CONTROLLER.STATE.MotorsOn ? true : false;
+          const cbControllerState = function (data) {
+            this.ctrlState = data;
 
-          data === API.CONTROLLER.STATE.MotorsOn ? (this.isMotOn = true) : (this.isMotOn = false);
-          callback && callback(data);
-          API.verbose && console.log(this.ctrlState);
-        };
-        subscribeRes('controller-state', cbControllerState.bind(this));
-      } catch (e) {
-        return API.rejectWithStatus('Failed to subscribe controller state', e);
+            data === API.CONTROLLER.STATE.MotorsOn ? (this.isMotOn = true) : (this.isMotOn = false);
+            es._events.trigger('controller-state', data);
+            API.verbose && console.log(this.ctrlState);
+          };
+          subscribeRes(RWS.Controller.MonitorResources.controllerState, cbControllerState.bind(this));
+        } catch (e) {
+          return API.rejectWithStatus('Failed to subscribe controller state', e);
+        }
       }
+      es._events.on('controller-state', callback);
     };
 
     // this.monitorMechUnit = async function (callback) {
@@ -476,7 +478,17 @@ const factoryApiBase = function (es) {
 
     /**
      * Set operation mode to manual
-     * @alias setOperationMode
+     * @alias setOpMode
+     * @memberof API.CONTROLLER
+     */
+    this.setOpMode = async function (mode) {
+      if (mode === API.CONTROLLER.OPMODE.Manual) await this.setOpModeManual();
+      else if (mode === API.CONTROLLER.OPMODE.Auto) await this.setOpModeAutomatic();
+    };
+
+    /**
+     * Set operation mode to manual
+     * @alias setOpModeManual
      * @memberof API.CONTROLLER
      */
     this.setOpModeManual = async function () {
@@ -503,7 +515,7 @@ const factoryApiBase = function (es) {
      *    <br>&emsp;'undefined' undefined
      * @alias getOperationMode
      * @memberof API.CONTROLLER
-     * @returns {Promise<string>} A promise with a string containing the operation mode.
+     * @returns {Promise<RWS.Controller.OperationModes>} A promise with a string containing the operation mode.
      */
     this.getOperationMode = function () {
       return (async () => {
@@ -522,7 +534,7 @@ const factoryApiBase = function (es) {
      *  <br>&emsp;'system_failure' system failure state
      * @alias getControllerState
      * @memberof API.CONTROLLER
-     * @returns {Promise<string>} A promise with a string containing the controller state.
+     * @returns {Promise<RWS.Controller.ControllerStates>} A promise with a string containing the controller state.
      */
     this.getControllerState = function () {
       return (async () => {
@@ -563,22 +575,6 @@ const factoryApiBase = function (es) {
       }
     };
   })();
-
-  // var script1 = document.createElement('script');
-  // script1.src = 'api/ecosystem-rws.js';
-  // document.head.appendChild(script1);
-  // var script2 = document.createElement('script');
-  // script2.src = 'api/ecosystem-cfg.js';
-  // document.head.appendChild(script2);
-  // var script3 = document.createElement('script');
-  // script3.src = 'api/ecosystem-rapid.js';
-  // document.head.appendChild(script3);
-  // var script4 = document.createElement('script');
-  // script4.src = 'api/ecosystem-motion.js';
-  // document.head.appendChild(script4);
-  // var script5 = document.createElement('script');
-  // script5.src = 'api/ecosystem-file.js';
-  // document.head.appendChild(script5);
 
   es.constructedBase = true;
 };

@@ -4,7 +4,7 @@ export default class SignalComponents extends TComponents.Component_A {
   constructor(parent, props) {
     super(parent, props);
 
-    this.initPropsDependencies = ['signal'];
+    this.initPropsDep(['signal']);
   }
 
   defaultProps() {
@@ -19,10 +19,7 @@ export default class SignalComponents extends TComponents.Component_A {
       return;
     }
     try {
-      this._signal =
-        typeof this._props.signal === 'string'
-          ? await API.SIGNAL.getSignal(this._props.signal)
-          : this._props.signal;
+      this._signal = typeof this._props.signal === 'string' ? await API.SIGNAL.getSignal(this._props.signal) : this._props.signal;
     } catch (e) {
       this.error = true;
       TComponents.Popup_A.error(e, 'SignalComponents');
@@ -32,16 +29,16 @@ export default class SignalComponents extends TComponents.Component_A {
   mapComponents() {
     const components = {};
     if (this._signal) {
-      components['signalIndicator'] = new TComponents.SignalIndicator_A(
-        this.find('.signal-indicator'),
-        { signal: this._signal, label: this._signal.name }
-      );
+      components['signalIndicator'] = new TComponents.SignalIndicator_A(this.find('.signal-indicator'), {
+        signal: this._signal,
+        label: this._signal.name,
+      });
       components['toggleButton'] = new TComponents.Button_A(this.find('.toggle-btn'), {
-        callback: async (value) => {
+        onClick: async (value) => {
           let v = await this._signal.getValue();
           !v ? this._signal.setValue(1) : this._signal.setValue(0);
         },
-        label: 'Toggle',
+        text: 'Toggle',
         icon: imgToggle,
       });
       components['switch'] = new TComponents.SwitchSignal_A(this.find('.switch-button'), {

@@ -2,9 +2,9 @@ import { Component_A } from './t-components-component.js';
 
 /**
  * @typedef TComponents.ButtonProps
- * @prop {Function} [callback] Function to be called when button is pressed
+ * @prop {Function} [onClick] Function to be called when button is pressed
  * @prop {string|null} [icon] - Path to image file
- * @prop {string} [label] Label text
+ * @prop {string} [text] Button text
  */
 
 /**
@@ -22,10 +22,10 @@ import { Component_A } from './t-components-component.js';
  *
  * // index.js
  *  const btnExecute = new Button_A(document.querySelector('.btn-container'), {
- *     callback: () => {
+ *     onClick: () => {
  *       console.log('execute');
  *     },
- *     label: 'Execute',
+ *     text: 'Execute',
  *   });
  */
 export class Button_A extends Component_A {
@@ -48,35 +48,26 @@ export class Button_A extends Component_A {
    */
   defaultProps() {
     return {
-      callback: null,
+      onClick: null,
       icon: null,
+      text: 'Click me',
     };
   }
 
   async onInit() {}
 
   onRender() {
-    this._btn.text = this._props.label;
+    this._btn.text = this._props.text;
     this._btn.icon = this._props.icon;
     this._btn.onclick = this.cbOnClick.bind(this);
-    if (this._props.callback) this.onClick(this._props.callback);
-    this._btn.attachToElement(this.container);
+    if (this._props.onClick) this.on('click', this._props.onClick);
+
+    const btnContainer = this.find('.tc-button');
+    if (btnContainer) this._btn.attachToElement(btnContainer);
   }
 
-  /**
-   * Component label text
-   * @alias label
-   * @type {string}
-   * @memberof TComponents.Button_A
-   */
-  get label() {
-    this._btn.text = this._props.label;
-    return this._btn.text;
-  }
-
-  set label(text) {
-    this._props.label = text;
-    this._btn.text = text;
+  markup() {
+    return /*html*/ `<div class="tc-button"></div>`;
   }
 
   get highlight() {
@@ -95,11 +86,19 @@ export class Button_A extends Component_A {
     this._btn.icon = value;
   }
 
+  get text() {
+    return this._props.text;
+  }
+
+  set text(value) {
+    this.setProps({ text: value });
+  }
+
   /**
    * Adds a callback funciton to the component. This will be called after the button is pressed and released
    * @alias onClick
    * @memberof TComponents.Button_A
-   * @param   {function}  func    The callback function which is called when the button is pressed
+   * @param   {(...values: any[]) => void}  func    The callback function which is called when the button is pressed
    */
   onClick(func) {
     this.on('click', func);

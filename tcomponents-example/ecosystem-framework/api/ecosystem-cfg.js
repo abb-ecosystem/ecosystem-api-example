@@ -12,6 +12,7 @@ const factoryApiCfg = function (cfg) {
      * Enum for configuration domains
      * @readonly
      * @enum {string}
+     * @memberof API.CONFIG
      */
     this.DOMAIN = {
       EIO: 'EIO',
@@ -19,6 +20,12 @@ const factoryApiCfg = function (cfg) {
       MOC: 'MOC',
     };
 
+    /**
+     * Enum for configuration types
+     * @readonly
+     * @enum {string}
+     * @memberof API.CONFIG
+     */
     this.TYPE = {
       SIGNAL: 'EIO_SIGNAL',
       CROSS: 'EIO_CROSS',
@@ -30,9 +37,9 @@ const factoryApiCfg = function (cfg) {
      * @alias loadConfiguration
      * @memberof API.CONFIG
      * @param  {string} filepath : the path to the file, including file name
-     * @param  {string} action="replace" :the validation method, valid values: 'add', 'replace' and 'add-with-reset'.
+     * @param  {RWS.CFG.LoadMode} action="replace" :the validation method, valid values: 'add', 'replace' and 'add-with-reset'.
      */
-    this.loadConfiguration = async function (filepath, action = 'add') {
+    this.loadConfiguration = async function (filepath, action = RWS.CFG.LoadMode.add) {
       try {
         const answer = await RWS.CFG.loadConfiguration(filepath, action);
       } catch (e) {
@@ -45,17 +52,13 @@ const factoryApiCfg = function (cfg) {
      * Get the attributes of a signal
      * @alias getSignalAttributes
      * @memberof API.CONFIG
-     * @return {object} The attributes of a signal
+     * @return {Promise<object>} The attributes of a signal
      */
     this.getSignalAttributes = async function (name) {
       try {
         // Check if instance is configured (which does not necesarily means that the signal is already availabe),
         // after creating an instance, a Reboot is reqiured
-        let config = await RWS.CFG.getInstanceByName(
-          API.CONFIG.DOMAIN.EIO,
-          API.CONFIG.TYPE.SIGNAL,
-          name
-        );
+        let config = await RWS.CFG.getInstanceByName(API.CONFIG.DOMAIN.EIO, API.CONFIG.TYPE.SIGNAL, name);
 
         let attr = null;
         if (config !== null) attr = config.getAttributes();
@@ -71,17 +74,13 @@ const factoryApiCfg = function (cfg) {
      * Get the attributes of a signal
      * @alias getCrossConnectionAttributes
      * @memberof API.CONFIG
-     * @return {object} The attributes of a signal
+     * @return {Promise<object>} The attributes of a signal
      */
     this.getCrossConnectionAttributes = async function (name) {
       try {
         // Check if instance is configured (which does not necesarily means that the signal is already availabe),
         // after creating an instance, a Reboot is reqiured
-        let config = await RWS.CFG.getInstanceByName(
-          API.CONFIG.DOMAIN.EIO,
-          API.CONFIG.TYPE.CROSS,
-          name
-        );
+        let config = await RWS.CFG.getInstanceByName(API.CONFIG.DOMAIN.EIO, API.CONFIG.TYPE.CROSS, name);
         let attr = null;
         if (config !== null) attr = config.getAttributes();
         return attr;
@@ -137,12 +136,7 @@ const factoryApiCfg = function (cfg) {
         await RWS.CFG.createInstance(API.CONFIG.DOMAIN.EIO, API.CONFIG.TYPE.SIGNAL, attr.Name);
       }
 
-      await RWS.CFG.updateAttributesByName(
-        API.CONFIG.DOMAIN.EIO,
-        API.CONFIG.TYPE.SIGNAL,
-        attr.Name,
-        attr
-      );
+      await RWS.CFG.updateAttributesByName(API.CONFIG.DOMAIN.EIO, API.CONFIG.TYPE.SIGNAL, attr.Name, attr);
     };
 
     /**
@@ -153,17 +147,13 @@ const factoryApiCfg = function (cfg) {
      * @returns {Promise<object>} - A Promise with an instance object
      */
     this.updateCrossConnectionAttributes = async function (attr) {
-      await RWS.CFG.updateAttributesByName(
-        API.CONFIG.DOMAIN.EIO,
-        API.CONFIG.TYPE.CROSS,
-        attr.Name,
-        attr
-      );
+      await RWS.CFG.updateAttributesByName(API.CONFIG.DOMAIN.EIO, API.CONFIG.TYPE.CROSS, attr.Name, attr);
     };
 
     /**
      * Get all instances on a type
      * @alias fetchAllInstancesOfType
+     * @param {API.CONFIG.TYPE} type - Type of the instance to be fetch from controller
      * @memberof API.CONFIG
      * @returns {Promise<object[]>} - A Promise with an list of objects
      */
@@ -204,11 +194,7 @@ const factoryApiCfg = function (cfg) {
      * @private
      */
     this.deleteCrossConnection = async function (name) {
-      return await API.RWS.CFG.deleteConfigInstance(
-        name,
-        API.CONFIG.TYPE.CROSS,
-        API.CONFIG.DOMAIN.EIO
-      );
+      return await API.RWS.CFG.deleteConfigInstance(name, API.CONFIG.TYPE.CROSS, API.CONFIG.DOMAIN.EIO);
     };
 
     /**
@@ -219,11 +205,7 @@ const factoryApiCfg = function (cfg) {
      * @private
      */
     this.deleteSignal = async function (name) {
-      return await API.RWS.CFG.deleteConfigInstance(
-        name,
-        API.CONFIG.TYPE.SIGNAL,
-        API.CONFIG.DOMAIN.EIO
-      );
+      return await API.RWS.CFG.deleteConfigInstance(name, API.CONFIG.TYPE.SIGNAL, API.CONFIG.DOMAIN.EIO);
     };
   })();
 
@@ -241,10 +223,7 @@ const factoryApiCfg = function (cfg) {
     const fetchEthernetIPDevices = async function () {
       const ethernetIPDevices = [];
       try {
-        const ethIPDevices = await RWS.CFG.getInstances(
-          API.CONFIG.DOMAIN.EIO,
-          API.CONFIG.TYPE.ETHERNETIP
-        );
+        const ethIPDevices = await RWS.CFG.getInstances(API.CONFIG.DOMAIN.EIO, API.CONFIG.TYPE.ETHERNETIP);
 
         for (let device of ethIPDevices) {
           ethernetIPDevices.push({
@@ -253,10 +232,7 @@ const factoryApiCfg = function (cfg) {
           });
         }
 
-        const eioSignals = await RWS.CFG.getInstances(
-          API.CONFIG.DOMAIN.EIO,
-          API.CONFIG.TYPE.SIGNAL
-        );
+        const eioSignals = await RWS.CFG.getInstances(API.CONFIG.DOMAIN.EIO, API.CONFIG.TYPE.SIGNAL);
         for (const signal of eioSignals) {
           let attr = signal.getAttributes();
           for (let item of ethernetIPDevices) {
@@ -385,10 +361,7 @@ const factoryApiCfg = function (cfg) {
       async setValue(value) {
         const v = value ? 1 : 0;
         try {
-          if (!this.signal)
-            return API.rejectWithStatus(
-              `Signal ${this.name} not yet availabe. If confiugred a system restart may be required.`
-            );
+          if (!this.signal) return API.rejectWithStatus(`Signal ${this.name} not yet availabe. If confiugred a system restart may be required.`);
           return await this.signal.setValue(v);
         } catch (e) {
           return API.rejectWithStatus(`Failed to set value of signal ${this.name}`, e);
@@ -438,8 +411,7 @@ const factoryApiCfg = function (cfg) {
        */
       async subscribe(raiseInitial = false) {
         try {
-          if (!this.signal)
-            return API.rejectWithStatus(`Signal ${this.name} not available for subscription`);
+          if (!this.signal) return API.rejectWithStatus(`Signal ${this.name} not available for subscription`);
 
           return await this.signal.subscribe(raiseInitial);
         } catch (e) {
@@ -490,34 +462,20 @@ const factoryApiCfg = function (cfg) {
 
       try {
         signal = await RWS.IO.getSignal(name);
-        let config = await RWS.CFG.getInstanceByName(
-          API.CONFIG.DOMAIN.EIO,
-          API.CONFIG.TYPE.SIGNAL,
-          name
-        );
+        let config = await RWS.CFG.getInstanceByName(API.CONFIG.DOMAIN.EIO, API.CONFIG.TYPE.SIGNAL, name);
         attr = await config.getAttributes();
       } catch (e) {
         try {
-          let config = await RWS.CFG.getInstanceByName(
-            API.CONFIG.DOMAIN.EIO,
-            API.CONFIG.TYPE.SIGNAL,
-            name
-          );
+          let config = await RWS.CFG.getInstanceByName(API.CONFIG.DOMAIN.EIO, API.CONFIG.TYPE.SIGNAL, name);
           attr = await config.getAttributes();
         } catch (e) {
           // Signal instance NOT found, create a config instance
           if (!attr.Name || !attr.SignalType || !attr.Access)
             return API.rejectWithStatus(
-              `Mandatory attributes missing: ${!attr.Name ? 'Name ' : ''}${
-                !attr.SignalType ? 'SignalType ' : ''
-              }${!attr.Access ? 'Access ' : ''} `
+              `Mandatory attributes missing: ${!attr.Name ? 'Name ' : ''}${!attr.SignalType ? 'SignalType ' : ''}${!attr.Access ? 'Access ' : ''} `
             );
           API.CONFIG.createSignalInstance(attr);
-          let config = await RWS.CFG.getInstanceByName(
-            API.CONFIG.DOMAIN.EIO,
-            API.CONFIG.TYPE.SIGNAL,
-            attr.Name
-          );
+          let config = await RWS.CFG.getInstanceByName(API.CONFIG.DOMAIN.EIO, API.CONFIG.TYPE.SIGNAL, attr.Name);
         }
       }
       const s = new Signal(name, signal, attr);
@@ -543,11 +501,7 @@ const factoryApiCfg = function (cfg) {
         if (found) return found;
         try {
           const signal = await RWS.IO.getSignal(name);
-          let config = await RWS.CFG.getInstanceByName(
-            API.CONFIG.DOMAIN.EIO,
-            API.CONFIG.TYPE.SIGNAL,
-            name
-          );
+          let config = await RWS.CFG.getInstanceByName(API.CONFIG.DOMAIN.EIO, API.CONFIG.TYPE.SIGNAL, name);
 
           let attr = await config.getAttributes();
           const s = new Signal(name, signal, attr);
@@ -618,36 +572,6 @@ const factoryApiCfg = function (cfg) {
       }
     };
 
-    // const fetchAllActiveSignals = async () => {
-    //   this.fetchAllSignalsCalled = true;
-    //   try {
-    //     const ss = await this.search({});
-    //     this.fetchAllSignalsDone = true;
-    //     return ss;
-    //   } catch (err) {
-    //     console.error(err);
-    //     throw err;
-    //   }
-    // };
-
-    // const getAllSignals = async () => {
-    //   if (this.fetchAllSignalsCalled) {
-    //     try {
-    //       const ret = await Promise.race([
-    //         API.waitForCondition(() => {
-    //           return this.fetchAllSignalsDone === true;
-    //         }),
-    //         API.timeout(5), // secs
-    //       ]);
-    //       return this.signals;
-    //     } catch (e) {
-    //       return API.rejectWithStatus(`Faile while getting all signals`, e);
-    //     }
-    //   } else {
-    //     return await fetchAllActiveSignals();
-    //   }
-    // };
-
     this.searchByName = async (name) => {
       const signals = await this.search({ name: name });
       return signals.length === 1 ? signals[0] : signals;
@@ -663,9 +587,7 @@ const factoryApiCfg = function (cfg) {
         const t = type.join(',');
         type = `[${t}]`;
       }
-      return device === null
-        ? await this.search({ type: type })
-        : await this.search({ type: type, device: device });
+      return device === null ? await this.search({ type: type }) : await this.search({ type: type, device: device });
     };
 
     this.isAnySignalModified = async () => {

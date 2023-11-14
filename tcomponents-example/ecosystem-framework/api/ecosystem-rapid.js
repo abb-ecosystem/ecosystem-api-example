@@ -7,6 +7,7 @@ export const factoryApiRapid = function (r) {
    */
   r.RAPID = new (function () {
     this.variables = [];
+    this.subscriptions = new Map();
 
     /**
      * Shallow compare does check for equality. When comparing scalar values (numbers, strings)
@@ -32,18 +33,6 @@ export const factoryApiRapid = function (r) {
     };
 
     /**
-     * @alias EXEC
-     * @memberof API.RAPID
-     * @readonly
-     * @enum {string}
-     */
-    const EXEC = {
-      Running: 'running',
-      Stopped: 'stopped',
-    };
-    this.EXEC = EXEC;
-
-    /**
      * @alias MODULETYPE
      * @memberof API.RAPID
      * @readonly
@@ -57,10 +46,10 @@ export const factoryApiRapid = function (r) {
 
     /**
      * @memberof API
-     * @param {string} res
-     * @param {function} func
+     * @param {RWS.Rapid.MonitorResources} res
+     * @param {Function} func
      * @param {string} [task]
-     * @returns {undefined |Promise<{}>}
+     * @returns {Promise<any>}
      * @private
      */
     const subscribeRes = async function (res, func, task = 'T_ROB1') {
@@ -101,7 +90,7 @@ export const factoryApiRapid = function (r) {
      * @alias searchSymbol
      * @memberof API.RAPID
      * @param {searchSymbolProps} props
-     * @returns {Promise<object>}
+     * @returns {Promise<RWS.Rapid.SymbolSearchResult[]>}
      * A Promise with list of objects. Each object contains:
      *      <br>&emsp;(string) name name of the data symbol
      *      <br>&emsp;([string]) scope symbol scope
@@ -121,7 +110,6 @@ export const factoryApiRapid = function (r) {
       let elements = [];
       try {
         var properties = RWS.Rapid.getDefaultSearchProperties();
-
         let url = `RAPID/${task}`;
         if (module) url = url + `/${module}`;
         properties.searchURL = url;
@@ -131,7 +119,7 @@ export const factoryApiRapid = function (r) {
         if (name instanceof Array) {
           for (const index in name) {
             const regexp = name[index] !== '' ? `^.*${name[index]}.*$` : '';
-            hits.push(...await RWS.Rapid.searchSymbols(properties, dataType, regexp));
+            hits.push(...(await RWS.Rapid.searchSymbols(properties, dataType, regexp)));
           }
         } else {
           const regexp = name !== '' ? `^.*${name}.*$` : '';
@@ -146,11 +134,30 @@ export const factoryApiRapid = function (r) {
         }
         return elements;
       } catch (e) {
-        return API.rejectWithStatus(
-          `Failed to search variable ${name} -  module: ${module}, isInUse: ${isInUse}`,
-          e
-        );
+        return API.rejectWithStatus(`Failed to search variable ${name} -  module: ${module}, isInUse: ${isInUse}`, e);
       }
+    };
+
+    /**
+     * Search for available tasks
+     * @alias searchTasks
+     * @memberof API.RAPID
+     * @param {string} [filter] Only symbols containing the string pattern
+     * @param {boolean} [caseSensitive] If false (default) the filter applies non-case-sensitive, otherwise it is case-sensitive
+     * @returns {Promise<object>}
+     */
+    this.searchTasks = async function (filter = '', caseSensitive = false) {
+      if (typeof filter !== 'string') {
+        throw new Error('The filter string should be a valid string.');
+      }
+      const allTasks = await RWS.Rapid.getTasks();
+      const taskNames = allTasks.map((t) => t.getName());
+
+      const flags = caseSensitive ? '' : 'i';
+      const regex = new RegExp(filter, flags);
+
+      const filteredTaskNames = taskNames.filter((element) => regex.test(element));
+      return taskNames.filter((element) => regex.test(element));
     };
 
     /**
@@ -163,21 +170,22 @@ export const factoryApiRapid = function (r) {
      * @param {function} [callback] - Callback function called when operation mode changes
      */
     this.monitorExecutionState = async function (callback = null) {
-      try {
-        if (typeof callback !== 'function' && callback !== null)
-          throw new Error('callback is not a valid function');
-        this.executionState = await RWS.Rapid.getExecutionState();
-        this.isRunning = this.executionState === EXEC.Running ? true : false;
-        const cbExecState = function (data) {
-          this.executionState = data;
-          data === EXEC.Running ? (this.isRunning = true) : (this.isRunning = false);
-          callback && callback(data);
-          API.log(this.executionState);
-        };
-        subscribeRes('execution', cbExecState.bind(this));
-      } catch (e) {
-        return API.rejectWithStatus('Failed to subscribe execution state', e);
+      if (this.executionState === undefined) {
+        try {
+          this.executionState = await RWS.Rapid.getExecutionState();
+          this.isRunning = this.executionState === RWS.Rapid.ExecutionStates.running ? true : false;
+          const cbExecState = function (data) {
+            this.executionState = data;
+            data === RWS.Rapid.ExecutionStates.running ? (this.isRunning = true) : (this.isRunning = false);
+            API._events.trigger('execution', data);
+            API.log(this.executionState);
+          };
+          subscribeRes(RWS.Rapid.MonitorResources.execution, cbExecState.bind(this));
+        } catch (e) {
+          return API.rejectWithStatus('Failed to subscribe execution state', e);
+        }
       }
+      API._events.on('execution', callback);
     };
 
     // this.monitorMechUnit = async function (callback = null) {
@@ -256,7 +264,7 @@ export const factoryApiRapid = function (r) {
        * @prop {boolean} [userLevel] If true, executes the procedure at user-leve,
        * i.e. as a service routine (default: false).
        * @prop {boolean} [resetPP] Resets the pointer to its previous position before execution
-       * @prop {string} [cycleMode] valid values: 'forever', 'as_is' or 'once'
+       * @prop {RWS.Rapid.CycleModes} [cycleMode] valid values: 'forever', 'as_is' or 'once'
        * @memberof API.RAPID.Task
        */
 
@@ -270,10 +278,7 @@ export const factoryApiRapid = function (r) {
        * const task = await API.RAPID.getTask('T_ROB1');
        * await task.executeProcedure('myProcedure', { userLevel: true, resetPP: false});
        */
-      async executeProcedure(
-        procedure,
-        { userLevel = false, resetPP = false, cycleMode = 'once' } = {}
-      ) {
+      async executeProcedure(procedure, { userLevel = false, resetPP = false, cycleMode = RWS.Rapid.CycleModes.once } = {}) {
         let pp;
         let progress;
 
@@ -285,7 +290,7 @@ export const factoryApiRapid = function (r) {
           //////////////////////////////////////////////////////////////////////////
           let exeState = await RWS.Rapid.getExecutionState();
 
-          if (exeState !== EXEC.Running) {
+          if (exeState !== RWS.Rapid.ExecutionStates.running) {
             // let opMode = await RWS.Controller.getOperationMode();
             //////////////////////////////////////////////////////////////////////
             progress = 'step1'; // 1 - check controller state
@@ -312,13 +317,11 @@ export const factoryApiRapid = function (r) {
             //////////////////////////////////////////////////////////////////////
             progress = 'step4'; // 4 - moved to routine pointer
             //////////////////////////////////////////////////////////////////////
-            console.log('😯', cycleMode);
-
             await RWS.Rapid.startExecution({
-              regainMode: 'continue',
-              executionMode: 'continue',
-              cycleMode: cycleMode,
-              condition: 'none',
+              regainMode: RWS.Rapid.RegainModes.continue,
+              executionMode: RWS.Rapid.ExecutionModes.continue,
+              cycleMode,
+              condition: RWS.Rapid.Conditions.none,
               stopAtBreakpoint: true,
               enableByTSP: true,
             });
@@ -326,7 +329,7 @@ export const factoryApiRapid = function (r) {
             progress = 'step5'; // 5 - execution started
             //////////////////////////////////////////////////////////////////////
             let exState = await RWS.Rapid.getExecutionState();
-            while (exState === 'running') {
+            while (exState === RWS.Rapid.ExecutionStates.running) {
               await API.sleep(200);
               exState = await RWS.Rapid.getExecutionState(); // ToDo: this is actually not working, modify it
             }
@@ -367,11 +370,7 @@ export const factoryApiRapid = function (r) {
               ret = API.rejectWithStatus('Program Pointer Reset', {
                 message: 'Unable to reset the program pointer for task T_ROB1.',
                 description: `The program will not start.`,
-                cause: [
-                  '• No program is loaded.',
-                  '• The main routine is missing.',
-                  '• There are errors in the program.',
-                ],
+                cause: ['• No program is loaded.', '• The main routine is missing.', '• There are errors in the program.'],
               });
             case 'step6':
             // await RWS.Rapid.resetPP();
@@ -381,10 +380,10 @@ export const factoryApiRapid = function (r) {
 
           var state = await RWS.Rapid.getExecutionState();
           API.log('Rapid execution state on error:', state);
-          if (state === 'running') {
+          if (state === RWS.Rapid.ExecutionStates.running) {
             await RWS.Rapid.stopExecution({
-              stopMode: 'stop',
-              useTSP: 'normal',
+              stopMode: RWS.Rapid.StopModes.stop,
+              useTSP: RWS.Rapid.UseTSPOptions.normal,
             });
             await setTimeout(() => {}, 2000);
             state = await RWS.Rapid.getExecutionState();
@@ -396,8 +395,8 @@ export const factoryApiRapid = function (r) {
 
       /**
        * @typedef stopExecutionProps
-       * @prop {string} [stopMode] stop mode, valid values: 'cycle', 'instruction', 'stop' or 'quick_stop'
-       * @prop {string} [useTSP] use task selection panel, valid values: 'normal' or 'all_tasks'
+       * @prop {RWS.Rapid.StopModes} [stopMode] stop mode, valid values: 'cycle', 'instruction', 'stop' or 'quick_stop'
+       * @prop {RWS.Rapid.UseTSPOptions.normal} [useTSP] use task selection panel, valid values: 'normal' or 'all_tasks'
        * @memberof API.RAPID.Task
        */
 
@@ -412,9 +411,9 @@ export const factoryApiRapid = function (r) {
        * const task = await API.RAPID.getTask('T_ROB1');
        * await task.stopExecution();
        */
-      async stopExecution({ stopMode = 'stop', useTSP = 'normal' } = {}) {
+      async stopExecution({ stopMode = RWS.Rapid.StopModes.stop, useTSP = RWS.Rapid.UseTSPOptions.normal } = {}) {
         var state = await RWS.Rapid.getExecutionState();
-        if (state === 'running') {
+        if (state === RWS.Rapid.ExecutionStates.running) {
           await RWS.Rapid.stopExecution({
             stopMode,
             useTSP,
@@ -443,7 +442,7 @@ export const factoryApiRapid = function (r) {
        * @param {string} module - Module where the search takes place
        * @param {boolean} [isInUse] Only return symbols that are used in a Rapid program,
        * @param {filterVariables} [filter] See {@link filterVariables}
-       * @returns {Promise<object>}
+       * @returns {Promise<RWS.Rapid.SymbolSearchResult[]>}
        */
 
       async searchVariables(module = null, isInUse = false, filter = {}) {
@@ -456,9 +455,7 @@ export const factoryApiRapid = function (r) {
                   arr.splice(1); // eject early
                   return RWS.Rapid.SymbolTypes[entry];
                 }
-                return entry === 'constant' || entry === 'variable' || entry === 'persistent'
-                  ? all + RWS.Rapid.SymbolTypes[entry]
-                  : all;
+                return entry === 'constant' || entry === 'variable' || entry === 'persistent' ? all + RWS.Rapid.SymbolTypes[entry] : all;
               }, 0)
             : RWS.Rapid.SymbolTypes[filter.symbolType];
         } else {
@@ -481,7 +478,7 @@ export const factoryApiRapid = function (r) {
        * @param {boolean} [isInUse] Only return symbols that are used in a Rapid program,
        * i.e. a type declaration that has no declared variable will not be returned when this flag is set true.
        * @param {string} [filter] Only symbols containing the string patern (not casesensitive)
-       * @returns {Promise<object>}
+       * @returns {Promise<RWS.Rapid.SymbolSearchResult[]>}
        */
       async searchModules(isInUse = false, filter = '') {
         return searchSymbol({
@@ -500,7 +497,7 @@ export const factoryApiRapid = function (r) {
        * @param {boolean} [isInUse] Only return symbols that are used in a Rapid program,
        * i.e. a type declaration that has no declared variable will not be returned when this flag is set true.
        * @param {string} [filter] Only symbols containing the string patern (not casesensitive)
-       * @returns {Promise<object>}
+       * @returns {Promise<RWS.Rapid.SymbolSearchResult[]>}
        */
       async searchProcedures(module = null, isInUse = false, filter = '') {
         return searchSymbol({
@@ -532,7 +529,7 @@ export const factoryApiRapid = function (r) {
        * @param {boolean} [isInUse] Only return symbols that are used in a Rapid program,
        * @param {filterRoutines} [filter] See {@link filterRoutines}
        *
-       * @returns {Promise<searchSymbolProps>}
+       * @returns {Promise<RWS.Rapid.SymbolSearchResult[]>}
        */
       async searchRoutines(module = null, isInUse = false, filter = {}) {
         let types;
@@ -543,9 +540,7 @@ export const factoryApiRapid = function (r) {
                   arr.splice(1); // eject early
                   return RWS.Rapid.SymbolTypes[entry];
                 }
-                return entry === 'procedure' || entry === 'function' || entry === 'trap'
-                  ? all + RWS.Rapid.SymbolTypes[entry]
-                  : all;
+                return entry === 'procedure' || entry === 'function' || entry === 'trap' ? all + RWS.Rapid.SymbolTypes[entry] : all;
               }, 0)
             : RWS.Rapid.SymbolTypes[filter.symbolType];
         } else {
@@ -574,10 +569,7 @@ export const factoryApiRapid = function (r) {
           var data = await this._task.getData(module, variable);
           return await data.getValue();
         } catch (e) {
-          return API.rejectWithStatus(
-            `Variable ${variable} not found at ${this._task.getName()} : ${module} module.`,
-            e
-          );
+          return API.rejectWithStatus(`Variable ${variable} not found at ${this._task.getName()} : ${module} module.`, e);
         }
       }
 
@@ -624,34 +616,6 @@ export const factoryApiRapid = function (r) {
       async getModule(module) {
         return await this._task.getModule(module);
       }
-
-      // /**
-      //  * Get the name of modules available within the task
-      //  * @alias getModuleNames
-      //  * @memberof API.RAPID.Task
-      //  * @param {string} type - it can be 'program' or 'system', otherwise all modules are returned
-      //  * @returns {Promise<array>} - List of found modules
-      //  * @private
-      //  */
-      // async getModuleNames(type = '') {
-      //   let ret = [];
-      //   try {
-      //     const modules = await RWS.Rapid.getModuleNames(this.name);
-      //     if (modules.hasOwnProperty('programModules') === true && type !== MODULETYPE.System) {
-      //       for (let i = 0; i < modules['programModules'].length; i++) {
-      //         ret.push(modules['programModules'][i]);
-      //       }
-      //     }
-      //     if (modules.hasOwnProperty('systemModules') === true && type !== MODULETYPE.Program) {
-      //       for (let i = 0; i < modules['systemModules'].length; i++) {
-      //         ret.push(modules['systemModules'][i]);
-      //       }
-      //     }
-      //     return ret;
-      //   } catch (e) {
-      //     return API.rejectWithStatus('Failed to get modules', e);
-      //   }
-      // }
     }
 
     /**
@@ -677,7 +641,7 @@ export const factoryApiRapid = function (r) {
      * Class representing a RAPID Variable.
      * @class Variable
      * @memberof API.RAPID
-     * @param {string} variable
+     * @param {RWS.Rapid.Data} variable
      * @param {VariableProps} props See {@link VariableProps}
      * @property {object} var Object returned by RWS.Rapid.getData().
      * @see {@link https://developercenter.robotstudio.com/omnicore-sdk|Omnicore-SDK}
@@ -688,7 +652,7 @@ export const factoryApiRapid = function (r) {
         this.props = props;
         this.var = variable;
         this.callbacks = [];
-        this._subscrided = false;
+        this._subscribed = false;
       }
 
       get name() {
@@ -726,8 +690,6 @@ export const factoryApiRapid = function (r) {
         } catch (e) {
           return API.rejectWithStatus(`Failed to set value of variable ${this.name}`, e);
         }
-
-        // this.signal && this.signal.setValue(v)
       }
 
       get type() {
@@ -746,14 +708,15 @@ export const factoryApiRapid = function (r) {
 
       /**
        * Subscribe to a RAPID variable
+       * @alias subscribe
        * @param {boolean} raiseInitial raises an event after subscription
        * @returns {undefined | Promise<{}>} undefined at success, reject Promise at fail.
+       * @memberof API.RAPID.Variable
        */
       async subscribe(raiseInitial = false) {
         try {
           await this._onChanged();
 
-          // const ret = await Promise.race(this.var.subscribe(raiseInitial), timeout(TIMEOUT_SEC));
           if (!this._subscrided) {
             await this.var.subscribe(raiseInitial);
             this._subscrided = true;
@@ -763,11 +726,17 @@ export const factoryApiRapid = function (r) {
         }
       }
 
+      /**
+       * Unsubscribe a RAPID variable
+       * @alias unsubscribe
+       * @returns {undefined | Promise<{}>} undefined at success, reject Promise at fail.
+       * @memberof API.RAPID.Variable
+       */
       async unsubscribe() {
         if (this._subscrided) {
           try {
             this._subscribed = false;
-            return this.var.unsubscribe();
+            return API.RAPID.unsubscribeVariable(this.props.taskName, this.props.moduleName, this.name);
           } catch (e) {
             return API.rejectWithStatus(`Failed to unsubscribe variable "${this.name}"`, e);
           }
@@ -777,7 +746,7 @@ export const factoryApiRapid = function (r) {
       /**
        * Internal callback for variable specific handling. This method is called inside the subscribe method
        * @returns {undefined | Promise<{}>} undefined at success, reject Promise at fail.
-       * @protected
+       * @private
        */
       async _onChanged() {
         try {
@@ -798,6 +767,12 @@ export const factoryApiRapid = function (r) {
         return value;
       }
 
+      /**
+       * Add a callback function to be executed when the variable value changes
+       * @alias onChanged
+       * @param {*} callback
+       * @memberof API.RAPID.Variable
+       */
       onChanged(callback) {
         this.on('changed', callback);
       }
@@ -862,18 +837,90 @@ export const factoryApiRapid = function (r) {
      */
     class VariableNum extends Variable {
       async getValue() {
-        const value = Number(await super.getValue());
-        return value;
+        const value = await super.getValue();
+        return this._getArrayItems(value);
       }
 
       async setValue(value) {
-        super.setValue(Number(value));
+        const setArrayItems = function (array, variable, indices = []) {
+          array.forEach((element, index) => {
+            if (Array.isArray(element)) {
+              setArrayItems(element, variable, [...indices, index + 1]);
+            } else {
+              variable.setArrayItem(Number(element), ...[...indices, index + 1]);
+            }
+          });
+        };
+
+        if (typeof value === 'string') value = JSON.parse(value);
+
+        if (Array.isArray(value)) {
+          setArrayItems(value, this.var);
+        } else {
+          super.setValue(Number(value));
+        }
       }
 
       _adapter(value) {
-        return Number(value);
+        return this._getArrayItems(value);
+      }
+
+      _getArrayItems(value) {
+        if (typeof value === 'string') value = JSON.parse(value);
+        if (Array.isArray(value)) {
+          const ret = value.map((v) => this._getArrayItems(v));
+          return ret;
+        } else {
+          return Number(value);
+        }
       }
     }
+
+    const createVariable = async function (task, module, name) {
+      const v = await RWS.Rapid.getData(task, module, name);
+      const p = await v.getProperties();
+
+      let variable;
+
+      if (p.dataType === 'string') variable = new VariableString(v, p);
+      else if (p.dataType === 'bool') variable = new VariableBool(v, p);
+      else if (p.dataType === 'num' || p.dataType === 'dnum') variable = new VariableNum(v, p);
+      else variable = new Variable(v, p);
+
+      return variable;
+    };
+
+    this.subscribeVariable = async function (task, module, name) {
+      const refName = task + ':' + module + ':' + name;
+      let entry = this.subscriptions.get(refName);
+
+      if (entry) {
+        entry.count++;
+        return entry.variable;
+      } else {
+        let newVariable = await createVariable(task, module, name);
+
+        // double check case parallel async subscriptions just happened
+        let entry = this.subscriptions.get(refName);
+        if (!entry) {
+          this.subscriptions.set(refName, { variable: newVariable, count: 1 });
+
+          newVariable.subscribe();
+          return newVariable;
+        } else {
+          return entry.variable;
+        }
+      }
+    };
+
+    this.unsubscribeVariable = function (task, module, name) {
+      const refName = task + ':' + module + ':' + name;
+      let entry = this.subscriptions.get(refName);
+      if (entry && --entry.count === 0) {
+        entry.variable.unsubscribe();
+        this.subscriptions.delete(refName);
+      }
+    };
 
     /**
      * Subscribe to a existing RAPID variable.
@@ -887,38 +934,11 @@ export const factoryApiRapid = function (r) {
      */
     const getVariableInstance = async (task, module, name) => {
       if (task && module && name) {
-        let found = this.variables.find((v) => v.name === name);
         try {
-          let variable;
-          if (found) {
-            variable = found;
-          } else {
-            const v = await RWS.Rapid.getData(task, module, name);
-            const p = await v.getProperties();
-
-            if (p.dataType === 'string') variable = new VariableString(v, p);
-            else if (p.dataType === 'bool') variable = new VariableBool(v, p);
-            else if (p.dataType === 'num' || p.dataType === 'dnum')
-              variable = new VariableNum(v, p);
-            else variable = new Variable(v, p);
-          }
-
-          //check again before pushing
-          const findIndex = this.variables.findIndex((v) => v.name === name);
-
-          if (findIndex === -1) {
-            variable.subscribe();
-            this.variables.push(variable);
-          } else {
-            variable = this.variables[findIndex];
-          }
-
-          return variable;
+          const v = await this.subscribeVariable(task, module, name);
+          return v;
         } catch (e) {
-          return API.rejectWithStatus(
-            `Failed to subscribe to variable ${name} at ${task}->${module} module.`,
-            e
-          );
+          return API.rejectWithStatus(`Failed to subscribe to variable ${name} at ${task}->${module} module.`, e);
         }
       }
     };

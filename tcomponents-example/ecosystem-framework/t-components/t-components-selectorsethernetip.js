@@ -27,7 +27,7 @@ export class SelectorEthernetIPDevices_A extends Dropdown_A {
    * @returns {TComponents.DropdownProps}
    */
   defaultProps() {
-    return { selected: '', label: '', addNoSelection: true };
+    return { selected: '', label: '', addNoSelection: false };
   }
 
   async onInit() {

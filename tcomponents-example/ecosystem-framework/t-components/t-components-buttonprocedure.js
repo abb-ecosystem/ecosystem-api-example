@@ -46,7 +46,7 @@ export class ButtonProcedure_A extends Button_A {
      */
     this._props;
 
-    this.initPropsDependencies = ['procedure'];
+    this.initPropsDep('procedure');
   }
 
   /**
@@ -86,9 +86,9 @@ export class ButtonProcedure_A extends Button_A {
 
     if (this._props.stopOnRelease) {
       const elemBtnMove = this.find('.fp-components-button');
-      elemBtnMove.addEventListener('pointerdown', this.cbOnClick.bind(this));
-      elemBtnMove.addEventListener('pointerup', this.cbStop.bind(this));
-      elemBtnMove.addEventListener('pointerleave', this.cbStop.bind(this));
+      this.addEventListener(elemBtnMove, 'pointerdown', this.cbOnClick.bind(this));
+      this.addEventListener(elemBtnMove, 'pointerup', this.cbStop.bind(this));
+      this.addEventListener(elemBtnMove, 'pointerleave', this.cbStop.bind(this));
     }
   }
 

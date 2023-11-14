@@ -41,7 +41,7 @@ export class SignalIndicator_A extends Digital_A {
      */
     this._props;
 
-    this.initPropsDependencies = ['signal'];
+    this.initPropsDep('signal');
   }
 
   /**
@@ -52,7 +52,7 @@ export class SignalIndicator_A extends Digital_A {
    */
   defaultProps() {
     return {
-      signal: null,
+      signal: '',
       onChange: null,
       readOnly: true,
     };
@@ -65,10 +65,7 @@ export class SignalIndicator_A extends Digital_A {
     }
 
     try {
-      this._signal =
-        typeof this._props.signal === 'string'
-          ? await API.SIGNAL.getSignal(this._props.signal)
-          : this._props.signal;
+      this._signal = typeof this._props.signal === 'string' ? await API.SIGNAL.getSignal(this._props.signal) : this._props.signal;
 
       this._signal.onChanged(this.cbUpdateIndicator.bind(this));
       this._props.onChange && this.onChange(this._props.onChange);
@@ -109,7 +106,7 @@ export class SignalIndicator_A extends Digital_A {
    * Adds a callback funciton to be called when the signal changes its state
    * @alias onChange
    * @memberof TComponents.SignalIndicator_A
-   * @param   {function}  func    The callback function which is called when the button is pressed
+   * @param   {Function}  func    The callback function which is called when the button is pressed
    */
   onChange(func) {
     this.on('change', func);

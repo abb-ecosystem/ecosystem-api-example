@@ -81,9 +81,7 @@ export const Popup_A = (function () {
     message: function (msg1, msg_array = [], callback = null) {
       if (!_enabled) return;
 
-      _show
-        ? FPComponents.Popup_A.message(msg1, msg_array, callback)
-        : console.log(msg1, ...msg_array);
+      _show ? FPComponents.Popup_A.message(msg1, msg_array, callback) : console.log(msg1, ...msg_array);
     },
 
     /**
@@ -110,14 +108,7 @@ export const Popup_A = (function () {
     info: function (msg1, msg_array = [], callback = null) {
       if (!_enabled) return;
 
-      _show
-        ? FPComponents.Popup_A.message(
-            msg1,
-            msg_array,
-            callback,
-            FPComponents.Popup_A.STYLE.INFORMATION
-          )
-        : console.log(msg1, ...msg_array);
+      _show ? FPComponents.Popup_A.message(msg1, msg_array, callback, FPComponents.Popup_A.STYLE.INFORMATION) : console.log(msg1, ...msg_array);
     },
 
     /**
@@ -137,14 +128,7 @@ export const Popup_A = (function () {
     warning: function (msg1, msg_array = [], callback = null) {
       if (!_enabled) return;
 
-      _show
-        ? FPComponents.Popup_A.message(
-            msg1,
-            msg_array,
-            callback,
-            FPComponents.Popup_A.STYLE.WARNING
-          )
-        : console.log(msg1, ...msg_array);
+      _show ? FPComponents.Popup_A.message(msg1, msg_array, callback, FPComponents.Popup_A.STYLE.WARNING) : console.log(msg1, ...msg_array);
     },
 
     /**
@@ -170,9 +154,7 @@ export const Popup_A = (function () {
 
       if (!_enabled) return;
 
-      _show
-        ? FPComponents.Popup_A.message(msg1, msg_array, callback, FPComponents.Popup_A.STYLE.DANGER)
-        : console.log(msg1, ...msg_array);
+      _show ? FPComponents.Popup_A.message(msg1, msg_array, callback, FPComponents.Popup_A.STYLE.DANGER) : console.log(msg1, ...msg_array);
     },
 
     /**
@@ -234,6 +216,8 @@ export const Popup_A = (function () {
 
     /**
      * TA popup dialog is a modal window that provides "OK/Cancel" confirmation dialog.
+     * @alias confirm
+     * @memberof TComponents.Popup_A
      * @param {string} msg1 - A string, describing the topic of the message.
      * @param {string|string[]} [msg_array] - The actual message. Can be either a simple string or,
      * if several lines are required, an array where each element is a string with a message line.
@@ -252,9 +236,7 @@ export const Popup_A = (function () {
     confirm: function (msg1, msg_array, callback = null) {
       if (!_enabled) return;
 
-      _show
-        ? FPComponents.Popup_A.confirm(msg1, msg_array, callback)
-        : console.log(msg1, ...msg_array);
+      _show ? FPComponents.Popup_A.confirm(msg1, msg_array, callback) : console.log(msg1, ...msg_array);
     },
   };
 })();

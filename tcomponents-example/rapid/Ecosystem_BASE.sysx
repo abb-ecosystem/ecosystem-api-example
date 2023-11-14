@@ -25,6 +25,8 @@ MODULE Ecosystem_BASE(SYSMODULE)
     PERS num esNumCols:= 12;
     PERS num esCurrentPart:=3;
     PERS bool esSim:= TRUE;
+    PERS num esArray{4}:=[1,2,3,4];
+    PERS num esArray2D{4,2}:=[[1,2],[3,4],[5,6],[7,8]];
 
     CONST num pi:=3.1416;
     PERS pos esPose:=[100,200,300];

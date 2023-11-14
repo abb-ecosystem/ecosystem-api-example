@@ -39,7 +39,7 @@ export class SelectorSignals_A extends Dropdown_A {
   constructor(parent, props = {}) {
     super(parent, props);
 
-    this.initPropsDependencies = ['filter'];
+    this.initPropsDep(['filter']);
   }
 
   /**
@@ -55,7 +55,7 @@ export class SelectorSignals_A extends Dropdown_A {
       filter: {},
       selected: '',
       label: '',
-      addNoSelection: true,
+      addNoSelection: false,
     };
   }
 
@@ -82,6 +82,6 @@ export class SelectorSignals_A extends Dropdown_A {
    * (boolean) blocked blocked signals
    */
   async updateSearch(filter) {
-    this.setProps({ filter });
+    await this.setProps({ filter }, null, true);
   }
 }

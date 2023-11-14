@@ -77,13 +77,13 @@ export class ModalWindow_A extends Component_A {
 
     this._window = this.find('.tc-modal-window');
     this._overlay = this.find('.tc-overlay');
-    this._btnClose = this.find('.tc-close-modal');
+    const _btnClose = this.find('.tc-close-modal');
 
-    this._window.addEventListener('click', (e) => {
+    this.addEventListener(this._window, 'click', (e) => {
       e.stopPropagation();
     });
-    this._btnClose.addEventListener('click', this.toggleWindow.bind(this));
-    this._overlay.addEventListener('click', this.toggleWindow.bind(this));
+    this.addEventListener(_btnClose, 'click', this.toggleWindow.bind(this));
+    this.addEventListener(this._overlay, 'click', this.toggleWindow.bind(this));
   }
 
   /**
@@ -139,7 +139,7 @@ export class ModalWindow_A extends Component_A {
   }
 
   /**
-   * Register a function to be called before the window is openned
+   * Registar a function to be called before the window is openned
    * @alias onOpen
    * @memberof TComponents.ModalWindow_A
    * @param {function} func
@@ -194,9 +194,7 @@ export class ModalWindow_A extends Component_A {
     this._overlay.classList.toggle('tc-hidden');
     this._window.classList.toggle('tc-hidden');
 
-    document.body.style.overflow === 'hidden'
-      ? (document.body.style.overflow = 'auto')
-      : (document.body.style.overflow = 'hidden');
+    document.body.style.overflow === 'hidden' ? (document.body.style.overflow = 'auto') : (document.body.style.overflow = 'hidden');
 
     this.isOpen ? this.trigger('open') : this.trigger('close');
   }

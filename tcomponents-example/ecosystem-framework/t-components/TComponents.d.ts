@@ -2,33 +2,38 @@
 
 declare namespace TComponents {
   type TComponetElement = Component_A | Element | string;
+  type TComponentParent = HTMLElement | null;
+
   const T_COMPONENTS_BASE_VERSION: string;
   class Eventing_A {
-    on(eventName: string, callback: Function): void;
-    off(eventName: string, callback: Function): boolean;
-    once(eventName: string, callback: Function): void;
+    on(eventName: string, callback: (...values: any[]) => void, strict?: boolean): void;
+    off(eventName: string, callback: (...values: any[]) => void): boolean;
+    once(eventName: string, callback: (...values: any[]) => void): void;
     trigger(eventName: string, ...data: any): void;
+    cleanUpEvents(): void;
   }
 
   class Base_A extends Eventing_A {
     constructor(props: object);
     protected noCheck: string[];
     protected _props: any;
+    protected initPropsDependencies: string[];
+    protected initPropsDep(props: string | string[]): void;
     props: any;
     defaultProps(props: object): object;
     getProps(): any;
-    setProps(props: object, onRender?: Function);
+    setProps(props: object, onRender?: Function, sync?: boolean): Promise<void>;
 
-    static _equalProps(newProps, prevProps): boolean;
-    static _splitObject(originalObject: object, includedKeysObject: object);
+    static _equalProps(newProps: object, prevProps: object): boolean;
   }
 
   interface ComponentProps {
     label?: string;
+    labelPos?: 'left' | 'right' | 'top' | 'bottom';
     options?: object;
   }
   class Component_A extends Base_A {
-    constructor(parent: HTMLElement, props?: ComponentProps);
+    constructor(parent: TComponentParent, props?: ComponentProps);
 
     static _isHTMLElement(o: any): boolean;
     static _isTComponent(o: any): boolean;
@@ -36,9 +41,13 @@ declare namespace TComponents {
     static mIf(condition: boolean, markup: string, elseMarkup?: string): string;
     static mFor(array: any[], markup: Function): string;
 
+    protected _getAllDefaultProps(): any;
+
     props: ComponentProps;
 
-    parent: HTMLElement;
+    parent: TComponentParent;
+
+    parentComponentId: string;
 
     container: HTMLElement;
 
@@ -49,6 +58,8 @@ declare namespace TComponents {
     private _data: any;
 
     protected child: any;
+
+    forceUpdate(): void;
 
     init(): object;
 
@@ -65,38 +76,37 @@ declare namespace TComponents {
     onRender(): void;
     markup(self: Component_A): string;
 
+    addEventListener(element: EventTarget, eventType: string, handler: EventListener): void;
+    removeAllEventListeners(): void;
+    destroy(): void;
+
     attachToElement(element: HTMLElement): void;
 
     // set(newProps: object): void;
     // setupProps(newProps: object, initial: object): void;
 
     find(selector: string): HTMLElement;
-
     all(selector: string): HTMLElement[];
 
     hide(): void;
-
     show(): void;
-
     toggle(): void;
 
     backgroundColor(param: string): void;
-
     cssBox(enable?: boolean): void;
-
     css(properties: string | any[]): void;
-
     cssAddClass(selector: string, className: string | string[], all?: boolean): void;
     cssRemoveClass(selector: string, className: string, all?: boolean): void;
   }
 
   interface ButtonProps extends ComponentProps {
-    callback?: Function;
+    text?: string;
+    onClick?: (...values: any[]) => void;
     icon?: string;
   }
 
   class Button_A extends Component_A {
-    constructor(parent: HTMLElement, props?: ButtonProps);
+    constructor(parent: TComponentParent, props?: ButtonProps);
 
     props: ButtonProps;
 
@@ -108,7 +118,7 @@ declare namespace TComponents {
 
     onClick(func: Function): void;
 
-    protected cbOnClick(value): void;
+    protected cbOnClick(value: any): void;
   }
 
   interface DigitalProps extends ComponentProps {
@@ -116,7 +126,7 @@ declare namespace TComponents {
   }
 
   class Digital_A extends Component_A {
-    constructor(parent: HTMLElement, props?: DigitalProps);
+    constructor(parent: TComponentParent, props?: DigitalProps);
 
     props: DigitalProps;
     protected _dig: FPComponents.Digital_A;
@@ -128,15 +138,15 @@ declare namespace TComponents {
 
     onClick(func: Function): void;
 
-    protected cbOnClick(value): void;
+    protected cbOnClick(value: any): void;
   }
 
   interface SwitchProps extends ComponentProps {
-    callback?: Function;
+    onChange?: (...values: any[]) => void;
   }
 
   class Switch_A extends Component_A {
-    constructor(parent: HTMLElement, props?: SwitchProps);
+    constructor(parent: TComponentParent, props?: SwitchProps);
 
     props: SwitchProps;
 
@@ -154,11 +164,11 @@ declare namespace TComponents {
 
     onChange(func: Function): void;
 
-    protected cbOnChange(value): void;
+    protected cbOnChange(value: any): void;
   }
 
   interface InputProps extends ComponentProps {
-    callback?: Function;
+    onChange?: Function;
     readOnly?: boolean;
     description?: string;
     useBorder?: boolean;
@@ -166,7 +176,7 @@ declare namespace TComponents {
   }
 
   class Input_A extends Component_A {
-    constructor(parent: HTMLElement, props?: InputProps);
+    constructor(parent: TComponentParent, props?: InputProps);
 
     props: InputProps;
 
@@ -184,7 +194,7 @@ declare namespace TComponents {
 
     onChange(func: Function): void;
 
-    protected cbOnChange(value): void;
+    protected cbOnChange(value: any): void;
   }
 
   interface ButtonAlignProps extends ButtonProps {
@@ -195,7 +205,7 @@ declare namespace TComponents {
   }
 
   class ButtonAlign_A extends Button_A {
-    constructor(parent: HTMLElement, props?: ButtonAlignProps);
+    constructor(parent: TComponentParent, props?: ButtonAlignProps);
     onInit(): void;
     align(): Promise<void>;
     stop(): Promise<void>;
@@ -210,7 +220,7 @@ declare namespace TComponents {
   }
 
   class ButtonMoveTo_A extends Button_A {
-    constructor(parent: HTMLElement, props?: ButtonMoveToProps);
+    constructor(parent: TComponentParent, props?: ButtonMoveToProps);
     onInit(): void;
     move(): Promise<void>;
     stop(): Promise<void>;
@@ -248,7 +258,7 @@ declare namespace TComponents {
   }
 
   class ButtonReboot_A extends Component_A {
-    constructor(parent: HTMLElement, props?: ButtonRebootProps);
+    constructor(parent: TComponentParent, props?: ButtonRebootProps);
 
     props: ButtonRebootProps;
 
@@ -261,7 +271,7 @@ declare namespace TComponents {
   }
 
   class ButtonTeach_A extends Component_A {
-    constructor(parent: HTMLElement, props?: ButtonTeachProps);
+    constructor(parent: TComponentParent, props?: ButtonTeachProps);
 
     teach(): Promise<void>;
   }
@@ -272,7 +282,7 @@ declare namespace TComponents {
   }
 
   class ButtonTeachMove_A extends Component_A {
-    constructor(parent: HTMLElement, props?: ButtonTeachMoveProps);
+    constructor(parent: TComponentParent, props?: ButtonTeachMoveProps);
   }
 
   interface DropdownProps extends ComponentProps {
@@ -282,7 +292,7 @@ declare namespace TComponents {
   }
 
   class Dropdown_A extends Component_A {
-    constructor(parent: HTMLElement, props?: DropdownProps);
+    constructor(parent: TComponentParent, props?: DropdownProps);
 
     onInit(): void;
 
@@ -325,7 +335,7 @@ declare namespace TComponents {
   }
 
   class OpMode_A extends Component_A {
-    constructor(parent: HTMLElement, props?: ComponentProps);
+    constructor(parent: TComponentParent, props?: ComponentProps);
     OpModeChanged(mode: any): Promise<void>;
     cbOpModeAuto(): Promise<void>;
     cbOpModeMan(): Promise<void>;
@@ -335,44 +345,30 @@ declare namespace TComponents {
     static get OK(): string;
     static get CANCEL(): string;
 
-    static message(
-      msg1: string,
-      msg_array?: string | string[],
-      callback?: (arg0: string) => void
-    ): void;
+    static show: boolean;
+    static enabled: boolean;
 
-    static info(
-      msg1: string,
-      msg_array?: string | string[],
-      callback?: (arg0: string) => void
-    ): void;
+    static show: boolean;
+    static enabled: boolean;
 
-    static warning(
-      msg1: string,
-      msg_array?: string | string[],
-      callback?: (arg0: string) => void
-    ): void;
+    static message(msg1: string, msg_array?: string | string[], callback?: (arg0: string) => void): void;
 
-    static danger(
-      msg1: string,
-      msg_array?: string | string[],
-      callback?: (arg0: string) => void
-    ): void;
+    static info(msg1: string, msg_array?: string | string[], callback?: (arg0: string) => void): void;
+
+    static warning(msg1: string, msg_array?: string | string[], callback?: (arg0: string) => void): void;
+
+    static danger(msg1: string, msg_array?: string | string[], callback?: (arg0: string) => void): void;
 
     static error(e: object, callback?: any): void;
 
-    static confirm(
-      msg1: string,
-      msg_array?: string | string[],
-      callback?: (arg0: string) => void
-    ): void;
+    static confirm(msg1: string, msg_array?: string | string[], callback?: (arg0: string) => void): void;
   }
 
   interface RapidStartStopProps {
     indicator?: boolean;
   }
   class RapidStartStop_A extends Component_A {
-    constructor(parent: HTMLElement, props?: RapidStartStopProps);
+    constructor(parent: TComponentParent, props?: RapidStartStopProps);
     cbStart(): Promise<void>;
     cbStop(): Promise<void>;
   }
@@ -382,7 +378,7 @@ declare namespace TComponents {
   }
 
   class SignalEdit_A extends Component_A {
-    constructor(parent: HTMLElement, props?: string | SignalEditProps);
+    constructor(parent: TComponentParent, props?: string | SignalEditProps);
 
     onUpdate(handler: any): void;
   }
@@ -394,7 +390,7 @@ declare namespace TComponents {
   }
 
   class SignalIndicator_A extends Digital_A {
-    constructor(parent: HTMLElement, props?: SignalIndicatorProps);
+    constructor(parent: TComponentParent, props?: SignalIndicatorProps);
     props: SignalIndicatorProps;
     get signal(): void;
   }
@@ -405,7 +401,7 @@ declare namespace TComponents {
   }
 
   class SwitchSignal_A extends Component_A {
-    constructor(parent: HTMLElement, props?: SwitchSignalProps);
+    constructor(parent: TComponentParent, props?: SwitchSignalProps);
     cbUpdateSwitch(value: any): Promise<void>;
     cbOnChange(value: any): Promise<void>;
   }
@@ -417,7 +413,7 @@ declare namespace TComponents {
   }
 
   class SignalView_A extends Component_A {
-    constructor(parent: HTMLElement, props?: SignalViewProps);
+    constructor(parent: TComponentParent, props?: SignalViewProps);
   }
 
   interface ButtonVariableProps extends ButtonProps {
@@ -427,7 +423,7 @@ declare namespace TComponents {
   }
 
   class ButtonVariable_A extends Button_A {
-    constructor(parent: HTMLElement, props);
+    constructor(parent: TComponentParent, props: ButtonVariableProps);
   }
 
   interface VarIncrDecrProps extends ComponentProps {
@@ -438,7 +434,7 @@ declare namespace TComponents {
   }
 
   class VarIncrDecr_A extends Component_A {
-    constructor(parent: HTMLElement, props?: VarIncrDecrProps);
+    constructor(parent: TComponentParent, props?: VarIncrDecrProps);
     props: VarIncrDecrProps;
     set variable(arg: string);
 
@@ -466,7 +462,7 @@ declare namespace TComponents {
   }
 
   class InputVariable_A extends Component_A {
-    constructor(parent: HTMLElement, props?: InputVariableProps);
+    constructor(parent: TComponentParent, props?: InputVariableProps);
 
     get variable(): string;
     set variable(arg: string);
@@ -479,15 +475,13 @@ declare namespace TComponents {
     cbUpdateInputField(value: any): void;
   }
 
-  interface SwitchVariableProps {
+  interface SwitchVariableProps extends Switch_A {
     variable?: string;
     module?: string;
-    callback?: Function;
-    label?: string;
   }
 
   class SwitchVariable_A extends Switch_A {
-    constructor(parent: HTMLElement, props?: SwitchVariableProps);
+    constructor(parent: TComponentParent, props?: SwitchVariableProps);
 
     get variable(): string;
     set variable(arg: string);
@@ -515,7 +509,7 @@ declare namespace TComponents {
   }
 
   class SelectorAlias_A extends Dropdown_A {
-    constructor(parent: HTMLElement, props?: SelectorAliasProps);
+    constructor(parent: TComponentParent, props?: SelectorAliasProps);
     onInit(): void;
 
     _updateItemMap(imap: object): void;
@@ -528,7 +522,7 @@ declare namespace TComponents {
   }
 
   class SelectorVariables_A extends Dropdown_A {
-    constructor(parent: HTMLElement, props?: SelectorVariablesProps);
+    constructor(parent: TComponentParent, props?: SelectorVariablesProps);
 
     updateSearch(module: string, filter?: object): Promise<void>;
   }
@@ -540,9 +534,13 @@ declare namespace TComponents {
   }
 
   class SelectorProcedures_A extends Dropdown_A {
-    constructor(parent: HTMLElement, props?: SelectorProceduresProps);
+    constructor(parent: TComponentParent, props?: SelectorProceduresProps);
 
     updateSearch(module: string, filter?: string): Promise<void>;
+  }
+
+  class SelectorTasks_A extends Dropdown_A {
+    constructor(parent: TComponentParent, props?: DropdownProps);
   }
 
   interface SelectorModulesProps extends DropdownProps {
@@ -551,13 +549,13 @@ declare namespace TComponents {
   }
 
   class SelectorModules_A extends Dropdown_A {
-    constructor(parent: HTMLElement, props?: SelectorModulesProps);
+    constructor(parent: TComponentParent, props?: SelectorModulesProps);
 
     updateSearch(filter?: string): Promise<void>;
   }
 
   class SelectorEthernetIPDevices_A extends Dropdown_A {
-    constructor(parent: HTMLElement, props?: DropdownProps);
+    constructor(parent: TComponentParent, props?: DropdownProps);
 
     updateSearch(): Promise<void>;
   }
@@ -577,7 +575,7 @@ declare namespace TComponents {
   }
 
   class SelectorSignals_A extends Dropdown_A {
-    constructor(parent: HTMLElement, props?: SelectorSignalsProps);
+    constructor(parent: TComponentParent, props?: SelectorSignalsProps);
 
     updateSearch(filter: object): Promise<void>;
   }
@@ -586,7 +584,7 @@ declare namespace TComponents {
     name?: string;
   }
   class TemplateView_A extends Component_A {
-    constructor(parent: HTMLElement, props?: TemplateViewProps);
+    constructor(parent: TComponentParent, props?: TemplateViewProps);
     protected prop: TemplateViewProps;
     name: string;
 
@@ -612,7 +610,7 @@ declare namespace TComponents {
   }
 
   class Menu_A extends Component_A {
-    constructor(parent: HTMLElement, props?: MenuProps);
+    constructor(parent: TComponentParent, props?: MenuProps);
     protected views: View[];
     protected viewId: Map<object, string>;
     protected _getDom(content: TComponetElement, id: string): HTMLElement;
@@ -627,7 +625,7 @@ declare namespace TComponents {
   }
 
   class Hamburger_A extends Menu_A {
-    constructor(parent: HTMLElement, props?: HamburgerProps);
+    constructor(parent: TComponentParent, props?: HamburgerProps);
     get activeView(): string;
     set activeView(name: string);
   }
@@ -640,7 +638,7 @@ declare namespace TComponents {
   }
 
   class TabContainer_A extends Menu_A {
-    constructor(parent: HTMLElement, props?: TabContainerProps);
+    constructor(parent: TComponentParent, props?: TabContainerProps);
     addTab(tab: View): void;
     removeTab(name: string): void;
     get getTabTitle(): string;
@@ -667,19 +665,19 @@ declare namespace TComponents {
   }
 
   class Container_A extends Component_A {
-    constructor(parent: HTMLElement, props?: ContainerProps);
+    constructor(parent: TComponentParent, props?: ContainerProps);
     protected prop: ContainerProps;
     cssItem(index: number, className: string, remove: boolean): void;
     cssItems(className: string, remove: boolean): void;
   }
 
   interface LayoutInfoboxProps extends ComponentProps {
-    label?: string;
+    title?: string;
     content?: ContainerProps;
   }
 
   class LayoutInfobox_A extends Component_A {
-    constructor(parent: HTMLElement, props?: LayoutInfoboxProps);
+    constructor(parent: TComponentParent, props?: LayoutInfoboxProps);
     protected prop: LayoutInfoboxProps;
   }
 }

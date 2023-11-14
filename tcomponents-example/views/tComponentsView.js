@@ -41,7 +41,7 @@ export default class TComponentsView extends TComponents.Component_A {
         module: this._module,
         variable: this._variableBool,
         label: 'SwitchVariable_A',
-        callback: () => {
+        onChange: () => {
           console.log('SwitchVariable_A changed...');
         },
       }),
@@ -80,67 +80,48 @@ export default class TComponentsView extends TComponents.Component_A {
       }),
       // dropDownMenu: new FPComponents.Dropdown_A(),
       btnRender: new TComponents.Button_A(this.find('.btns-all'), {
-        callback: this.cbRender.bind(this),
-        label: 'Button_A - Render',
+        onClick: this.cbRender.bind(this),
+        text: 'Button_A - Render',
       }),
       varButton: new TComponents.ButtonVariable_A(this.find('.btns-all'), {
         module: this._module,
         variable: this._variable,
-        callback: async function (value) {
+        onClick: async function (value) {
           console.log(`tComponentsView: ButtonVariable_A : `);
 
           const valueString = value.toString();
 
-          TComponents.Popup_A.message('I am a Message window', [
-            `Variable ${this._variable} changed`,
-            '\n',
-            ` ${this._variable} = ${value}`,
-          ]);
-          TComponents.Popup_A.info('I am a Information window', [
-            `Variable ${this._variable} equals:`,
-            '\n',
-            ` ${this._variable} = ${value}`,
-          ]);
-          TComponents.Popup_A.warning('I am a Warning window', [
-            `Variable ${this._variable} equals:`,
-            '\n',
-            ` ${this._variable} = ${value}`,
-          ]);
-          TComponents.Popup_A.danger('I am a Error window', [
-            `Variable ${this._variable} equals:`,
-            '\n',
-            ` ${this._variable} = ${value}`,
-          ]);
-          TComponents.Popup_A.confirm('I am a Confirm window', [
-            `Variable ${this._variable} equals:`,
-            '\n',
-            ` ${this._variable} = ${value}`,
-          ]);
+          TComponents.Popup_A.message('I am a Message window', [`Variable ${this._variable} changed`, '\n', ` ${this._variable} = ${value}`]);
+          TComponents.Popup_A.info('I am a Information window', [`Variable ${this._variable} equals:`, '\n', ` ${this._variable} = ${value}`]);
+          TComponents.Popup_A.warning('I am a Warning window', [`Variable ${this._variable} equals:`, '\n', ` ${this._variable} = ${value}`]);
+          TComponents.Popup_A.danger('I am a Error window', [`Variable ${this._variable} equals:`, '\n', ` ${this._variable} = ${value}`]);
+          TComponents.Popup_A.confirm('I am a Confirm window', [`Variable ${this._variable} equals:`, '\n', ` ${this._variable} = ${value}`]);
         }.bind(this),
-        label: 'Call variable and popups',
+        text: 'Call variable and popups',
       }),
       btnProcedure: new TComponents.ButtonProcedure_A(this.find('.btns-all'), {
         procedure: 'es_Procedure_01',
         userLevel: true,
-        label: 'Execute procedure',
+        text: 'Execute procedure',
       }),
       align: new TComponents.ButtonAlign_A(this.find('.btns-move'), {
-        label: 'ButtonAlign_A',
+        text: 'ButtonAlign_A',
       }),
       teach: new TComponents.ButtonTeach_A(this.find('.btns-move'), {
         variable: 'esTarget02',
         module: 'Ecosystem_BASE',
-        label: 'ButtonTeach_A',
+        text: 'ButtonTeach_A',
       }),
       move: new TComponents.ButtonMoveTo_A(this.find('.btns-move'), {
         variable: 'esTarget02',
         module: 'Ecosystem_BASE',
-        label: 'ButtonMoveTo_A',
+        text: 'ButtonMoveTo_A',
       }),
       teachMove: new TComponents.ButtonTeachMove_A(this.find('.btns-move'), {
         variable: 'esTarget02',
         module: 'Ecosystem_BASE',
         label: 'ButtonTeachMove_A',
+        labelPos: 'right',
       }),
       selectorVar: new TComponents.SelectorVariables_A(this.find('.selectors-all'), {
         module: 'Ecosystem_BASE',
@@ -171,6 +152,7 @@ export default class TComponentsView extends TComponents.Component_A {
         signal: this._signal,
         readOnly: false,
         label: 'DI Is Gripper Closed',
+        labelPos: 'right',
         onChange: (value) => {
           console.log(`SignalIndicator callback onChange called -- value ${value}`);
         },
@@ -183,6 +165,7 @@ export default class TComponentsView extends TComponents.Component_A {
       switch: new TComponents.SwitchSignal_A(this.find('.signal-switch'), {
         signal: this._signal,
         label: 'DI Is Gripper Closed',
+        labelPos: 'left',
       }),
       editSignal: editSignal,
       modalWindow: new TComponents.ModalWindow_A(this.find('.modal-window'), {
@@ -192,7 +175,7 @@ export default class TComponentsView extends TComponents.Component_A {
         content: editSignal,
       }),
       btnTrigger: new TComponents.Button_A(this.find('.btns-all'), {
-        label: 'trigger modal window',
+        text: 'trigger modal window',
       }),
       templateComp: templateComp,
       btnStart: new TComponents.RapidStartStop_A(this.find('.controls-all'), { indicator: false }),
