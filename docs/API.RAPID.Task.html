@@ -352,6 +352,8 @@
             
                 <li data-name="getFile"><a href="API.FILESYSTEM.html">getFile</a></li>
             
+                <li data-name="getFiles"><a href="API.FILESYSTEM.html">getFiles</a></li>
+            
             </ul>
             <ul class="events itemMembers">
             
@@ -1143,7 +1145,7 @@
             
                 <li data-name="trigger"><a href="API.Events.html">trigger</a></li>
             
-                <li data-name="cleanup"><a href="TComponents.Eventing_A.html">cleanup</a></li>
+                <li data-name="cleanUpEvents"><a href="TComponents.Eventing_A.html">cleanUpEvents</a></li>
             
             </ul>
             <ul class="events itemMembers">
@@ -2230,7 +2232,7 @@
     
         
         <div class="tag-source">
-            api/ecosystem-rapid.js, line 217
+            api/ecosystem-rapid.js, line 218
         </div>
         
     </div>
@@ -2347,8 +2349,7 @@ method instead.</p>
         
 
     
-    <pre class="prettyprint"><code>const task = await API.RAPID.getTask('T_ROB1');
-const modules = await task.searchModules();</code></pre>
+    <pre class="prettyprint"><code>const task = await API.RAPID.getTask('T_ROB1');const modules = await task.searchModules();</code></pre>
     
 
     
@@ -2383,7 +2384,7 @@ const modules = await task.searchModules();</code></pre>
     
         
         <div class="tag-source">
-            api/ecosystem-rapid.js, line 247
+            api/ecosystem-rapid.js, line 248
         </div>
         
     </div>
@@ -2526,8 +2527,7 @@ the HOME directory (included extension of the module).</p></td>
         
 
     
-    <pre class="prettyprint"><code>let url = `${this.path}/${this.name}${this.extension}`;
-await task.loadModule(url, true);</code></pre>
+    <pre class="prettyprint"><code>let url = `${this.path}/${this.name}${this.extension}`;await task.loadModule(url, true);</code></pre>
     
 
     
@@ -2544,7 +2544,7 @@ await task.loadModule(url, true);</code></pre>
     
         
         <div class="tag-source">
-            api/ecosystem-rapid.js, line 257
+            api/ecosystem-rapid.js, line 258
         </div>
         
     </div>
@@ -2660,7 +2660,7 @@ await task.loadModule(url, true);</code></pre>
     
         
         <div class="tag-source">
-            api/ecosystem-rapid.js, line 280
+            api/ecosystem-rapid.js, line 281
         </div>
         
     </div>
@@ -2802,8 +2802,7 @@ await task.loadModule(url, true);</code></pre>
         
 
     
-    <pre class="prettyprint"><code>const task = await API.RAPID.getTask('T_ROB1');
-await task.executeProcedure('myProcedure', { userLevel: true, resetPP: false});</code></pre>
+    <pre class="prettyprint"><code>const task = await API.RAPID.getTask('T_ROB1');await task.executeProcedure('myProcedure', { userLevel: true, resetPP: false});</code></pre>
     
 
     
@@ -2820,7 +2819,7 @@ await task.executeProcedure('myProcedure', { userLevel: true, resetPP: false});<
     
         
         <div class="tag-source">
-            api/ecosystem-rapid.js, line 413
+            api/ecosystem-rapid.js, line 414
         </div>
         
     </div>
@@ -2929,8 +2928,7 @@ useTSP = 'normal'</p>
         
 
     
-    <pre class="prettyprint"><code>const task = await API.RAPID.getTask('T_ROB1');
-await task.stopExecution();</code></pre>
+    <pre class="prettyprint"><code>const task = await API.RAPID.getTask('T_ROB1');await task.stopExecution();</code></pre>
     
 
     
@@ -2947,7 +2945,7 @@ await task.stopExecution();</code></pre>
     
         
         <div class="tag-source">
-            api/ecosystem-rapid.js, line 447
+            api/ecosystem-rapid.js, line 448
         </div>
         
     </div>
@@ -3175,7 +3173,7 @@ await task.stopExecution();</code></pre>
     
         
         <div class="tag-source">
-            api/ecosystem-rapid.js, line 482
+            api/ecosystem-rapid.js, line 483
         </div>
         
     </div>
@@ -3370,7 +3368,7 @@ i.e. a type declaration that has no declared variable will not be returned when 
     
         
         <div class="tag-source">
-            api/ecosystem-rapid.js, line 501
+            api/ecosystem-rapid.js, line 502
         </div>
         
     </div>
@@ -3599,7 +3597,7 @@ i.e. a type declaration that has no declared variable will not be returned when 
     
         
         <div class="tag-source">
-            api/ecosystem-rapid.js, line 533
+            api/ecosystem-rapid.js, line 534
         </div>
         
     </div>
@@ -3827,7 +3825,7 @@ i.e. a type declaration that has no declared variable will not be returned when 
     
         
         <div class="tag-source">
-            api/ecosystem-rapid.js, line 566
+            api/ecosystem-rapid.js, line 567
         </div>
         
     </div>
@@ -3995,7 +3993,7 @@ i.e. a type declaration that has no declared variable will not be returned when 
     
         
         <div class="tag-source">
-            api/ecosystem-rapid.js, line 585
+            api/ecosystem-rapid.js, line 586
         </div>
         
     </div>
@@ -4193,7 +4191,7 @@ i.e. a type declaration that has no declared variable will not be returned when 
     
         
         <div class="tag-source">
-            api/ecosystem-rapid.js, line 603
+            api/ecosystem-rapid.js, line 604
         </div>
         
     </div>
@@ -4368,7 +4366,7 @@ i.e. a type declaration that has no declared variable will not be returned when 
     
         
         <div class="tag-source">
-            api/ecosystem-rapid.js, line 615
+            api/ecosystem-rapid.js, line 616
         </div>
         
     </div>
@@ -4828,7 +4826,7 @@ i.e. as a service routine (default: false).</p></td>
         
 
         <footer>
-            Documentation generated by <a target="_blank" href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.2</a> on Thu Nov 09 2023 16:51:52 GMT+0100 (Mitteleuropäische Normalzeit)
+            Documentation generated by <a target="_blank" href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.2</a> on Wed Nov 15 2023 08:21:41 GMT+0100 (Mitteleuropäische Normalzeit)
         </footer>
     </div>
 </div>
