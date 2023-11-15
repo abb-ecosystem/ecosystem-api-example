@@ -32,7 +32,7 @@ import { Button_A } from './t-components-button.js';
  *    onClick: async function (value) {
  *      Set_Pos(value);
  *    },
- *    label: 'Up',
+ *    text: 'Up',
  *    }
  *  ).render();
  */

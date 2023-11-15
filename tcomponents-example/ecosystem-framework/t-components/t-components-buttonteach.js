@@ -27,7 +27,7 @@ import { Button_A } from './t-components-button.js';
  * const btnTeach = new ButtonTeach_A(document.querySelector('.btn-teach'), {
  *    variable: 'esTarget02',
  *    module: 'Ecosystem_BASE',
- *    label: 'teach',
+ *    text: 'teach',
  *  });
  *  await btnTeach.render();
  */

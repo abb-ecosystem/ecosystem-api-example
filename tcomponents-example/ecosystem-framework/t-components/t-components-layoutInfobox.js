@@ -3,7 +3,8 @@ import { Container_A } from './t-components-container.js';
 
 /**
  * @typedef TComponents.LayoutInfoboxProps
- * @prop {string} [tilte] Title of the infobox
+ * @prop {string} [title] Title of the infobox
+ * @prop {boolean} [useBorder] Use border around the infobox
  * @prop {TComponents.ContainerProps} [content] Props to be passed to the content container}
  * @prop {object} [options] Option to be passed to the container
  */

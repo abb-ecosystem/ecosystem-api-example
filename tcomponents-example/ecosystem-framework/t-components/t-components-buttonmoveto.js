@@ -30,7 +30,7 @@ import { Button_A } from './t-components-button.js';
  * const btnMove = new ButtonMoveTo_A(document.querySelector('.btn-move'), {
  *    variable: 'esTarget02',
  *    module: 'Ecosystem_BASE',
- *    label: 'move to',
+ *    text: 'move to',
  *  });
  *  await btnMove.render();
  *

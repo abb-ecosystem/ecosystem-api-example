@@ -673,6 +673,7 @@ declare namespace TComponents {
 
   interface LayoutInfoboxProps extends ComponentProps {
     title?: string;
+    useBorder?: boolean;
     content?: ContainerProps;
   }
 

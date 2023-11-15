@@ -15,7 +15,7 @@ import { Dropdown_A } from './t-components-dropdown.js';
  */
 
 /**
- * Button to jog the robot to a position provided by a RAPID robtarget variable.
+ * Button to align the tool center point with respect to the coordinate system provided within the {@link TComponents.ButtonAlignProps}.
  * If the {@link TComponents.ButtonAlignProps.selector} is set to true, a coordinate selector element will be added to the button.
  * @class TComponents.ButtonAlign_A
  * @extends TComponents.Button_A
@@ -30,7 +30,7 @@ import { Dropdown_A } from './t-components-dropdown.js';
  * // index.js
  * const btnMove = new ButtonAlign_A(
  *    document.querySelector('.btn-align'),
- *    {label: 'Align'}
+ *    {text: 'Align'}
  *  );
  *  await btnMove.render();
  */

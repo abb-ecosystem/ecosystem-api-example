@@ -98,7 +98,7 @@ export class Button_A extends Component_A {
    * Adds a callback funciton to the component. This will be called after the button is pressed and released
    * @alias onClick
    * @memberof TComponents.Button_A
-   * @param   {(...values: any[]) => void}  func    The callback function which is called when the button is pressed
+   * @param   {function}  func    The callback function which is called when the button is pressed
    */
   onClick(func) {
     this.on('click', func);

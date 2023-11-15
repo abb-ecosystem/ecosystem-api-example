@@ -33,7 +33,7 @@ import { Button_A } from './t-components-button.js';
  * btnProcedure = new ButtonProcedure_A(document.querySelector('.btn-procedure'), {
  *    procedure: 'myProcedure',
  *    userLevel: true,
- *    label: 'Execute',
+ *    text: 'Execute',
  *    stopOnRelease: true
  *  });
  */

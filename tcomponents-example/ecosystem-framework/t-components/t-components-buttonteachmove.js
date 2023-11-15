@@ -27,7 +27,6 @@ import { ButtonTeach_A } from './t-components-buttonteach.js';
  *    document.querySelector('.btn-teach-move'), {
  *     variable: 'esTarget02',
  *     module: 'Ecosystem_BASE',
- *     label: 'teach'
  *    }
  *  );
  *  await btnTeach.render();
