@@ -5,7 +5,7 @@
 // or disclosure to third parties is strictly forbidden.
 // ABB reserves all rights regarding Intellectual Property Rights
 
-// OmniCore App SDK 1.3
+// OmniCore App SDK 1.4
 
 'use strict';
 
@@ -262,7 +262,7 @@ var FPComponents = FPComponents || {};
             }
         }
 
-        o.Levelmeter_A.VERSION = "1.3";
+        o.Levelmeter_A.VERSION = "1.4";
 
     }
 

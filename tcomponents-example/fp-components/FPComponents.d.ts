@@ -5,7 +5,7 @@
 // or disclosure to third parties is strictly forbidden.
 // ABB reserves all rights regarding Intellectual Property Rights
 
-// OmniCore App SDK 1.3
+// OmniCore App SDK 1.4
 
 declare function fpComponentsLoadCSS(href: string): void;
 declare const FP_COMPONENTS_COMMON_VERSION: string;
@@ -130,6 +130,7 @@ declare namespace FPComponents {
         } | null;
         desc: string | null;
         selected: number | null;
+        leftTruncate: boolean;
 
         attachToId(id: string): void;
         attachToElement(em: HTMLElement): void;
@@ -385,7 +386,29 @@ declare namespace FPComponents {
         }
     }
 
+    class Filesystemdialog_A {
 
+        static select(selectionMode?: Filesystemdialog_A.SelectionMode, fileSystemType?: Filesystemdialog_A.FileSystemObjectType, textHeading?: string|null, validFileEndings?: string[]|null, defaultFolderPath?:string|null): Promise<string[]|null>;
+
+        static readonly ROOT_FOLDER_HOME: `$HOME`;
+        static readonly ROOT_FOLDER_TEMP: `$TEMP`;
+        static readonly ROOT_FOLDER_BACKUP: `$BACKUP`;
+
+        static readonly VERSION: string;
+    }
+
+    namespace Filesystemdialog_A {
+        
+        enum SelectionMode {
+            Single,
+            Multi
+        }
+
+        enum FileSystemObjectType {
+            File,
+            Folder
+        }
+    }
 
     class Radio_A {
 

@@ -1,4 +1,4 @@
-const T_COMPONENTS_EXAMPLE_VERSION = '1.0.8';
+const T_COMPONENTS_EXAMPLE_VERSION = '1.0.9';
 
 const moduleName = 'Ecosystem_BASE';
 const configName = 'EIO_ECOSYSTEM_GUIDE';

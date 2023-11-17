@@ -29,9 +29,11 @@ export default class Procedure extends TComponents.Component_A {
       modSelector: new TComponents.SelectorModules_A(this.find('.module-dropdown'), {
         isInUse: false,
         label: 'Select a module:',
+        addNoSelection: true,
       }),
       procSelector: new TComponents.SelectorProcedures_A(this.find('.proc-dropdown'), {
         label: 'Select a procedure:',
+        addNoSelection: true,
       }),
       btnProcedure: new TComponents.ButtonProcedure_A(this.find('.exe-btn'), {
         procedure: '',

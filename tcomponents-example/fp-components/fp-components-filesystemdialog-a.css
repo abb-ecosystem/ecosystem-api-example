@@ -1,0 +1,322 @@
+
+/*
+
+(c) Copyright 2020-2023 ABB
+
+Any unauthorized use, reproduction, distribution,
+or disclosure to third parties is strictly forbidden.
+ABB reserves all rights regarding Intellectual Property Rights
+
+OmniCore App SDK 1.4
+
+*/
+
+.fp-components-filesystemdialog-bg {
+    display: none;
+    position: fixed;
+    z-index: 2147480100;
+    top: 0px;
+    left: 0px;
+    box-sizing: border-box;
+    height: 100vh;
+    width: 100vw;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(255,255,255,0.7);
+}
+
+.fp-components-filesystemdialog-main {
+    display: flex;
+    width: 95vw;
+    height: 95vh;
+    box-sizing: border-box;
+    border-style: solid;
+    border-color: var(--fp-color-GRAY-20);
+    border-width: 1px;
+    flex-direction: column;
+    box-shadow: 0px 6px 15px 0px var(--fp-color-GRAY-40);   
+    background-color: var(--fp-color-STD-BACKGROUND);
+}
+
+.fp-components-filesystemdialog-top {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    /* height: auto; */
+    padding: 10px;
+
+}
+
+.fp-components-filesystemdialog-dialogTopic {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    font-size: 24px;
+    font-weight: 600;
+}
+
+.fp-components-filesystemdialog-heading {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    font-size: 24px;
+    font-weight: 600;
+    margin-left: 5px;
+    font-size: 16px;
+}
+
+.fp-components-filesystemdialog-mid {
+    display: flex;
+    flex-direction: row;
+    flex-grow: 1;
+    overflow-y: hidden;
+    border-top: solid lightGray 1px;
+}
+
+.fp-components-filesystemdialog-mid-left {
+    display: flex;
+    flex-direction: column;
+    border-right: solid var(--fp-color-GRAY-20) 1px;
+    overflow-y: hidden;
+    min-width: 170px;
+}
+
+.fp-components-filesystemdialog-root-folder {
+    display: flex;
+    flex-direction: column;
+    width: auto;
+}
+
+.fp-components-filesystemdialog-root-folder-topic {
+    display: flex;
+    flex-direction: row;
+    justify-content: left;
+    align-items: center;
+    padding: 20px 10px 10px 10px;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.fp-components-filesystemdialog-root-folder-list {
+
+}
+
+.fp-components-filesystemdialog-root-folder-list-item {
+    font-weight: bold;
+    padding: 20px;
+    display: flex;
+    flex-direction: row;
+}
+
+.fp-components-filesystemdialog-root-folder-list-item:active {
+    background-color: lightgray;
+}
+
+.fp-components-filesystemdialog-root-folder-list-item-active {
+    font-weight: bold;
+    padding: 20px;
+    background-color: lightblue;
+    display: flex;
+    flex-direction: row;
+}
+
+
+
+.fp-components-filesystemdialog-root-folder-label {
+    margin-left: 5px;
+    font-size: 14px;
+    font-weight: normal;
+}
+
+.fp-components-filesystemdialog-file-selection-count {
+    margin-right: 5px;
+}
+
+.fp-components-filesystemdialog-mid-right {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1; 
+    overflow-y: hidden;   
+}
+
+.fp-components-filesystemdialog-navigation {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    height: auto;
+    min-height: 50px;
+    margin: 5px 10px 5px 5px;
+    overflow-y: hidden;
+}
+
+.fp-components-filesystemdialog-sort {
+    margin: 5px;
+    width: 150px;
+}
+
+.fp-components-filesystemdialog-navigation-button {
+    margin: 5px;
+}
+
+.fp-components-filesystemdialog-navigation-breadcrumbs {
+    border: solid var(--fp-color-GRAY-20) 2px;
+    border-radius: 5px;
+    padding: 5px 5px 5px 10px;
+    margin: 0px 10px 10px 10px;
+    word-break: break-all;
+    white-space: normal;
+}
+
+.fp-components-filesystemdialog-selection-name-field {
+    display: block;
+    margin-left: 5px;
+    min-width: 0%;
+    max-width: 100%;
+    flex-basis: 0;
+    flex-shrink: 1;
+    flex-grow: 1;
+    height: 20px;
+    border: solid var(--fp-color-GRAY-20) 2px;
+    border-radius: 5px;
+    padding: 5px 5px 5px 10px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    unicode-bidi: bidi-override;
+    direction: rtl;
+    text-align: left;
+    white-space: nowrap;
+}
+
+.fp-components-filesystemdialog-selection-name-dropdown {
+    display: block;
+    margin-left: 5px;
+    min-width: 0%;
+    max-width: 100%;
+    flex-basis: 0;
+    flex-shrink: 1;
+    flex-grow: 1;
+}
+
+.fp-components-filesystemdialog-table-scroll {
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    margin-left: 10px;
+}
+
+table th {
+    position: sticky;
+    top: 0;
+    background-color: white;
+}
+
+.fp-components-filesystemdialog-folder-content {
+    display: table;
+    border: none;
+    border-spacing: 0 0;
+    border-collapse: separate;
+    overflow-y: auto;
+}
+
+.fp-components-filesystemdialog-folder-content-table-heading-row {
+    text-align: left;
+}
+
+.fp-components-filesystemdialog-folder-content-object-unselected {
+    height: 50px;
+    padding: 5px;
+}
+
+tr:active {
+    background-color: lightgray;
+}
+
+.fp-components-filesystemdialog-folder-content-object-selected {
+    height: 50px;
+    padding: 5px;
+    background-color: lightblue;
+}
+
+.fp-components-filesystemdialog-folder-content-object-icon {
+    width: 20px;
+    height: 20px;
+    vertical-align: middle;
+}
+
+.fp-components-filesystemdialog-root-folder-icon {
+    width: 20px;
+    height: 20px;
+    vertical-align: middle;
+}
+
+.fp-components-filesystemdialog-folder-content-object-name {
+    word-break: break-all;
+    padding-right: 20px;
+}
+
+.fp-components-filesystemdialog-folder-open-button {
+    display: table-cell;
+    vertical-align: middle;
+    padding-right: 10px;
+}
+
+.fp-components-filesystemdialog-file-object {
+    
+}
+
+
+.fp-components-filesystemdialog-folder-object {
+    
+}
+
+.fp-components-filesystemdialog-bot {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    height: auto;
+    min-height: 50px;
+    border-top: solid var(--fp-color-GRAY-20) 1px;
+    padding: 5px 10px 5px 10px;
+}
+
+.fp-components-filesystemdialog-file-selection {
+    display: flex;
+    flex-direction: row;
+    flex-grow: 1;
+    justify-content: left;
+    align-items: center;
+    margin: 0px 5px 0px 0px;
+}
+
+.fp-components-filesystemdialog-file-selection-label {
+    display: flex;
+    flex-direction: row;
+    justify-content: left;
+    align-items: center;
+    margin-right: 5px;
+}
+
+.fp-components-filesystemdialog-buttons {
+    display: flex;
+    flex-direction: row;
+    justify-content: right;
+    align-items: center;
+    margin-left: 10px;
+    
+}
+
+.fp-components-filesystemdialog-button {
+    margin: 5px;
+}
+
+.fp-components-filesystemdialog-bot-left {
+    overflow-y: hidden;
+}
+
+.fp-components-filesystemdialog-bot-right {
+
+}

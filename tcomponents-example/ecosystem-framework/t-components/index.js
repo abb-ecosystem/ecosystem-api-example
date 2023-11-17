@@ -39,4 +39,4 @@ export { TabContainer_A } from './t-components-tabcontainer.js';
 export { Container_A } from './t-components-container.js';
 export { LayoutInfobox_A } from './t-components-layoutInfobox.js';
 
-export const T_COMPONENTS_BASE_VERSION = '0.8';
+export const T_COMPONENTS_BASE_VERSION = '0.9';

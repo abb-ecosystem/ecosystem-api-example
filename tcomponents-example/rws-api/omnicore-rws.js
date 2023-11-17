@@ -5,7 +5,7 @@
 // or disclosure to third parties is strictly forbidden.
 // ABB reserves all rights regarding Intellectual Property Rights
 
-// OmniCore App SDK 1.3
+// OmniCore App SDK 1.4
 
 'use strict';
 
@@ -14,9 +14,9 @@ if (typeof RWS.constructedMain === "undefined") {
     (function (o) {
 
         // VERSION INFO
-        o.RWS_LIB_VERSION = "1.3";
+        o.RWS_LIB_VERSION = "1.4";
 
-        var script = document.createElement('script');
+        let script = document.createElement('script');
         script.src = "rws-api/rapiddata-rws.js";
         document.head.appendChild(script);
 
@@ -25,46 +25,70 @@ if (typeof RWS.constructedMain === "undefined") {
         const VC_NOT_SUPPORTED = "Not supported on virtual controller.";        // Error text when calling routines that are not available on VC
         const SHARED_TAG = '%%SHARED%%';                                        // Tag used to identify shared modules, etc
         const UNASSIGNED_TAG = '%%UNASSIGNED%%';                                // Tag used to identify unassigned IO signals
-        var isVirtual = null;
         let debugType = 1;
         let debugSeverity = 2;
+        
+        let isVirtual = null;
+        let isVirtualResolvers = [];
 
         /**
         * Gets the controller type, i.e. checks if controller is a VC
         * 
-        * @returns {boolean}   A boolean indicating if currently connected to a virtual controller.
+        * @returns {Promise<boolean>}   A Promise with a boolean indicating if currently connected to a virtual controller.
         */
-        o.isVirtualController = () => {
-            if (isVirtual === null) throw new Error("RWS has not been initialized properly yet.");
+        o.isVirtualController = async () => {
+            if (isVirtual === null) {
+                const promise = new Promise((resolve)=>{
+                    isVirtualResolvers.push(resolve);
+                });
+                await promise;
+            }
             return isVirtual;
         }
 
         /**
          * Initializes the RWS object
          */
-        o.init = () => {
+        o.init = async () => {
 
-            o.Network.get("/ctrl")
-                .then(res => {
-                    let obj = null;
-                    try {
-                        obj = JSON.parse(res.responseText);
-                    } catch (error) {
-                        return Promise.reject("Could not parse JSON.");
+            try {
+                const res = await o.Network.get("/ctrl");
+    
+                let obj = null;
+                try {
+                    obj = JSON.parse(res.responseText);
+                } catch (error) {
+                    throw "Could not parse JSON.";
+                }
+    
+                for (const item of obj._embedded.resources) {
+                    if (item._type === "ctrl-identity-info-li") {
+                        isVirtual = item['ctrl-type'] === "Virtual Controller";
+                        window.setTimeout(()=>{
+                            for(const resolver of isVirtualResolvers) {
+                                resolver();
+                            }
+                            isVirtualResolvers = [];
+                        },0);
+                        break;
                     }
+                }
 
-                    for (const item of obj._embedded.resources) {
-                        if (item._type === "ctrl-identity-info-li") {
-                            isVirtual = item['ctrl-type'] === "Virtual Controller";
-                            break;
-                        }
-                    }
-                })
-                .catch(err => console.warn(`Init failed to read controller. >>> ${err}`));
+                if (isVirtual === null) {
+                    throw "No controller type found.";
+                }
+
+            } catch(err) {
+                console.error(`Init failed to read controller type. >>> ${err}`);
+            }
 
             o.Network.heartBeat();
-            if (typeof (window.external) !== 'undefined' && ('notify' in window.external)) window.external.notify("GetCookies");
+
+            if (typeof (window.external) !== 'undefined' && ('notify' in window.external)) {
+                window.external.notify("GetCookies");
+            }
         }
+
         window.addEventListener("load", o.init, false);
 
         o.__unload = false;
@@ -700,6 +724,7 @@ if (typeof RWS.constructedMain === "undefined") {
             }
             
 
+            let abortingServiceRoutine = false;
 
             /**
              * A Monitoring object for subscriptions
@@ -1342,6 +1367,52 @@ if (typeof RWS.constructedMain === "undefined") {
                         .then(() => Promise.resolve())
                         .catch(err => rejectWithStatus('Failed to set PP to routine.', err));
 
+                }
+
+
+                /**
+                 * Aborts the current execution level on the task, given that it is a service routine (user).
+                 * NOTE: This asynchronous function must complete (successfully or not) before it can be called again.
+                 * 
+                 * @returns {Promise}   A Promise without any content
+                 */
+                this.abortServiceRoutine = async () => {
+
+                    const ERR_MSG = "Could not abort service routine.";
+
+                    if (abortingServiceRoutine) {
+                        throw createStatusObject(ERR_MSG, "Abort process already in progress.")
+                    }
+
+                    abortingServiceRoutine = true;
+
+                    try {
+                        await o.Mastership.request();
+                    } catch(e) {
+                        this.abortServiceRoutine = false;
+                        throw createStatusObject(ERR_MSG, e);
+                    }
+
+                    try {
+                        
+                        let props = await this.getProperties();
+                        
+                        if (props.executionLevel === o.Rapid.TaskExecutionLevels.user) {
+                            await o.Network.post(`/rw/rapid/tasks/${encodeURIComponent(taskName)}/abortexeclevel`);
+                        } else {
+                            throw "Current execution level is not \"user\".";
+                        }
+
+                    } catch(e) {
+                        throw createStatusObject(ERR_MSG, e);
+                        
+                    } finally {
+                        try {
+                            await o.Mastership.release();
+                        } catch (e) {
+                        }
+                        abortingServiceRoutine = false;
+                    }
                 }
                 
 
@@ -2961,7 +3032,8 @@ if (typeof RWS.constructedMain === "undefined") {
              * @param   {string}        signal      The name of the signal
              */
             function Signal(network, device, signal,
-                _category=null, _signalType=null, _signalValue=null, _isSimulated=null, _quality=null) {
+                _category=null, _signalType=null, _signalValue=null, _isSimulated=null,
+                _quality=null, _accessLvl=null, _writeAccess=null, _safeLvl=null) {
 
                 let isUnassigned = network === UNASSIGNED_TAG && device === UNASSIGNED_TAG;
                 let signalPath = isUnassigned === true ? `${encodeURIComponent(signal)}` : `${encodeURIComponent(network)}/${encodeURIComponent(device)}/${encodeURIComponent(signal)}`;
@@ -2975,6 +3047,9 @@ if (typeof RWS.constructedMain === "undefined") {
                 let signalValue = _signalValue;
                 let isSimulated = _isSimulated;
                 let quality = _quality;
+                let accessLvl = _accessLvl;
+                let writeAccess = _writeAccess;
+                let safeLvl = _safeLvl;
 
                 /**
                  * Gets the path of the signal
@@ -3070,6 +3145,42 @@ if (typeof RWS.constructedMain === "undefined") {
                 }
 
                 /**
+                 * Gets the access level of the signal
+                 * 
+                 * @returns {Promise<string>}   A Promise with the access level as a string
+                 */
+                this.getAccessLevel = function () {
+                    if (accessLvl !== null && accessLvl !== undefined) return Promise.resolve(accessLvl);
+                    return this.fetch()
+                        .then(() => Promise.resolve(accessLvl))
+                        .catch(err => Promise.reject(err));
+                }
+
+                /**
+                 * Gets the write access setting of the signal
+                 * 
+                 * @returns {Promise<string>}   A Promise with the write access setting as a string
+                 */
+                this.getWriteAccess = function () {
+                    if (writeAccess !== null && writeAccess !== undefined) return Promise.resolve(writeAccess);
+                    return this.fetch()
+                        .then(() => Promise.resolve(writeAccess))
+                        .catch(err => Promise.reject(err));
+                }
+
+                /**
+                 * Gets the safe level of the signal
+                 * 
+                 * @returns {Promise<string>}   A Promise with the safe level as a string
+                 */
+                this.getSafeLevel = function () {
+                    if (safeLvl !== null && safeLvl !== undefined) return Promise.resolve(safeLvl);
+                    return this.fetch()
+                        .then(() => Promise.resolve(safeLvl))
+                        .catch(err => Promise.reject(err));
+                }
+
+                /**
                  * Gets the value of the signal
                  * 
                  * @returns {Promise<string>}   A Promise with the signal value
@@ -3116,6 +3227,9 @@ if (typeof RWS.constructedMain === "undefined") {
                                     isSimulated = item.lstate === "simulated";
                                     quality = item.quality;
                                     category = item.category;
+                                    accessLvl = item["access-level"];
+                                    writeAccess = item["write-access"];
+                                    safeLvl = item["safe-level"];
                                     break;
                                 }
                             }
@@ -3272,6 +3386,8 @@ if (typeof RWS.constructedMain === "undefined") {
                     .catch(err => rejectWithStatus('Error setting signal.', err));
             }
 
+            
+
             /**
              * Searches for signals
              * 
@@ -3289,43 +3405,54 @@ if (typeof RWS.constructedMain === "undefined") {
              *      blocked: <true | false>
              * }
              */
-            this.searchSignals = (filter = {}) => {
-                let body = "";
+            this.searchSignals = async (filter = {}) => {
 
-                const refObject = {
-                    name: '',
-                    device: '',
-                    network: '',
-                    category: '',
-                    'category-pon': '',
-                    type: '',
-                    invert: true,
-                    blocked: true
-                };
+            
+                async function _searchSignalsImpl(filter, offset=0) {
 
-                let s = verifyDataType(filter, refObject);
-                if (s !== '') {
-                    return rejectWithStatus('Failed searching signal.', s);
-                }
+                    const CHUNK_SIZE = 100;
 
-                try {
-                    Object.keys(filter).forEach((key) => {
-                        body += `${key}=${encodeURIComponent(filter[key])}&`;
-                    });
-                    body = body.slice(0, -1);
-                } catch (error) {
-                    return rejectWithStatus('Failed searching signal.', error);
-                }
-
-                return o.Network.post("/rw/iosystem/signals/signal-search-ex", body, { "Accept": "application/hal+json;v=2.0" })
-                    .then(res => {
-                        let obj = parseJSON(res.responseText);
-                        if (typeof obj === 'undefined') return Promise.reject('Could not parse JSON.');
-
-                        let signals = []
+                    let body = "";
+    
+                    const refObject = {
+                        name: '',
+                        device: '',
+                        network: '',
+                        category: '',
+                        'category-pon': '',
+                        type: '',
+                        invert: true,
+                        blocked: true
+                    };
+    
+                    const s = verifyDataType(filter, refObject);
+                    if (s !== '') {
+                        throw createStatusObject('Failed searching signal.', s);
+                    }
+    
+                    try {
+                        Object.keys(filter).forEach((key) => {
+                            body += `${key}=${encodeURIComponent(filter[key])}&`;
+                        });
+                        body = body.slice(0, -1);
+                    } catch (error) {
+                        throw createStatusObject('Failed searching signal.', error);
+                    }
+    
+                    const signals = [];
+                    let obj;
+    
+                    try {
+    
+                        // RWS response provides buggy next-links for this endpoint, so we construct our own, assuming at least 100 results can be fetched at once
+                        const rwsRes = await o.Network.post(`/rw/iosystem/signals/signal-search-ex?start=${encodeURIComponent(offset)}&limit=${encodeURIComponent(CHUNK_SIZE)}`, body, { "Accept": "application/hal+json;v=2.0" });
+    
+                        obj = parseJSON(rwsRes.responseText);
+                        if (typeof obj === 'undefined') throw 'Could not parse JSON.';
+    
                         for (const item of obj._embedded.resources) {
                             if (item._type === "ios-signal-li") {
-                                let path = item._title.split("/");
+                                const path = item._title.split("/");
                                 let networkName = UNASSIGNED_TAG;
                                 let deviceName = UNASSIGNED_TAG;
                                 let signalName = '';
@@ -3336,27 +3463,41 @@ if (typeof RWS.constructedMain === "undefined") {
                                     deviceName = path[1];
                                     signalName = path[2];
                                 } else {
-                                    Console.error(`Illegal data: '${item._title}'`);
+                                    console.error(`Invalid signal data: '${item._title}'`);
                                     continue;
                                 }
-
+    
                                 let signalValue;
                                 if (item.type === 'AI' || item.type === 'AO') {
                                     signalValue = parseFloat(item.lvalue);
                                 } else {
                                     signalValue = parseInt(item.lvalue);
                                 }
-
-                                let signal = new Signal(networkName, deviceName, signalName,
-                                    item.category, item.type, signalValue, item.lstate==="simulated", item.quality);
-
-                                signals.push(signal)
+    
+                                const signal = new Signal(networkName, deviceName, signalName,
+                                    item.category, item.type, signalValue, item.lstate==="simulated",
+                                    item.quality, item["access-level"], item["write-access"], item["safe-level"]);
+    
+                                signals.push(signal);
                             }
-
                         }
-                        return Promise.resolve(signals);
-                    })
-                    .catch(err => rejectWithStatus('Failed searching signal.', err));
+     
+                    } catch(error) {
+                        throw createStatusObject("Failed searching signal.", error);
+                    }
+                    
+                    if (obj !== undefined && obj._links !== undefined && obj._links.next !== undefined) {
+                        for (const sig of await _searchSignalsImpl(filter, offset + CHUNK_SIZE)) {
+                            signals.push(sig);
+                        }
+                    }
+
+                    return signals;
+                }
+                
+                return await _searchSignalsImpl(filter);
+    
+
             }
 
             /**
@@ -3558,6 +3699,25 @@ if (typeof RWS.constructedMain === "undefined") {
                 this.updateAttributesById = function (type, id, attributes) {
                     return new Type(this, type).updateAttributesById(id, attributes);
                 }
+
+                /**
+                 * Delete an instance by name
+                 * @param {string} type
+                 * @param {string} name
+                 */
+                this.deleteInstanceByName = function (type, name) {
+                    return new Type(this, type).deleteInstanceByName(name);
+                }
+                
+                /**
+                 * Delete an instance by id
+                 * @param {string} type
+                 * @param {string} id
+                */
+               this.deleteInstanceById = async function (type, id) {
+                    return new Type(this, type).deleteInstanceById(id);
+
+                }                
 
                 /**
                  * Save domain to file
@@ -3809,6 +3969,32 @@ if (typeof RWS.constructedMain === "undefined") {
                         })
                         .catch(err => rejectWithStatus('Could not update attributes.', err));
                 }
+
+                /**
+                 * Delete an instance by name
+                 * @param {string} name
+                 */
+                this.deleteInstanceByName = async function (name) {
+                    try {
+                        let instance = await this.getInstanceByName(name);
+                        return await instance.delete();
+                    } catch(e) {
+                        throw createStatusObject('Could not delete instance.', e);
+                    }
+                }
+
+                /**
+                 * Delete an instance by id
+                 * @param {string} id
+                 */
+                this.deleteInstanceById = async function (id) {
+                    try {
+                        let instance = await this.getInstanceById(id);
+                        return await instance.delete();
+                    } catch(e) {
+                        throw createStatusObject('Could not delete instance.', e);
+                    }
+                }
             }
 
             /**
@@ -3909,6 +4095,24 @@ if (typeof RWS.constructedMain === "undefined") {
                             return Promise.resolve();
                         })
                         .catch(err => rejectWithStatus('Failed updating attributes.', err));
+                }
+
+
+                /**
+                 * Deletes the instance (on the controller)
+                 * This instance object is invalid after calling this method.
+                 */
+                this.delete = async function() {
+
+                    try {
+
+                        const uri = `/rw/cfg/${encodeURIComponent(domainName)}/${encodeURIComponent(typeName)}/instances/${encodeURIComponent(instanceName == "" ? instanceId : instanceName)}`;
+                        await o.Network.delete(uri);
+
+                    } catch(e) {
+                        throw createStatusObject("Error when deleting CFG instance.", e);
+                    }
+
                 }
             }
 
@@ -4086,6 +4290,28 @@ if (typeof RWS.constructedMain === "undefined") {
             this.updateAttributesById = function (domain, type, id, attributes) {
                 return new Domain(domain).updateAttributesById(type, id, attributes);
             }
+
+            /**
+             * Delete an instance of a type in a domain
+             * 
+             * @param   {string}            domain      Config domain
+             * @param   {string}            type        Config type
+             * @param   {string}            name        The name of the config instance to be deleted
+             */
+            this.deleteInstanceByName = function (domain, type, name) {
+                return new Domain(domain).deleteInstanceByName(type, name);
+            }            
+
+            /**
+             * Delete an instance of a type in a domain
+             * 
+             * @param   {string}            domain      Config domain
+             * @param   {string}            type        Config type
+             * @param   {string}            id          The indentifier of the config instance to be deleted
+             */
+            this.deleteInstanceById = function (domain, type, id) {
+                return new Domain(domain).deleteInstanceByName(type, id);
+            }            
         }
 
         /**
@@ -4362,6 +4588,15 @@ if (typeof RWS.constructedMain === "undefined") {
             }
 
             /**
+            * Gets the controller type, i.e. checks if controller is a VC
+            * 
+            * @returns {Promise<boolean>}   A Promise with a boolean indicating if currently connected to a virtual controller.
+            */
+            this.isVirtualController = async () => {
+                return await o.isVirtualController();
+            }
+
+            /**
              * Gets the state of the controller
              * 
              * @returns {Promise<string>}   A Promise with the state
@@ -4556,27 +4791,40 @@ if (typeof RWS.constructedMain === "undefined") {
              * 
              * @returns {Promise}   A Promise with the timezone information
              */
-            this.getTimezone = () => {
-                if (isVirtual === true) return rejectWithStatus(VC_NOT_SUPPORTED);
+            this.getTimezone = async () => {
+                
+                try {
 
-                return o.Network.get("/ctrl/clock/timezone")
-                    .then(res => {
-                        let obj = parseJSON(res.responseText);
-                        if (typeof obj === 'undefined') return Promise.reject('Could not parse JSON.');
+                    if (await o.isVirtualController() === true) {
+                        throw createStatusObject(VC_NOT_SUPPORTED);
+                    }
 
-                        let timezone = '';
-                        for (const item of obj.state) {
-                            if (item._type === "ctrl-timezone") {
-                                timezone = item.timezone;
-                                break;
-                            }
+                    const res = await o.Network.get("/ctrl/clock/timezone"); 
+                        
+                    const obj = parseJSON(res.responseText);
+                    if (typeof obj === 'undefined') {
+                        throw 'Could not parse JSON.';
+                    }
+
+                    let timezone = '';
+
+                    for (const item of obj.state) {
+                        if (item._type === "ctrl-timezone") {
+                            timezone = item.timezone;
+                            break;
                         }
+                    }
 
-                        if (timezone === '') return Promise.reject("'ctrl-timezone' not found.");
+                    if (timezone === '') {
+                        throw "'ctrl-timezone' not found.";
+                    }
 
-                        return Promise.resolve(timezone);
-                    })
-                    .catch(err => rejectWithStatus('Could not get timezone.', err));
+                    return timezone;
+
+                } catch (e) {
+                    throw createStatusObject('Could not get timezone.',e);
+                }
+
             }
 
             /**
@@ -4611,38 +4859,47 @@ if (typeof RWS.constructedMain === "undefined") {
              * 
              * @returns {Promise<[{}]>}   A Promise with the controllers network settings
              */
-            this.getNetworkSettings = () => {
-                if (isVirtual === true) return rejectWithStatus(VC_NOT_SUPPORTED);
+            this.getNetworkSettings = async () => {
+          
+                try {
 
-                return o.Network.get("/ctrl/network")
-                    .then(res => {
-                        let obj = parseJSON(res.responseText);
-                        if (typeof obj === 'undefined') return Promise.reject('Could not parse JSON.');
+                    if (await o.isVirtualController() === true) {
+                        throw createStatusObject(VC_NOT_SUPPORTED);
+                    }
 
-                        let settingsList = [];
-
-                        for (const item of obj.state) {
-                            if (item._type === 'ctrl-netw') {
-                                let settings = {
-                                    id: item.title,
-                                    logicalName: item['logical-name'],
-                                    network: item['network'],
-                                    address: item['addr'],
-                                    mask: item['mask'],
-                                    primaryDNS: item['dns-primary'],
-                                    secondaryDNS: item['dns-secondary'],
-                                    DHCP: item['dhcp'].toLowerCase() === 'true',
-                                    gateway: item['gateway']
-                                };
-
-                                settingsList.push(settings);
-                            }
+                    const res = await o.Network.get("/ctrl/network");
+                    
+                    const obj = parseJSON(res.responseText);
+                    if (typeof obj === 'undefined') {
+                        throw'Could not parse JSON.';
+                    }
+                        
+                    
+                    const settingsList = [];
+                    
+                    for (const item of obj.state) {
+                        if (item._type === 'ctrl-netw') {
+                            let settings = {
+                                id: item.title,
+                                logicalName: item['logical-name'],
+                                network: item['network'],
+                                address: item['addr'],
+                                mask: item['mask'],
+                                primaryDNS: item['dns-primary'],
+                                secondaryDNS: item['dns-secondary'],
+                                DHCP: item['dhcp'].toLowerCase() === 'true',
+                                gateway: item['gateway']
+                            };
+                            
+                            settingsList.push(settings);
                         }
+                    }
 
-                        return Promise.resolve(settingsList);
+                    return settingsList;
 
-                    })
-                    .catch(err => rejectWithStatus('Could not get network settings.', err));
+                } catch (err) {
+                    throw createStatusObject('Could not get network settings.', err);
+                }
             }
 
             /**
@@ -4650,34 +4907,42 @@ if (typeof RWS.constructedMain === "undefined") {
              * 
              * @returns {Promise<{}>}   A Promise with the controllers network connections
              */
-            this.getNetworkConnections = () => {
-                if (isVirtual === true) return rejectWithStatus(VC_NOT_SUPPORTED);
+            this.getNetworkConnections = async () => {
 
-                return o.Network.get("/ctrl/network/advanced")
-                    .then(res => {
-                        let obj = parseJSON(res.responseText);
-                        if (typeof obj === 'undefined') return Promise.reject('Could not parse JSON.');
+                try {
 
-                        let connectionsList = [];
-
-                        for (const item of obj.state) {
-                            if (item._type === "ctrl-netw-adv") {
-                                let connection = {
-                                    id: item.title,
-                                    MACAddress: item["mac-address"],
-                                    connected: item["media-state"].toLowerCase() === 'plugged',
-                                    enabled: item["enabled"].toLowerCase() === 'true',
-                                    speed: item["speed"]
-                                };
-
-                                connectionsList.push(connection);
-                            }
+                    if (await o.isVirtualController() === true) {
+                        throw createStatusObject(VC_NOT_SUPPORTED);
+                    }
+    
+                    const res = await o.Network.get("/ctrl/network/advanced");
+    
+                    const obj = parseJSON(res.responseText);
+                    if (typeof obj === 'undefined') {
+                        throw'Could not parse JSON.';
+                    }
+    
+                    const connectionsList = [];
+    
+                    for (const item of obj.state) {
+                        if (item._type === "ctrl-netw-adv") {
+                            let connection = {
+                                id: item.title,
+                                MACAddress: item["mac-address"],
+                                connected: item["media-state"].toLowerCase() === 'plugged',
+                                enabled: item["enabled"].toLowerCase() === 'true',
+                                speed: item["speed"]
+                            };
+    
+                            connectionsList.push(connection);
                         }
+                    }
+    
+                    return connectionsList;
 
-                        return Promise.resolve(connectionsList);
-
-                    })
-                    .catch(err => rejectWithStatus('Could not get network connections.', err));
+                } catch (err) {
+                    throw createStatusObject('Could not get network connections.', err);
+                }
             }
 
             /**
@@ -4923,32 +5188,44 @@ if (typeof RWS.constructedMain === "undefined") {
              * @param   {number}            timeout     The time (in seconds) to wait for the process to finish
              * @returns {Promise<{}>}                   A Promise with a status
              */
-            this.saveDiagnostics = (destPath, timeout = 60) => {
-                if (isVirtual === true) return Promise.reject(VC_NOT_SUPPORTED);
+            this.saveDiagnostics = async (destPath, timeout = 60) => {
 
-                if (typeof destPath !== 'string' || destPath === '') return rejectWithStatus("Invalid 'destPath'.");
-                if (isNaN(timeout) == true || timeout < 0) return rejectWithStatus("Invalid 'timeout'.");
+                try {
+                    if (await o.isVirtualController() === true) {
+                        throw createStatusObject(VC_NOT_SUPPORTED);
+                    }
+    
+                    if (typeof destPath !== 'string' || destPath === '') {
+                        throw "Invalid 'destPath'.";
+                    }
+                    if (isNaN(timeout) == true || timeout < 0) {
+                        throw "Invalid 'timeout'.";
+                    }
+    
+                    const p = `/fileservice/${destPath}`;
+                    const body = `dstpath=${encodeURIComponent(p)}`;
+    
+                    const res = await o.Network.post("/ctrl/diagnostics/save", body);
+    
+                    const location = res.getResponseHeader('Location');
+                    
+                    if (location !== null) {
 
-                let p = `/fileservice/${destPath}`;
-                let body = `dstpath=${encodeURIComponent(p)}`;
-
-                return o.Network.post("/ctrl/diagnostics/save", body)
-                    .then(res => {
-                        let location = res.getResponseHeader('Location');
-                        if (location !== null) {
-                            return waitProgressCompletion(location, timeout)
-                                .then(code => getStatusCode(code))
-                                .then(status => {
-                                    if (status.severity.toLowerCase() === 'error') return Promise.reject({ message: 'Progress resource reported error.', controllerStatus: status });
-                                    return Promise.resolve();
-                                })
-                                .catch(err => Promise.reject(err));
+                        const code = await waitProgressCompletion(location, timeout);
+                        const status = await getStatusCode(code);
+    
+                        if (status.severity.toLowerCase() === 'error') {
+                            throw { message: 'Progress resource reported error.', controllerStatus: status };
                         }
 
-                        o.writeDebug('saveDiagnostics: Failed to get the location of progress resource. The diagnostics will be saved but the call returns before it has completed.', 2);
-                        return Promise.resolve();
-                    })
-                    .catch(err => rejectWithStatus('Failed to save diagnostics.', err));
+                    } else {
+                        throw 'saveDiagnostics: Failed to get the location of progress resource. The diagnostics might be successful but the call returns before it has completed.';
+                    }
+    
+                } catch (err) {
+                    throw createStatusObject("Problem while save diagnostics.",err);
+                }
+                    
             }
         }
 
@@ -7128,8 +7405,8 @@ if (typeof RWS.constructedMain === "undefined") {
         o.constructedMain = true;
 
     })(RWS);
-    var _onMastershipRequested = RWS.Mastership.onRequested;
-    var _onMastershipReleased = RWS.Mastership.onReleased;
-    var _setCookies = RWS.Network.setCookies;
+    window["_onMastershipRequested"] = RWS.Mastership.onRequested;
+    window["_onMastershipReleased"] = RWS.Mastership.onReleased;
+    window["_setCookies"] = RWS.Network.setCookies;
 }
 

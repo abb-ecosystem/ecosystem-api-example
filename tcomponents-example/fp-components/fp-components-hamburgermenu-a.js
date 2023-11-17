@@ -5,7 +5,7 @@
 // or disclosure to third parties is strictly forbidden.
 // ABB reserves all rights regarding Intellectual Property Rights
 
-// OmniCore App SDK 1.3
+// OmniCore App SDK 1.4
 
 'use strict';
 
@@ -177,6 +177,10 @@ var FPComponents = FPComponents || {};
             }
 
             _updateViews(view = null) {
+
+                if (this._root === null) {
+                    return;
+                }
 
                 if(view != null && view != undefined) {
                     if (view.delete) {
@@ -411,13 +415,18 @@ var FPComponents = FPComponents || {};
                     this._titleDiv = titleDiv;
 
                     this._updateMenu();
+
+                    for (const v of this._views) {
+                        this._updateViews(v);
+                    }
                     this._updateViews();
+
                     this._anchor.appendChild(container);
                 }
             }
         }
 
-        o.Hamburgermenu_A.VERSION = "1.3";
+        o.Hamburgermenu_A.VERSION = "1.4";
         o.Hamburgermenu_A._MENU_OVERLAY_OPEN = "fp-components-hamburgermenu-a-overlay--open"
         o.Hamburgermenu_A._MENU_CONTAINER_OPEN = "fp-components-hamburgermenu-a-menu__container--open"
         o.Hamburgermenu_A._MENU_OPEN = "fp-components-hamburgermenu-a--open"

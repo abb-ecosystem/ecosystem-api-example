@@ -5,7 +5,7 @@
 // or disclosure to third parties is strictly forbidden.
 // ABB reserves all rights regarding Intellectual Property Rights
 
-// OmniCore App SDK 1.3
+// OmniCore App SDK 1.4
 
 'use strict';
 
@@ -14,7 +14,7 @@ if (typeof App.constructed === "undefined") {
     (function (o) {
 
         // VERSION INFO
-        o.APP_LIB_VERSION = "1.3";        
+        o.APP_LIB_VERSION = "1.4";        
 
         /**
          * Initializes the App object
@@ -356,11 +356,12 @@ if (typeof App.constructed === "undefined") {
 
         o.constructed = true;
     })(App);
-    var _onGetTpuType = App.onGetTpuType;
-    var _onNavigateTo = App.Interaction.onNavigateTo;
-    var _onNavigateToResponse = App.Interaction.onNavigateToResponse;
-    var _onSendMessage = App.Interaction.onMessageReceived;
-    var _onSendMessageResponse = App.Interaction.onSendMessageResponse;
-    var _onActivate = App.Activation.onActivate;
-    var _onDeactivate = App.Activation.onDeactivate;
+    
+    window["_onGetTpuType"] = App.onGetTpuType;
+    window["_onNavigateTo"] = App.Interaction.onNavigateTo;
+    window["_onNavigateToResponse"] = App.Interaction.onNavigateToResponse;
+    window["_onSendMessage"] = App.Interaction.onMessageReceived;
+    window["_onSendMessageResponse"] = App.Interaction.onSendMessageResponse;
+    window["_onActivate"] = App.Activation.onActivate;
+    window["_onDeactivate"] = App.Activation.onDeactivate;
 }

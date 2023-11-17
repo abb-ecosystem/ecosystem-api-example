@@ -5,7 +5,7 @@
 // or disclosure to third parties is strictly forbidden.
 // ABB reserves all rights regarding Intellectual Property Rights
 
-// OmniCore App SDK 1.3
+// OmniCore App SDK 1.4
 
 'use strict';
 
@@ -14,7 +14,7 @@ if (typeof RWS.constructedRapidData === "undefined") {
     (function (rd) {
 
         // VERSION INFO
-        rd.RAPIDDATA_LIB_VERSION = "1.3";      
+        rd.RAPIDDATA_LIB_VERSION = "1.4";      
 
         let monitor = null;
 

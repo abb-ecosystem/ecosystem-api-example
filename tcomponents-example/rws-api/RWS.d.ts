@@ -5,12 +5,14 @@
 // or disclosure to third parties is strictly forbidden.
 // ABB reserves all rights regarding Intellectual Property Rights
 
-// OmniCore App SDK 1.3
+// OmniCore App SDK 1.4
 
 declare namespace RWS {
 
     const RWS_LIB_VERSION: string;
     const RAPIDDATA_LIB_VERSION: string;
+
+    function isVirtualController(): Promise<boolean>;
 
 }
 
@@ -213,6 +215,7 @@ declare namespace RWS.Rapid {
         getModule(moduleName: string): Promise<Module>;
         getPointers(): Promise<TaskPointers>;
         movePPToRoutine(routineName: string, userLevel?: boolean, moduleName?: string): Promise<void>;
+        abortServiceRoutine() : Promise<void>;
 
     }
 
@@ -491,6 +494,7 @@ declare namespace RWS.Controller {
         include?: BackupInclude
     }): Promise<void>;
     function saveDiagnostics(path: string, timeout: number): Promise<void>;
+    function isVirtualController(): Promise<boolean>;
 }
 
 declare namespace RWS.FileSystem {
@@ -675,6 +679,8 @@ declare namespace RWS.CFG {
         createInstance(type: string, name?: string) : Promise<void>;
         updateAttributesByName(type: string, name: string, attributes: {[key:string]: string|undefined}) : Promise<void>; 
         updateAttributesById(type: string, id: string, attributes: {[key:string]: string|undefined}) : Promise<void>;
+        deleteInstanceByName(type: string, name: string) : Promise<void>; 
+        deleteInstanceById(type: string, id: string) : Promise<void>; 
         saveToFile(filePath: string) : Promise<void>;
     }
     
@@ -688,6 +694,8 @@ declare namespace RWS.CFG {
         createInstance(name?: string) : Promise<void>;
         updateAttributesByName(name: string, attributes: {[key:string]: string|undefined}) : Promise<void>; 
         updateAttributesById(id: string, attributes: {[key:string]: string|undefined}) : Promise<void>;
+        deleteInstanceByName(name: string) : Promise<void>; 
+        deleteInstanceById(id: string) : Promise<void>;         
     }
 
     interface Instance {
@@ -697,6 +705,7 @@ declare namespace RWS.CFG {
         getType() : Type;
         getAttributes() : Promise<{[key:string]: string|undefined}>;
         updateAttributes(attributes: {[key:string]: string|undefined}) : Promise<void>;
+        delete() : Promise<void>; 
     }
 
     function getDomains() : Promise<Domain[]>;
@@ -710,6 +719,9 @@ declare namespace RWS.CFG {
     function createInstance(domain: string, type: string, name?: string) : Promise<void>;
     function updateAttributesByName(domain: string, type: string, name: string, attributes: {[key:string]: string|undefined}) : Promise<void>; 
     function updateAttributesById(domain: string, type: string, id: string, attributes: {[key:string]: string|undefined}) : Promise<void>;
+    function deleteInstanceByName(domain: string, type: string, name: string) : Promise<void>;
+    function deleteInstanceById(domain: string, type: string, id: string) : Promise<void>;
+
 
 }
 
@@ -806,4 +818,12 @@ declare namespace RWS.UAS {
     function getGrants(): Promise<{[reference: string]: Grant|undefined}>;
     function hasGrant(grant: string): Promise<boolean>;
     function hasRole(role: string): Promise<boolean>;
+}
+
+
+declare namespace RWS.Mastership {
+
+    function request(): Promise<void>;
+    function release(): Promise<void>;
+
 }

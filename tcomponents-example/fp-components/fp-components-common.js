@@ -5,7 +5,7 @@
 // or disclosure to third parties is strictly forbidden.
 // ABB reserves all rights regarding Intellectual Property Rights
 
-// OmniCore App SDK 1.3
+// OmniCore App SDK 1.4
 
 'use strict';
 
@@ -20,7 +20,7 @@ function fpComponentsLoadCSS(href) {
     head.appendChild(link);
 }
 
-const FP_COMPONENTS_COMMON_VERSION = "1.3";
+const FP_COMPONENTS_COMMON_VERSION = "1.4";
 
 fpComponentsLoadCSS("fp-components/fp-components-common.css");
 

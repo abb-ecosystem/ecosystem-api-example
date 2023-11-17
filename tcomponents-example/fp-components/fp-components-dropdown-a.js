@@ -5,7 +5,7 @@
 // or disclosure to third parties is strictly forbidden.
 // ABB reserves all rights regarding Intellectual Property Rights
 
-// OmniCore App SDK 1.3
+// OmniCore App SDK 1.4
 
 'use strict';
 
@@ -18,6 +18,8 @@ var FPComponents = FPComponents || {};
         o.Dropdown_A = class {
 
             constructor() {
+
+                this._leftTruncate = false;
                 this._anchor = null;                
                 this._root = null;
                 this._descDiv = null;
@@ -92,6 +94,15 @@ var FPComponents = FPComponents || {};
                 this._descDiv.textContent = l;
             }
 
+            get leftTruncate() {
+                return this._leftTruncate;
+            }
+
+            set leftTruncate(b) {
+                this._leftTruncate = b;
+                this.rebuild();
+            }
+
             get selected() {
                 return this._selected;
             }
@@ -126,14 +137,22 @@ var FPComponents = FPComponents || {};
                         this._root.getElementsByTagName("p")[0].innerHTML = "&nbsp;";
                     } else {
                         if (s!== null && this._model.items !== undefined && this._model.items.length >= s + 1) {
-                            this._root.getElementsByTagName("p")[0].textContent = this._model.items[s].toString();
+
+                            let text = this._model.items[s].toString();
+
+                            if (this._leftTruncate) {
+
+                                // related to creation of text ellipsis (left side)
+                                text = text.split("").reverse().join("");
+                            }
+                            
+                            this._root.getElementsByTagName("p")[0].textContent = text;
+
                         } else {
                             this._root.getElementsByTagName("p")[0].innerHTML = "&nbsp;";
                         }
                     }
                 }
-
-
             }
 
             _createDesc() {
@@ -205,7 +224,7 @@ var FPComponents = FPComponents || {};
                 let pBox            = document.createElement("p");
                 let divOverlay      = document.createElement("div");
                 let divMenu         = document.createElement("div");
-                
+
                 divBox.onclick = ()=> {
                     if (this._enabled) {
                         divOverlay.style.display = "block";
@@ -247,6 +266,13 @@ var FPComponents = FPComponents || {};
                         }
                     }
                 };
+
+                if (this._leftTruncate) {
+                    pBox.className = "fp-components-dropdown-selected-truncate-left";
+                } 
+                else {
+                    pBox.className = "fp-components-dropdown-selected-truncate-right";
+                }
 
                 divBox.appendChild(pBox);
                 
@@ -313,7 +339,7 @@ var FPComponents = FPComponents || {};
             }         
         }
 
-        o.Dropdown_A.VERSION = "1.3";
+        o.Dropdown_A.VERSION = "1.4";
 
     }
 

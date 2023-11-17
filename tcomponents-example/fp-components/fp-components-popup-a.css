@@ -7,13 +7,13 @@ Any unauthorized use, reproduction, distribution,
 or disclosure to third parties is strictly forbidden.
 ABB reserves all rights regarding Intellectual Property Rights
 
-// OmniCore App SDK 1.3
+// OmniCore App SDK 1.4
 
 */
 
 /* Background */
 .fp-components-popup-bg {
-    display: none; /* Will be "block" when visible */
+    display: flex; 
     position: fixed;
     z-index: 2147480100;
     top: 0px;
@@ -29,7 +29,7 @@ ABB reserves all rights regarding Intellectual Property Rights
 
 /* Main popup window */
 .fp-components-popup {
-    display: flex; /* Will be "flex" when visible */
+    display: flex;
     max-width: 600px;
     min-width: 480px;
     box-sizing: border-box;
