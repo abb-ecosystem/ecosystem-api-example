@@ -55,7 +55,9 @@ export class Component_A extends Base_A {
     this._props;
 
     if (!Component_A._isHTMLElement(parent) && parent !== null)
-      throw new Error(`HTML parent element not detected. Set parent input argument to null if you want to attach the component later.`);
+      throw new Error(
+        `HTML parent element not detected. Set parent input argument to null if you want to attach the component later.`,
+      );
 
     this.compId = `${this.constructor.name}_${API.generateUUID()}`;
 
@@ -168,7 +170,8 @@ export class Component_A extends Base_A {
     this.container.appendChild(this.template.content);
 
     if (this._props.label) {
-      this.label = this._props.label;
+      const labelEl = this.find(`#${this.compId}__label`);
+      labelEl.innerHTML = this._props.label;
       if (this._props.labelPos === 'top' || this._props.labelPos === 'bottom') {
         this.container.classList.add('flex-col');
         this.container.classList.remove('flex-row', 'gap-2', 'items-center');
@@ -255,7 +258,8 @@ export class Component_A extends Base_A {
     }
 
     const arrAll = Object.entries(this.child).reduce((acc, [key, value]) => {
-      if (value instanceof Promise) throw new Error(`Promise detected but not expected at ${this.compId}--mapComponent element ${key}...`);
+      if (value instanceof Promise)
+        throw new Error(`Promise detected but not expected at ${this.compId}--mapComponent element ${key}...`);
 
       const sortComponent = (value) => {
         if (value instanceof Component_A) {
@@ -365,12 +369,12 @@ export class Component_A extends Base_A {
     return /*html*/ `
         ${Component_A.mIf(
           this._props.label && (this._props.labelPos === 'top' || this._props.labelPos === 'left'),
-          /*html*/ `<p>${this._props.label}</p>`
+          /*html*/ `<p id="${this.compId}__label"></p>`,
         )}
         ${this.markup(this)}
         ${Component_A.mIf(
           this._props.label && (this._props.labelPos === 'bottom' || this._props.labelPos === 'right'),
-          /*html*/ `<p>${this._props.label}</p>`
+          /*html*/ `<p id="${this.compId}__label"></p>`,
         )}
     `;
   }
@@ -544,7 +548,8 @@ export class Component_A extends Base_A {
     if (selector === 'this') this.container.classList.add(...arrClassNames);
     else {
       const el = all ? this.all(selector) : this.find(selector);
-      if (el) Array.isArray(el) ? el.forEach((el) => el.classList.add(...arrClassNames)) : el.classList.add(...arrClassNames);
+      if (el)
+        Array.isArray(el) ? el.forEach((el) => el.classList.add(...arrClassNames)) : el.classList.add(...arrClassNames);
     }
   }
 
@@ -568,7 +573,10 @@ export class Component_A extends Base_A {
     if (selector === 'this') this.container.classList.remove(...arrClassNames);
     else {
       const el = all ? this.all(selector) : this.find(selector);
-      if (el) Array.isArray(el) ? el.forEach((el) => el.classList.remove(...arrClassNames)) : el.classList.remove(...arrClassNames);
+      if (el)
+        Array.isArray(el)
+          ? el.forEach((el) => el.classList.remove(...arrClassNames))
+          : el.classList.remove(...arrClassNames);
     }
   }
 

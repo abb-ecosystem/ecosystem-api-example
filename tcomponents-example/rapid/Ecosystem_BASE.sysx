@@ -51,6 +51,6 @@ MODULE Ecosystem_BASE(SYSMODULE)
         MoveL esTrayApproach,v100,z50,esTool\WObj:=wobj0;
         MoveL esTrayGrip,v50,fine,esTool\WObj:=wobj0;
         WaitTime 1;
-        MoveL esTrayExit,v100,fine,tool0\WObj:=wobj0;
+        MoveL esTrayExit,v100,fine,esTool\WObj:=wobj0;
     ENDPROC
 ENDMODULE

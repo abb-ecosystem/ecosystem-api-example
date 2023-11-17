@@ -28,26 +28,30 @@ export default class Variable extends TComponents.Component_A {
       varCtrl: new TComponents.InputVariable_A(this.find('.var-ctrl'), {
         module: this._props.module,
         variable: this._props.variable,
-        label: 'Control',
-        labelPos: 'left',
-        useBorder: false,
+        label: 'Righty label',
+        labelPos: 'right',
+        // useBorder: false,
       }),
       varInd: new TComponents.InputVariable_A(this.find('.var-ind'), {
         module: this._props.module,
         variable: this._props.variable,
-        label: 'Indicator',
+        label: 'Lefty label',
         labelPos: 'left',
-        useBorder: false,
+        // useBorder: false,
       }),
       varIncrDecrInd: new TComponents.VarIncrDecr_A(this.find('.var-incr-decr-ind'), {
         module: this._props.module,
         variable: this._props.variable,
         readOnly: false,
+        label: '<div style="text-align: center">Label on the <span style="font-weight:bold">TOP</span></div>',
+        labelPos: 'top',
       }),
       varIncrDecrCtrl: new TComponents.VarIncrDecr_A(this.find('.var-incr-decr-ctrl'), {
         module: this._props.module,
         variable: this._props.variable,
         readOnly: true,
+        label: '<div style="color:gray;font-style:italic;font-weight:200">* This is a label on the bottom</div>',
+        labelPos: 'bottom',
       }),
       toggleBtn: new TComponents.Button_A(this.find('.toggle-view'), {
         onClick: () => {
@@ -96,16 +100,16 @@ export default class Variable extends TComponents.Component_A {
     this.swUseContainer.desc = 'use border';
     this.swUseContainer.onchange = (value) => {
       if (value) {
-        this.child.varInd.setProps({ useBorder: true });
-        this.child.varCtrl.setProps({ useBorder: true });
+        // this.child.varInd.setProps({ useBorder: true });
+        // this.child.varCtrl.setProps({ useBorder: true });
         this.child.varIncrDecrInd.cssBox();
         this.child.varIncrDecrCtrl.css({
           border: '3px double',
           margin: '5px',
         });
       } else {
-        this.child.varInd.setProps({ useBorder: false });
-        this.child.varCtrl.setProps({ useBorder: false });
+        // this.child.varInd.setProps({ useBorder: false });
+        // this.child.varCtrl.setProps({ useBorder: false });
         this.child.varIncrDecrInd.cssBox(false);
         this.child.varIncrDecrCtrl.css('');
       }
