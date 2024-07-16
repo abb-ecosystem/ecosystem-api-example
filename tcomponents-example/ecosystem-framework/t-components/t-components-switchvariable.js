@@ -4,9 +4,10 @@ import { Popup_A } from './t-components-popup.js';
 
 /**
  * @typedef TComponents.SwitchVariableProps
+ * @prop {string} [task] RAPID Task in which the variable is contained (default = "T_ROB1"
  * @prop {string} [variable] - Rapid variable to subpscribe to
  * @prop {string} [module] - Module containig the rapid variable
- * @prop {Function} [callback] Function to be called when button is pressed
+ * @prop {Function} [onChange] Function to be called when button is pressed
  * @prop {string} [label] Label text
  */
 
@@ -52,23 +53,25 @@ export class SwitchVariable_A extends Switch_A {
    * @returns {TComponents.SwitchVariableProps}
    */
   defaultProps() {
-    return { variable: '', module: '' };
+    return { task: 'T_ROB1', variable: '', module: '' };
   }
 
   async onInit() {
+    super.onInit();
     if (!this._props.module || !this._props.variable) {
       this.error = true;
       return;
     }
 
     try {
-      if (!this.task) this.task = await API.RAPID.getTask();
+      this.task = await API.RAPID.getTask(this._props.task);
       this.varElement = await this.task.getVariable(this._props.module, this._props.variable);
 
       this.varElement.onChanged(this.cbUpdateSwitch.bind(this));
-      this._switch.active = await this.varElement.getValue();
+      this.active = await this.varElement.getValue();
 
-      if (this.varElement.type !== 'bool') throw new Error(`TComponents.SwitchVariable_A : ${this._props.variable} is not a bool variable`);
+      if (this.varElement.type !== 'bool')
+        throw new Error(`TComponents.SwitchVariable_A : ${this._props.variable} is not a bool variable`);
     } catch (e) {
       this.error = true;
       Popup_A.error(e);
@@ -111,6 +114,7 @@ export class SwitchVariable_A extends Switch_A {
    * @private
    */
   async cbOnChange(value) {
+    if (!this.varElement) throw new Error('Variable not defined');
     try {
       await this.varElement.setValue(value);
     } catch (e) {
@@ -127,7 +131,7 @@ export class SwitchVariable_A extends Switch_A {
    * @private
    */
   cbUpdateSwitch(value) {
-    this._switch.active = value;
+    this.active = value;
     this.trigger('change', value);
   }
 }

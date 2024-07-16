@@ -108,7 +108,9 @@ export const Popup_A = (function () {
     info: function (msg1, msg_array = [], callback = null) {
       if (!_enabled) return;
 
-      _show ? FPComponents.Popup_A.message(msg1, msg_array, callback, FPComponents.Popup_A.STYLE.INFORMATION) : console.log(msg1, ...msg_array);
+      _show
+        ? FPComponents.Popup_A.message(msg1, msg_array, callback, FPComponents.Popup_A.STYLE.INFORMATION)
+        : console.log(msg1, ...msg_array);
     },
 
     /**
@@ -128,7 +130,9 @@ export const Popup_A = (function () {
     warning: function (msg1, msg_array = [], callback = null) {
       if (!_enabled) return;
 
-      _show ? FPComponents.Popup_A.message(msg1, msg_array, callback, FPComponents.Popup_A.STYLE.WARNING) : console.log(msg1, ...msg_array);
+      _show
+        ? FPComponents.Popup_A.message(msg1, msg_array, callback, FPComponents.Popup_A.STYLE.WARNING)
+        : console.warn(msg1, ...msg_array);
     },
 
     /**
@@ -154,7 +158,9 @@ export const Popup_A = (function () {
 
       if (!_enabled) return;
 
-      _show ? FPComponents.Popup_A.message(msg1, msg_array, callback, FPComponents.Popup_A.STYLE.DANGER) : console.log(msg1, ...msg_array);
+      _show
+        ? FPComponents.Popup_A.message(msg1, msg_array, callback, FPComponents.Popup_A.STYLE.DANGER)
+        : console.error(msg1, ...msg_array);
     },
 
     /**
@@ -208,9 +214,11 @@ export const Popup_A = (function () {
           : FPComponents.Popup_A.STYLE.WARNING;
 
       if (msg1 === '') {
-        _show && FPComponents.Popup_A.message(e.message, msgArray, callback, severity);
+        _show
+          ? FPComponents.Popup_A.message(e.message, msgArray, callback, severity)
+          : console.error(e.message, ...msgArray);
       } else {
-        _show && FPComponents.Popup_A.message(msg1, msgArray, callback, severity);
+        _show ? FPComponents.Popup_A.message(msg1, msgArray, callback, severity) : console.error(msg1, ...msgArray);
       }
     },
 

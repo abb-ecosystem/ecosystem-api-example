@@ -3,6 +3,8 @@
  * @namespace API
  */
 
+const API = {};
+
 // @ts-ignore
 const factoryApiBase = function (es) {
   /**
@@ -11,7 +13,7 @@ const factoryApiBase = function (es) {
    * @constant
    * @type {number}
    */
-  es.ECOSYSTEM_API_VERSION = '0.8';
+  es.ECOSYSTEM_API_VERSION = '0.11';
 
   const TIMEOUT_SEC = 5;
   es.verbose = false;
@@ -43,7 +45,12 @@ const factoryApiBase = function (es) {
     });
 
     window.addEventListener('unhandledrejection', (evt) => {
-      API.error(evt.reason);
+      console.log('💩', 'undandledrejection!!!!', evt);
+      console.error(evt.reason);
+    });
+
+    window.addEventListener('uncaughtException', (error) => {
+      console.error('💩 uncaughtException', 'An error occurred:', error);
     });
   };
   window.addEventListener('load', es.init, false);
@@ -138,6 +145,14 @@ const factoryApiBase = function (es) {
   };
 
   /**
+   * Disable monitor and variable subscriptions.
+   * @param {} value
+   */
+  es.disableSubscriptions = (value = true) => {
+    es._disableSubscribe = value;
+  };
+
+  /**
    * Set vorbose-flag to print in Flexpendant debugging window any error catched within the API
    * @alias setVerbose
    * @param {boolean} [value] - if true, logs are exposed
@@ -153,11 +168,11 @@ const factoryApiBase = function (es) {
    * @param {string} msg
    * @private
    */
-  es.log = (msg) => {
+  es.log = (...args) => {
     try {
-      es.verbose && console.log(JSON.stringify(msg));
+      es.verbose && console.log(args.map((arg) => JSON.stringify(arg)).join(' '));
     } catch (e) {
-      console.log(msg);
+      console.log(args);
     }
   };
 
@@ -362,6 +377,11 @@ const factoryApiBase = function (es) {
      */
     const subscribeRes = async function (res, func) {
       try {
+        if (es._disableSubscribe) {
+          API.log('API.CONTROLLER: Subscription disabled, monitor controller');
+          return;
+        }
+
         const monitor = await RWS.Controller.getMonitor(res);
         monitor.addCallbackOnChanged(func);
         await monitor.subscribe();
@@ -411,6 +431,7 @@ const factoryApiBase = function (es) {
             API.verbose && console.log(this.opMode);
           };
           subscribeRes(RWS.Controller.MonitorResources.operationMode, cbOpMode.bind(this));
+          callback(this.opMode);
         } catch (e) {
           return API.rejectWithStatus('Failed to subscribe operation mode', e);
         }
@@ -452,6 +473,7 @@ const factoryApiBase = function (es) {
             API.verbose && console.log(this.ctrlState);
           };
           subscribeRes(RWS.Controller.MonitorResources.controllerState, cbControllerState.bind(this));
+          callback(this.ctrlState);
         } catch (e) {
           return API.rejectWithStatus('Failed to subscribe controller state', e);
         }
@@ -579,7 +601,7 @@ const factoryApiBase = function (es) {
   es.constructedBase = true;
 };
 
-const API = {};
+// const API = {};
 factoryApiBase(API);
 
 export default API;

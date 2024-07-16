@@ -88,6 +88,17 @@ export class Eventing_A {
   }
 
   /**
+   * Get the number of callbacks subscribed to an event
+   * @alias count
+   * @memberof TComponents.Eventing_A
+   * @param {string} eventName - name of the triggering event
+   * @returns {number} - number of callbacks subscribed to the event
+   */
+  count(eventName) {
+    return this.events[eventName] ? this.events[eventName].length : 0;
+  }
+
+  /**
    * Clean up all registered events
    * @alias cleanUpEvents
    * @memberof TComponents.Eventing_A
@@ -102,5 +113,26 @@ export class Eventing_A {
         });
       }
     }
+  }
+
+  /**
+   * Check if an event has been registered already
+   * @alias hasEvent
+   * @memberof TComponents.Eventing_A
+   * @param {string} eventName - name of the triggering event
+   * @returns {boolean} - true if the event has been registered already, false otherwise
+   */
+  hasEvent(eventName) {
+    return this.events.hasOwnProperty(eventName);
+  }
+
+  /**
+   * Check if any event has been registered already
+   * @alias anyEventRegistered
+   * @memberof TComponents.Eventing_A
+   * @returns {boolean} - true if any event has been registered already, false otherwise
+   */
+  anyEvent() {
+    return Object.keys(this.events).length > 0;
   }
 }

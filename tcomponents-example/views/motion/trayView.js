@@ -57,25 +57,25 @@ export default class TrayView extends TComponents.Component_A {
         itemMap: this.locArray,
       }),
       trayPose: new TComponents.ButtonTeachMove_A(this.find('.tray-position-1'), {
-        variable: this._props.tray1,
+        robTarget: this._props.tray1,
         module: this._props.module,
         label: this.locArray[0].alias,
         labelPos: 'right',
       }),
       trayPoseGrip: new TComponents.ButtonTeachMove_A(this.find('.tray-position-grip'), {
-        variable: this._props.trayGrip,
+        robTarget: this._props.trayGrip,
         module: this._props.module,
         label: 'Grip Location',
         labelPos: 'right',
       }),
       trayPoseApproach: new TComponents.ButtonTeachMove_A(this.find('.tray-position-approach'), {
-        variable: this._props.trayApproach,
+        robTarget: this._props.trayApproach,
         module: this._props.module,
         label: 'Approach Location',
         labelPos: 'right',
       }),
       trayPoseExit: new TComponents.ButtonTeachMove_A(this.find('.tray-position-exit'), {
-        variable: this._props.trayExit,
+        robTarget: this._props.trayExit,
         module: this._props.module,
         label: 'Exit Location',
         labelPos: 'right',
@@ -98,7 +98,7 @@ export default class TrayView extends TComponents.Component_A {
       }),
       align: new TComponents.ButtonAlign_A(this.find('.align-tool'), {
         text: 'Align tool',
-        selector: true,
+        useCoordSelector: true,
       }),
     };
   }

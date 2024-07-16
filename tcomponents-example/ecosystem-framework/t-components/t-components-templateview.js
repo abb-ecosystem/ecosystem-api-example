@@ -107,7 +107,7 @@ export class TemplateView_A extends Component_A {
   markup() {
     return /*html*/ `
           <div class="flex-col items-center">
-            <div class="row tc-test-text">Hello World, I am ${this._props.name}</div>
+            <div class="row tc-test-text">Hello World, I am ${Component_A.t(this._props.name)}</div>
             <div class="flex-row">
               <div class="tc-example-btn tc-item"></div>
               <div class="fpcomponent-example-btn tc-item"></div>

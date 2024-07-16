@@ -8,15 +8,17 @@ import { Dropdown_A } from './t-components-dropdown.js';
  * @prop {string} [tool] Active tool - default='', which means current tool,
  * @prop {string} [wobj] Active working object - defaut='', which means current working object,
  * @prop {string} [coords] Active coordinate system {@link API.MOTION.COORDS} , defaut=API.MOTION.COORDS.Current,
- * @prop {boolean} [selector] Show coordinate selector - default=false,
- * @prop {Function} [callback] Function to be called when button is pressed
+ * @prop {boolean} [useCoordSelector] Show coordinate selector - default=false,
+ * @prop {Function} [onClick] Function to be called when button is pressed
  * @prop {string} [label] Label text
  * @prop {string|null} [icon] - Path to image file
+ * @prop {string} [text] Button text
+ * @prop {number} [speed] Speed of the movement in %, default=100
  */
 
 /**
  * Button to align the tool center point with respect to the coordinate system provided within the {@link TComponents.ButtonAlignProps}.
- * If the {@link TComponents.ButtonAlignProps.selector} is set to true, a coordinate selector element will be added to the button.
+ * If the {@link TComponents.ButtonAlignProps.useCoordSelector} is set to true, a coordinate selector element will be added to the button.
  * @class TComponents.ButtonAlign_A
  * @extends TComponents.Button_A
  * @param {HTMLElement} parent - HTMLElement that is going to be the parent of the component
@@ -53,12 +55,13 @@ export class ButtonAlign_A extends Button_A {
       tool: '',
       wobj: '',
       coords: API.MOTION.COORDS.Current,
-      selector: false,
+      useCoordSelector: false,
+      speed: 100,
     };
   }
 
   mapComponents() {
-    return this._props.selector
+    return this._props.useCoordSelector
       ? {
           selector: new Dropdown_A(this.find('.btn-align__coords'), {
             itemList: ['Base', 'Work Object', 'World'],
@@ -86,7 +89,7 @@ export class ButtonAlign_A extends Button_A {
     return /*html*/ `
       <div class="tc-btn-align flex-row gap-2 justify-stretch">
         <div class="btn-align__btn"></div>
-        ${this._props.selector ? '<div class="btn-align__coords"></div>' : ''}
+        ${this._props.useCoordSelector ? '<div class="btn-align__coords"></div>' : ''}
       </div>
     `;
   }
@@ -99,37 +102,39 @@ export class ButtonAlign_A extends Button_A {
    */
   async align() {
     if (this._btn.enabled) {
-      const jogData = [500, 500, 500, 500, 500, 500];
-
-      if (this._props.selector) {
-        const coord = this.child.selector.selected;
-        switch (coord) {
-          case 'Base':
-            this._props.coords = API.MOTION.COORDS.Base;
-            break;
-          case 'Work Object':
-            this._props.coords = API.MOTION.COORDS.Wobj;
-            break;
-          case 'World':
-            this._props.coords = API.MOTION.COORDS.World;
-            break;
-        }
-      }
-
-      const wobj = await API.MOTION.getWobj();
-
       try {
-        let props = {
-          jogMode: API.MOTION.JOGMODE.Align,
-          jogData: jogData,
-          wobj,
-        };
-        if (this._props.tool) props = Object.assign(props, { tool: this._props.tool });
-        if (this._props.wobj) props = Object.assign(props, { wobj: this._props.wobj });
-        if (this._props.coords) props = Object.assign(props, { coords: this._props.coords });
+        const speed = this._props.speed > 100 ? 100 : this._props.speed < 2 ? 2 : this._props.speed;
+        const jogData = [
+          (1000 * speed) / 100,
+          (1000 * speed) / 100,
+          (1000 * speed) / 100,
+          (1000 * speed) / 100,
+          (1000 * speed) / 100,
+          (1000 * speed) / 100,
+        ];
+
+        const tool = this._props.tool ? this._props.tool : await API.MOTION.getTool();
+        const wobj = this._props.wobj ? this._props.wobj : await API.MOTION.getWobj();
+
+        let coords = this._props.coords;
+        if (this._props.useCoordSelector) {
+          const coord = this.child.selector.selected;
+          switch (coord) {
+            case 'Base':
+              coords = API.MOTION.COORDS.Base;
+              break;
+            case 'Work Object':
+              coords = API.MOTION.COORDS.Wobj;
+              break;
+            case 'World':
+              coords = API.MOTION.COORDS.World;
+              break;
+          }
+        }
 
         this._isJogging = true;
-        await API.MOTION.executeJogging(props);
+
+        await API.MOTION.executeJogging(tool, wobj, coords, API.MOTION.JOGMODE.Align, jogData);
       } catch (e) {
         this._isJogging = false;
         Popup_A.error(e, 'TComponents.ButtonAlign_A');
@@ -164,5 +169,5 @@ ButtonAlign_A.loadCssClassFromString(
   min-width: 136px;
 }
 
-`
+`,
 );

@@ -12,6 +12,7 @@ import { InputVariable_A } from './t-components-inputvariable.js';
  * @prop {boolean} [readOnly] - if true, variable value is displayed and can only be modified with the increment and decrement buttons. If false, the value can also be directly modified
  * @prop {number} [steps] - Increments/decrements steps applied at a button click (default = 1)
  * @prop {string} [label] Label text
+ * @prop {Funtion} [onChange] Function to be called when button is pressed
  */
 
 /**
@@ -55,7 +56,16 @@ export class VarIncrDecr_A extends Component_A {
    * @returns {TComponents.VarIncrDecrProps}
    */
   defaultProps() {
-    return { module: '', variable: '', readOnly: false, steps: 1, label: '' };
+    return {
+      task: 'T_ROB1',
+      module: '',
+      variable: '',
+      readOnly: false,
+      steps: 1,
+      label: '',
+      useBorder: true,
+      onChange: null,
+    };
   }
 
   async onInit() {
@@ -65,7 +75,7 @@ export class VarIncrDecr_A extends Component_A {
     }
 
     try {
-      if (!this.task) this.task = await API.RAPID.getTask();
+      this.task = await API.RAPID.getTask(this._props.task);
       this._var = await this.task.getVariable(this._props.module, this._props.variable);
 
       this._isNum = this._var.type === 'num' || this._var.type === 'dnum' ? true : false;
@@ -76,7 +86,7 @@ export class VarIncrDecr_A extends Component_A {
           'Only variables of type "num" are fully supported',
         ]);
     } catch (e) {
-      Popup_A.e(e, 'VarIncrDecr view');
+      Popup_A.error(e, 'VarIncrDecr view');
     }
   }
 
@@ -86,6 +96,8 @@ export class VarIncrDecr_A extends Component_A {
         module: this._props.module,
         variable: this._props.variable,
         readOnly: this._props.readOnly,
+        useBorder: this._props.useBorder,
+        onChange: this._props.onChange,
       }),
       incrValue: new Button_A(this.find('.tc-varincrdecr-incr'), {
         onClick: this.cbIncr.bind(this),
@@ -181,11 +193,12 @@ export class VarIncrDecr_A extends Component_A {
    */
   async cbIncr() {
     try {
+      if (!this._var) throw new Error('Variable not defined');
       let cv = Number.parseFloat(await this._var.getValue());
       cv += this._props.steps;
       this._var.setValue(cv);
     } catch (e) {
-      Popup_A.error(e);
+      Popup_A.error(e, 'VarIncrDecr_A');
     }
   }
 
@@ -198,6 +211,7 @@ export class VarIncrDecr_A extends Component_A {
    */
   async cbDecr() {
     try {
+      if (!this._var) return;
       let cv = Number.parseFloat(await this._var.getValue());
       cv -= this._props.steps;
       this._var.setValue(cv);
@@ -227,20 +241,76 @@ VarIncrDecr_A.loadCssClassFromString(/*css*/ `
   min-width: fit-content;
 }
 
+.tc-container-row .fp-components-input{
+  justify-content: center;
+}
+
 `);
 
-// var tComponentStyle = document.createElement('style');
-// tComponentStyle.innerHTML = `
+/**
+ * @class VarIncrDecr_B
+ * @classdesc This class creates a custom incremental/decremental input
+ * @extends TComponents.Component_A
+ * @memberof tunView
+ * @param {HTMLElement} parent - The parent element to which the view will be rendered
+ * @param {Object} props - The properties object to be passed to the view
+ */
+export class VarIncrDecr_B extends VarIncrDecr_A {
+  constructor(parent, props) {
+    super(parent, props);
+  }
 
-// .tc-varincrdecr-container {
-//   display: flex;
-//   flex-direction: row;
-//   justify-content: flex-start;
-//   align-items: center;
-//   min-width: fit-content;
-// }
+  onRender() {
+    super.onRender();
+    if (this._props.useBorder) this.find('.tc-container-row').classList.add('use-border');
+  }
 
-// `;
+  markup() {
+    return /*html*/ `
+      <div class="tc-varincrdecr-b">
+        ${super.markup()}
+      </div>
+      `;
+  }
+}
 
-// var ref = document.querySelector('script');
-// ref.parentNode.insertBefore(tComponentStyle, ref);
+/**
+ * Add css properties to the component
+ * @alias loadCssClassFromString
+ * @static
+ * @param {string} css - The css string to be loaded into style tag
+ * @memberof VarIncrDecr_B
+ */
+VarIncrDecr_B.loadCssClassFromString(/*css*/ `
+  .tc-varincrdecr-b .fp-components-button,
+  .tc-varincrdecr-b .fp-components-button-disabled {
+    border-radius: 4px;
+    padding: 0px;
+    min-width: 30px;
+    height: 30px;
+
+  }
+  .tc-varincrdecr-b .fp-components-input{
+    border: none;
+    min-height: 20px;
+    justify-content: center;
+  }
+  .tc-varincrdecr-b {
+    display: flex;
+  }
+
+  .tc-varincrdecr-b .use-border {
+    border: solid 2px var(--fp-color-GRAY-20);
+    border-radius: 4px;
+  }
+
+  .tc-varincrdecr-b .tc-container-row {
+    align-items: center;
+  }
+
+  .tc-varincrdecr-b .fp-components-button-text{
+    font-weight: bold;
+    font-size: 18px;
+    line-height: 15px;
+  }
+`);

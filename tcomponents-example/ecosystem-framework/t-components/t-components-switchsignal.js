@@ -5,7 +5,7 @@ import { Popup_A } from './t-components-popup.js';
 /**
  * @typedef TComponents.SwitchSignalProps
  * @prop {string | object} signal - Signal name, or API.CONFIG.SIGNAL.Signal object
- * @prop {Function} [callback] Function to be called when button is pressed
+ * @prop {Function} [onChange] Function to be called when button is pressed
  * @prop {string} [label] Label text
  * @todo Update the signal type with API interface
  */
@@ -52,6 +52,7 @@ export class SwitchSignal_A extends Switch_A {
   }
 
   async onInit() {
+    super.onInit();
     if (!this._props.signal) {
       this.error = true;
       return;
@@ -72,15 +73,16 @@ export class SwitchSignal_A extends Switch_A {
   }
 
   async cbUpdateSwitch(value) {
-    value ? (this._switch.active = true) : (this._switch.active = false);
+    value ? (this.active = true) : (this.active = false);
   }
 
   async cbOnChange(value) {
+    if (!this._signal) throw new Error('Signal not initialized');
     try {
-      this._switch.active ? await this._signal.setValue(1) : await this._signal.setValue(0);
+      this.active ? await this._signal.setValue(1) : await this._signal.setValue(0);
     } catch (e) {
       console.error(e);
-      Popup_A.error(e);
+      Popup_A.error(e, 'SwitchSignal_A');
     }
   }
 

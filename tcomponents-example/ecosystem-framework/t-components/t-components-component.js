@@ -1,9 +1,8 @@
 import API from '../api/index.js';
 import { Base_A } from './t-components-base.js';
-
-const maxGap = 16;
-const maxPadding = 16;
-const maxMargin = 16;
+import { Eventing_A } from './t-components-event.js';
+import { Popup_A } from './t-components-popup.js';
+// import { FPComponents } from '../../omicore-sdk/omnicore-sdk.js';
 
 /**
  * Load a CSS file
@@ -25,7 +24,7 @@ tComponentsLoadCSS('ecosystem-framework/t-components/t-components.css');
 /**
  * @typedef TComponents.ComponentProps
  * @prop {string} [label] Label text
- * @prop {string} [labelPos] Label position: "top|bottom|left|right"
+ * @prop {string} [labelPos] Label position: "top|bottom|left|right|top-center|bottom-center"
  * @prop {object} [options] Set of options to modify the behaviour of the component
  * - async : if true, the subcomponents are instantiated asynchronously and onRender is executed inmediatelly without
  * waiting for the subcomponents to finish.
@@ -55,7 +54,9 @@ export class Component_A extends Base_A {
     this._props;
 
     if (!Component_A._isHTMLElement(parent) && parent !== null)
-      throw new Error(`HTML parent element not detected. Set parent input argument to null if you want to attach the component later.`);
+      throw new Error(
+        `HTML parent element not detected. Set parent input argument to null if you want to attach the component later.`,
+      );
 
     this.compId = `${this.constructor.name}_${API.generateUUID()}`;
 
@@ -71,12 +72,22 @@ export class Component_A extends Base_A {
     this.parentComponentId = '';
 
     this.template = null;
+    this.initialized = false;
     this._initCalled = false;
     this._enabled = true;
 
     this._deinstallFunction = null;
     this._eventListeners = new Map();
     this._fUpdate = false;
+    Object.defineProperty(this, '_isTComponent', {
+      value: true,
+      writable: false,
+    });
+
+    Object.defineProperty(this, '_isView', {
+      value: false,
+      writable: true,
+    });
   }
 
   /**
@@ -101,7 +112,12 @@ export class Component_A extends Base_A {
     try {
       this.trigger('before:init', this);
 
-      if (typeof this._deinstallFunction === 'function') this._deinstallFunction();
+      /**
+       * Clean up before initializing. Relevant from the second time the component is initialized.
+       * - Remove all event listeners
+       */
+      this.removeAllEventListeners();
+
       /**
        * Parent HTML element where the component is attached to.
        */
@@ -114,15 +130,11 @@ export class Component_A extends Base_A {
       this.initialized = false;
       this._initCalled = true;
       /**
-       * Set to true if an error ocurrs during initialization.
+       * Reset values before onInit
+       * Reseting enabled only if previously an error occured, for a next try, otherwise it was explicity disabled by the user
        */
+      if (this.error) this.enabled = true;
       this.error = false;
-
-      /**
-       * Enables or disables any FPComponent component (see Omnicore App SDK) declared
-       * within the component as an own property (e.g. this.btn = new FPComponent()).
-       */
-      this.enabled = true;
 
       try {
         this._deinstallFunction = await this.onInit();
@@ -150,6 +162,7 @@ export class Component_A extends Base_A {
    * @returns {Promise<object>} The TComponents instance on which this method was called.
    */
   async render(data = null) {
+    this.container.innerHTML = '';
     try {
       this.trigger('before:render', this);
 
@@ -164,23 +177,32 @@ export class Component_A extends Base_A {
       console.error(e);
     }
 
-    this.container.innerHTML = '';
-    this.container.appendChild(this.template.content);
+    if (this.container.hasChildNodes() && this._labelStart()) {
+      // Insert before the first child node
+      this.container.insertBefore(this.template.content, this.container.firstChild);
+    } else {
+      this.container.appendChild(this.template.content);
+    }
 
     if (this._props.label) {
       const labelEl = this.find(`#${this.compId}__label`);
-      labelEl.innerHTML = this._props.label;
-      if (this._props.labelPos === 'top' || this._props.labelPos === 'bottom') {
+      labelEl.innerHTML = Component_A.t(this._props.label);
+
+      if (this._props.labelPos.includes('top') || this._props.labelPos.includes('bottom')) {
         this.container.classList.add('flex-col');
-        this.container.classList.remove('flex-row', 'gap-2', 'items-center');
+        this.container.classList.remove('flex-row', 'gap-2', 'items-center', 'content-start');
       } else {
         this.container.classList.remove('flex-col');
-        this.container.classList.add('flex-row', 'gap-2', 'items-center');
+        this.container.classList.add('flex-row', 'gap-2', 'items-center', 'content-start');
+      }
+      if (this._props.labelPos.includes('center')) {
+        labelEl.classList.add('text-center');
+      } else if (this._props.labelPos.includes('end')) {
+        labelEl.classList.add('text-right');
       }
     }
 
     this.parent && this.attachToElement(this.parent);
-
     this.error && (this.enabled = false);
 
     this.onRender();
@@ -234,7 +256,7 @@ export class Component_A extends Base_A {
         const newChild = newChildren[key];
         const oldChild = this.child[key];
 
-        if (Component_A._isTComponent(oldChild)) {
+        if (Component_A.isTComponent(oldChild) && Component_A.isTComponent(newChild)) {
           const shouldUpdate = !Base_A._equalProps(oldChild._props, newChild._props) || oldChild._fUpdate;
 
           if (shouldUpdate) {
@@ -256,10 +278,11 @@ export class Component_A extends Base_A {
     }
 
     const arrAll = Object.entries(this.child).reduce((acc, [key, value]) => {
-      if (value instanceof Promise) throw new Error(`Promise detected but not expected at ${this.compId}--mapComponent element ${key}...`);
+      if (value instanceof Promise)
+        throw new Error(`Promise detected but not expected at ${this.compId}--mapComponent element ${key}...`);
 
       const sortComponent = (value) => {
-        if (value instanceof Component_A) {
+        if (Component_A.isTComponent(value)) {
           value.parentComponentId = this.compId;
           acc.push(value);
         }
@@ -316,6 +339,7 @@ export class Component_A extends Base_A {
   }
 
   addEventListener(element, eventType, listener, options) {
+    if (!element) throw new Error('Element not found');
     element.addEventListener(eventType, listener, options);
 
     if (!this._eventListeners.has(element)) {
@@ -326,13 +350,33 @@ export class Component_A extends Base_A {
 
   removeAllEventListeners() {
     if (!this._eventListeners) return;
-    this._eventListeners.forEach((entry, element) => {
-      element.removeEventListener(entry.eventType, entry.listener);
+    this._eventListeners.forEach((listeners, element) => {
+      listeners.forEach(({ eventType, listener }) => {
+        element.removeEventListener(eventType, listener);
+      });
     });
     this._eventListeners.clear();
   }
 
+  /**
+   * Clean up before initializing. Relevant from the second time the component is initialized.
+   * - Call onDestroy method
+   * - Call return function from onInit method if it exists
+   * - Detach the component from the parent element
+   * - Remove all local events, like this.on('event', callback)
+   * - Remove all event listeners attached with this.addEventListener
+   * @alias destroy
+   * @memberof TComponents.Component_A
+   * @private
+   */
   destroy() {
+    // calling instance specific onDestroy method
+    try {
+      this.onDestroy();
+    } catch (error) {
+      console.warn('Error during onDestroy method. Continue anyway...', error);
+    }
+
     // clean reference to attached callbacks
     this.cleanUpEvents();
 
@@ -340,12 +384,19 @@ export class Component_A extends Base_A {
     if (this._deinstallFunction && typeof this._deinstallFunction === 'function') this._deinstallFunction();
 
     if (this.container.parentElement) this.container.parentElement.removeChild(this.container);
+
     this.removeAllEventListeners();
     if (this.child) {
       Object.keys(this.child).forEach((key) => {
-        if (Component_A._isTComponent(key)) this.child[key].destroy();
+        if (Component_A.isTComponent(this.child[key])) this.child[key].destroy();
       });
     }
+  }
+
+  onDestroy() {}
+
+  get propsEnums() {
+    return {};
   }
 
   /**
@@ -360,20 +411,6 @@ export class Component_A extends Base_A {
 
   set label(text) {
     this._props.label = text;
-  }
-
-  _markupWithLabel() {
-    return /*html*/ `
-        ${Component_A.mIf(
-          this._props.label && (this._props.labelPos === 'top' || this._props.labelPos === 'left'),
-          /*html*/ `<p id="${this.compId}__label"></p>`
-        )}
-        ${this.markup(this)}
-        ${Component_A.mIf(
-          this._props.label && (this._props.labelPos === 'bottom' || this._props.labelPos === 'right'),
-          /*html*/ `<p id="${this.compId}__label"></p>`
-        )}
-    `;
   }
 
   /**
@@ -391,10 +428,19 @@ export class Component_A extends Base_A {
     // const callerName = new Error().stack.split('\n')[2].trim().split(' ')[1];
 
     this._enabled = en;
+
     const objects = Component_A._hasChildOwnProperty(this, '_enabled');
     objects.forEach((o) => {
       o.enabled = en;
     });
+  }
+
+  static isTComponent(obj) {
+    return obj && obj._isTComponent ? true : false;
+  }
+
+  static isView(obj) {
+    return obj && obj._isView ? true : false;
   }
 
   /**
@@ -476,6 +522,20 @@ export class Component_A extends Base_A {
   }
 
   /**
+   * Get Set the hidden state of the component.
+   * @alias hidden
+   * @memberof TComponents.Component_A
+   * @returns {boolean} True if the component is hidden, false otherwise.
+   */
+  get hidden() {
+    return this.container.classList.contains('tc-hidden');
+  }
+
+  set hidden(hide) {
+    hide ? this.hide() : this.show();
+  }
+
+  /**
    * Changes the background color of the component
    * @alias backgroundColor
    * @memberof TComponents.Component_A
@@ -545,7 +605,8 @@ export class Component_A extends Base_A {
     if (selector === 'this') this.container.classList.add(...arrClassNames);
     else {
       const el = all ? this.all(selector) : this.find(selector);
-      if (el) Array.isArray(el) ? el.forEach((el) => el.classList.add(...arrClassNames)) : el.classList.add(...arrClassNames);
+      if (el)
+        Array.isArray(el) ? el.forEach((el) => el.classList.add(...arrClassNames)) : el.classList.add(...arrClassNames);
     }
   }
 
@@ -569,7 +630,10 @@ export class Component_A extends Base_A {
     if (selector === 'this') this.container.classList.remove(...arrClassNames);
     else {
       const el = all ? this.all(selector) : this.find(selector);
-      if (el) Array.isArray(el) ? el.forEach((el) => el.classList.remove(...arrClassNames)) : el.classList.remove(...arrClassNames);
+      if (el)
+        Array.isArray(el)
+          ? el.forEach((el) => el.classList.remove(...arrClassNames))
+          : el.classList.remove(...arrClassNames);
     }
   }
 
@@ -581,6 +645,24 @@ export class Component_A extends Base_A {
    */
   forceUpdate() {
     this._fUpdate = true;
+  }
+
+  _labelStart() {
+    return this._props.label && (this._props.labelPos.includes('top') || this._props.labelPos.includes('left'));
+  }
+
+  _labelEnd() {
+    return this._props.label && (this._props.labelPos.includes('bottom') || this._props.labelPos.includes('right'));
+  }
+
+  _markupWithLabel() {
+    const markup = this.markup(this);
+
+    return /*html*/ `
+        ${Component_A.mIf(this._labelStart(), /*html*/ `<p id="${this.compId}__label"></p>`)}
+        ${markup}
+        ${Component_A.mIf(this._labelEnd(), /*html*/ `<p id="${this.compId}__label"></p>`)}
+    `;
   }
 
   _handleData(data) {
@@ -596,7 +678,7 @@ export class Component_A extends Base_A {
   }
 
   /**
-   * Recursively search for property of an object and underlying objects.
+   * Recursively search for property of an object and underlying objects of type TComponents and FPComponents.
    * @alias _hasChildOwnProperty
    * @memberof TComponents.Component_A
    * @static
@@ -610,7 +692,7 @@ export class Component_A extends Base_A {
     if (typeof obj === 'object' && obj !== null) {
       for (const val of Object.values(obj)) {
         if (typeof val === 'object' && val !== null && val !== obj && !Component_A._isHTMLElement(val)) {
-          if (val.hasOwnProperty(property)) {
+          if (val.hasOwnProperty(property) && (Component_A.isTComponent(val) || Component_A._isFPComponent(val))) {
             result.push(val);
           }
           Component_A._hasChildOwnProperty(val, property, result);
@@ -621,15 +703,12 @@ export class Component_A extends Base_A {
   }
 
   /**
-   * Check if an entry is a TComponent (of type TComponent.Component_A)
-   * @alias _isTComponent
-   * @memberof TComponents.Component_A
-   * @static
-   * @param {any} o Oject to check
-   * @returns {boolean} true if entry is an TComponent, false otherwise
+   * Recursively check for instances of type TComponent and FPComponent
    */
-  static _isTComponent(o) {
-    return o instanceof Component_A;
+  static _hasChildComponent(obj, result = []) {}
+
+  static _isFPComponent(o) {
+    return Object.values(FPComponents).some((FPComponent) => o instanceof FPComponent);
   }
 
   /**
@@ -648,6 +727,16 @@ export class Component_A extends Base_A {
 
   static loadCssClassFromString(css) {
     if (typeof css !== 'string') throw new Error('css must be a string');
+    // Query all existing <style> tags
+    const existingStyles = document.querySelectorAll('style');
+    // Check if any existing <style> tag has the same CSS content
+    for (let style of existingStyles) {
+      if (style.innerHTML === css) {
+        // A matching <style> tag is found, so we don't need to insert a new one
+        return;
+      }
+    }
+    // No matching <style> tag found, proceed to insert a new one
     const tComponentStyle = document.createElement('style');
     tComponentStyle.innerHTML = css;
     const ref = document.querySelector('script');
@@ -661,7 +750,160 @@ export class Component_A extends Base_A {
   static mFor(array, markup) {
     return array.map((item, index) => markup(item, index)).join('');
   }
+
+  static async handleComponentOn(self, { resource, instance, state }, action) {
+    let varInstances = [];
+    const actions = {
+      disable: (condition) => (condition ? (self.enabled = false) : (self.enabled = true)),
+      hide: (condition) => (condition ? self.hide() : self.show()),
+    };
+
+    const eventHandlers = {
+      OpMode: {
+        event: 'op-mode',
+        monitorFn: API.CONTROLLER.monitorOperationMode,
+        callback: monitorOpMode,
+        states: [API.CONTROLLER.OPMODE.Auto, API.CONTROLLER.OPMODE.ManualR],
+      },
+      Execution: {
+        event: 'execution-state',
+        monitorFn: API.RAPID.monitorExecutionState,
+        callback: monitorExecutionState,
+        states: [API.RAPID.EXECUTIONSTATE.Running, API.RAPID.EXECUTIONSTATE.Stopped],
+      },
+      Motor: {
+        event: 'controller-state',
+        monitorFn: API.CONTROLLER.monitorControllerState,
+        callback: monitorControllerState,
+        states: [API.CONTROLLER.STATE.MotorsOn, API.CONTROLLER.STATE.MotorsOff],
+      },
+      Error: {
+        event: 'controller-state',
+        monitorFn: API.CONTROLLER.monitorControllerState,
+        callback: monitorControllerState,
+        states: [API.CONTROLLER.STATE.SysFailure, API.CONTROLLER.STATE.EStop, API.CONTROLLER.STATE.GuardStop],
+      },
+      Signal: {
+        event: `signal-state-${instance}`,
+        monitorFn: API.SIGNAL.monitorSignal,
+        callback: monitorDigitalSignal,
+        states: [true, false],
+        instance: instance,
+      },
+      Variable: {
+        event: `variable-state-${instance}`,
+        monitorFn: API.RAPID.monitorVariableInstance,
+        callback: monitorBooleanVariable,
+        states: [true, false],
+        instance: instance,
+      },
+    };
+
+    const handler = eventHandlers[resource];
+
+    try {
+      if (handler) {
+        const promises = handler.states.map(async (s) => {
+          const cb = (state) => {
+            actions[action](state === s);
+          };
+
+          if (state === s) {
+            Component_A.globalEvents.on(handler.event, cb);
+
+            if (Component_A.globalEvents.count(handler.event) <= 1) {
+              if (handler.instance) {
+                if (varInstances.length === 3) {
+                  await handler.monitorFn(varInstances[0], varInstances[1], varInstances[2], handler.callback);
+                } else {
+                  await handler.monitorFn(handler.instance, handler.callback);
+                }
+              } else {
+                await handler.monitorFn(handler.callback);
+              }
+            }
+
+            // trigger once the callback depending on the event
+            let currentState;
+
+            if (handler.event === 'op-mode') {
+              currentState = await RWS.Controller.getOperationMode();
+            } else if (handler.event === 'execution-state') {
+              currentState = await RWS.Rapid.getExecutionState();
+            } else if (handler.event === 'controller-state') {
+              currentState = await RWS.Controller.getControllerState();
+            } else if (handler.event.includes('signal-state')) {
+              const signal = await API.SIGNAL.getSignal(instance);
+              currentState = (await signal.getValue()) ? true : false;
+            } else if (handler.event.includes('variable-state')) {
+              varInstances = instance.split('/');
+              if (varInstances.length !== 3 || !varInstances[0] || !varInstances[1] || !varInstances[2])
+                throw new Error('Variable instance must be of the form task/module/variable');
+              const variable = await API.RAPID.getVariable(varInstances[0], varInstances[1], varInstances[2]);
+              if (variable.type !== 'bool') throw new Error('Variable must be of type bool');
+
+              currentState = (await variable.getValue()) ? true : false;
+            }
+            cb(currentState);
+          }
+        });
+        await Promise.all(promises);
+      }
+    } catch (e) {
+      Popup_A.error(e, 'TComponents.Component_A.handleComponentOn');
+    }
+  }
+
+  static disableComponentOn(self, condition) {
+    this.handleComponentOn(self, condition, 'disable');
+  }
+
+  static hideComponentOn(self, condition) {
+    this.handleComponentOn(self, condition, 'hide');
+  }
+
+  static setLanguageAdapter(adapter) {
+    if (typeof adapter !== 'function') throw new Error('adapter must be a function');
+
+    // load in a static variable the language function
+    Component_A.languageAdapter = adapter;
+  }
+
+  static t(key) {
+    if (Component_A.languageAdapter) return Component_A.languageAdapter(key);
+    return key;
+  }
 }
+
+Component_A.languageAdapter = null;
+
+Component_A.globalEvents = new Eventing_A();
+
+const monitorOpMode = async (value) => {
+  Component_A.globalEvents.trigger('op-mode', value);
+};
+
+const monitorExecutionState = async (value) => {
+  Component_A.globalEvents.trigger('execution-state', value);
+};
+
+const monitorControllerState = async (value) => {
+  Component_A.globalEvents.trigger('controller-state', value);
+};
+
+const monitorDigitalSignal = async (value, signal_name) => {
+  const boolValue = value ? true : false;
+  Component_A.globalEvents.trigger(`signal-state-${signal_name}`, boolValue);
+};
+
+const monitorBooleanVariable = async (value, variable_name) => {
+  const boolValue = value ? true : false;
+  Component_A.globalEvents.trigger(`variable-state-${variable_name}`, boolValue);
+};
+
+const maxGap = 16;
+const maxPadding = 16;
+const maxMargin = 16;
 
 const generatePaddingStyles = () => {
   let styles = '';
@@ -672,6 +914,8 @@ const generatePaddingStyles = () => {
       .pr-${i} { padding-right: ${paddingValue}rem; /* ${i * 4}px */ }
       .pt-${i} { padding-top: ${paddingValue}rem; /* ${i * 4}px */ }
       .pb-${i} { padding-bottom: ${paddingValue}rem; /* ${i * 4}px */ }
+      .px-${i} { padding-left: ${paddingValue}rem; padding-right: ${paddingValue}rem; /* ${i * 4}px */ }
+      .py-${i} { padding-top: ${paddingValue}rem; padding-bottom: ${paddingValue}rem; /* ${i * 4}px */ }
     `;
   }
   return styles;
@@ -687,6 +931,8 @@ function generateMarginStyles() {
       .mr-${i} { margin-right: ${value}rem; /* ${i * 4}px */ }
       .mt-${i} { margin-top: ${value}rem; /* ${i * 4}px */ }
       .mb-${i} { margin-bottom: ${value}rem; /* ${i * 4}px */ }
+      .mx-${i} { margin-left: ${value}rem; margin-right: ${value}rem; /* ${i * 4}px */ }
+      .my-${i} { margin-top: ${value}rem; margin-bottom: ${value}rem; /* ${i * 4}px */ }
     `;
   }
 

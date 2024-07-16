@@ -47,11 +47,11 @@ export const factoryApiFile = function (f) {
      * Get the content of a file as a string
      * @alias getFile
      * @memberof API.FILESYSTEM
-     * @param  {string} path Path to the file, including file name
+     * @param  {string} path Path to the file, optional - including file name
      * @param  {string} file Name of the file
      */
     this.getFile = async function (path, file) {
-      let url = `${path.replace(/\:$/, '').replace(/^HOME/, '$HOME')}/${file}`;
+      let url = `${path.replace(/\:$/, '').replace(/^HOME/, '$HOME')}${file ? `/${file}` : ''}`;
       try {
         let f = await RWS.FileSystem.getFile(url);
         return await f.getContents();
@@ -93,14 +93,21 @@ export const factoryApiFile = function (f) {
 
     this.createDirectory = async function (directoryPath) {
       let dir = directoryPath.replace(/\:$/, '').replace(/^HOME/, '$HOME');
-      try {
-        return await RWS.FileSystem.createDirectory(dir);
-      } catch (e) {
-        if (e && e.httpStatus && e.httpStatus.code == 409) {
-          // the directory is already created
-        } else {
-          console.error(e);
-          return API.rejectWithStatus(`Creating ${directoryPath} directory failed`, e);
+      let parts = dir.split('/');
+
+      let pathSoFar = '$HOME';
+      let startIndex = parts[0] === '$HOME' ? 1 : 0;
+      for (let i = startIndex; i < parts.length; i++) {
+        pathSoFar += '/' + parts[i];
+        try {
+          await RWS.FileSystem.createDirectory(pathSoFar);
+        } catch (e) {
+          if (e && e.httpStatus && e.httpStatus.code == 409) {
+            // the directory is already created
+          } else {
+            console.error(e);
+            return API.rejectWithStatus(`Creating ${pathSoFar} directory failed`, e);
+          }
         }
       }
     };
@@ -136,15 +143,45 @@ export const factoryApiFile = function (f) {
     };
 
     this.deleteFile = async function (directoryPath, fileName) {
-      const file = await _getFile(`${directoryPath}/${fileName}`);
+      const file = await _getFile(`${directoryPath}${fileName ? `/${fileName}` : ''}`);
       return await file.delete();
+    };
+
+    this.deleteDirectory = async function (directoryPath) {
+      try {
+        const dir = await _getDirectory(directoryPath);
+        return await dir.delete();
+      } catch (error) {
+        console.warn(`API.FILESYSTEM.deleteDirectory ${directoryPath}`, 'Directory not found, nothing to delete.');
+      }
+    };
+
+    this.deleteDirectoryContent = async function (directoryPath) {
+      try {
+        const dirContent = await this.getDirectoryContents(directoryPath);
+        if (dirContent && dirContent.directories && dirContent.directories.length > 0) {
+          const dirContentPromise = dirContent.directories.forEach(async (dir) => {
+            const dirObject = await _getDirectory(`${directoryPath}/${dir}`);
+            await dirObject.delete();
+          });
+          await Promise.all(dirContentPromise);
+        }
+
+        dirContent.files.forEach((file) => {
+          API.FILESYSTEM.deleteFile(directoryPath, file);
+        });
+      } catch (e) {
+        return API.rejectWithStatus(`Deleting content of ${directoryPath} directory failed`, e);
+      }
     };
 
     this.copy = async function (source, destination, overwrite = false) {
       const srcFile = RWS.FileSystem.createFileObject(source);
       const destFile = RWS.FileSystem.createFileObject(destination);
       if ((await destFile.fileExists()) && !overwrite) {
-        return API.rejectWithStatus(`Copy file failed since destination file already exists and overwrite equals false.`);
+        return API.rejectWithStatus(
+          `Copy file failed since destination file already exists and overwrite equals false.`,
+        );
       }
       return await srcFile.copy(destination, overwrite, false);
     };

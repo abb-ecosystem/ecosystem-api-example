@@ -1,13 +1,13 @@
 
 /*
 
-(c) Copyright 2020-2023 ABB
+(c) Copyright 2020-2024 ABB
 
 Any unauthorized use, reproduction, distribution,
 or disclosure to third parties is strictly forbidden.
 ABB reserves all rights regarding Intellectual Property Rights
 
-// OmniCore App SDK 1.4
+// OmniCore App SDK 1.4.1
 
 */
 
@@ -50,10 +50,6 @@ ABB reserves all rights regarding Intellectual Property Rights
     border-color: var(--fp-color-GRAY-60);
 }
 
-.fp-components-dropdown-selected-truncate-right {
-
-}
-
 .fp-components-dropdown-selected-truncate-left {
     unicode-bidi: bidi-override;
     direction: rtl;
@@ -77,21 +73,19 @@ ABB reserves all rights regarding Intellectual Property Rights
 }
 
 .fp-components-dropdown-overlay {
-    display: none;
     position: fixed;
     top: 0;
     left: 0;
-    z-index: 1;
+    z-index: 2147480050;
     background-color: rgba(255, 255, 255, 0.6);
     width: 100vw;
     height: 100vh;
 }
 
 .fp-components-dropdown-menu {
-    display: none;
     position: fixed;
     box-sizing: border-box;
-    z-index: 2;
+    z-index: 2147480050;
     background-color: var(--fp-color-WHITE);
     border-style: solid;
     border-width: 1px;

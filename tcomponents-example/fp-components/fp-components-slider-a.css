@@ -1,13 +1,13 @@
 
 /*
 
-(c) Copyright 2020-2023 ABB
+(c) Copyright 2020-2024 ABB
 
 Any unauthorized use, reproduction, distribution,
 or disclosure to third parties is strictly forbidden.
 ABB reserves all rights regarding Intellectual Property Rights
 
-// OmniCore App SDK 1.4
+// OmniCore App SDK 1.4.1
 
 */
 
@@ -76,8 +76,18 @@ ABB reserves all rights regarding Intellectual Property Rights
 /* Container for range elements */
 
 .fp-components-slider__range-wrapper {
+    
     position: relative;
     height: 16px;
+    width: 2px;
+    background-position-x: -1px;
+    background-image: linear-gradient(to right, lightgray 2px, transparent 2px);    
+}
+
+.fp-components-slider-last_tick {
+    position: relative;
+    height: 16px;
+    background-image: linear-gradient(to right, lightgray 2px, transparent 2px);    
 }
 
 .fp-components-slider__track {
@@ -135,7 +145,7 @@ ABB reserves all rights regarding Intellectual Property Rights
 
  .fp-components-slider__tick{
     width: 2px;
-    height: 8px;
+    height: 16px;
     position: absolute;
     background-color: var(--fp-color-GRAY-20);
     transform: translate(-50%, -50%);

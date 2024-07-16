@@ -10,9 +10,10 @@ import { Button_A } from './t-components-button.js';
  * @prop {string} [cycleMode] - 'once' (default), 'forever', 'as_is'
  * @prop {boolean} [stopOnRelease]
  * @prop {string} [task]
- * @prop {function|null} [callback] - Function to be called when button is pressed
+ * @prop {function|null} [onClick] - Function to be called when button is pressed
  * @prop {string|null} [icon] - Path to image file
  * @prop {string} [label] - label text
+ * @prop {string} [text] Button text
  */
 
 /**
@@ -72,7 +73,7 @@ export class ButtonProcedure_A extends Button_A {
         return;
       }
 
-      if (!this.rapidTask) this.rapidTask = await API.RAPID.getTask(this._props.task);
+      this.rapidTask = await API.RAPID.getTask(this._props.task);
     } catch (e) {
       this.error = true;
       Popup_A.error(e, `TComponents.ButtonProcedure`);
@@ -82,9 +83,8 @@ export class ButtonProcedure_A extends Button_A {
   onRender() {
     super.onRender();
 
-    this._props.stopOnRelease || this.onClick(this.cbOnClick.bind(this));
-
     if (this._props.stopOnRelease) {
+      this._btn.onclick = null;
       const elemBtnMove = this.find('.fp-components-button');
       this.addEventListener(elemBtnMove, 'pointerdown', this.cbOnClick.bind(this));
       this.addEventListener(elemBtnMove, 'pointerup', this.cbStop.bind(this));
@@ -116,6 +116,7 @@ export class ButtonProcedure_A extends Button_A {
             userLevel: this._props.userLevel,
             cycleMode: this._props.cycleMode,
           });
+          this.trigger('click');
         }
         this.stopped = true;
       } catch (e) {

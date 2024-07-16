@@ -6,6 +6,7 @@ import { Component_A } from './t-components-component.js';
  * @prop {string} [selected] item that shall be shown as selected after first render
  * @prop {boolean} [addNoSelection] - if true, and empty selector item is placed as first item
  * @prop {string} [label] Label text
+ * @prop {Function} [onSelection] Function to be called when button is pressed
  */
 
 /**
@@ -18,6 +19,9 @@ import { Component_A } from './t-components-component.js';
  *    itemList: ['a', 'b', 'c'],
  *    selected: 'b',
  *    label: 'ABC',
+ *    onSelection: () => {
+ *       console.log('execute');
+ *     },
  *  });
  * await ddMenu.render();
  */
@@ -29,8 +33,7 @@ export class Dropdown_A extends Component_A {
      * @type {TComponents.DropdownProps}
      */
     this._props;
-    this.initPropsDep('addNoSelection');
-
+    this.initPropsDep('itemList', 'selected', 'addNoSelection');
     this._dropDownMenu = new FPComponents.Dropdown_A();
   }
 
@@ -43,24 +46,27 @@ export class Dropdown_A extends Component_A {
   defaultProps() {
     this.noCheck = ['itemList'];
 
-    return { itemList: [], selected: '', addNoSelection: false, label: '' };
+    return { itemList: [], selected: '', addNoSelection: false, label: '', onSelection: null };
   }
 
   onInit() {
+    if (this._props.onSelection) this.on('selection', this._props.onSelection);
+    this._dropDownMenu.onselection = this.cbOnSelection.bind(this);
+
     this._updateItemList(this._props.itemList);
   }
 
   onRender() {
     if (this._props.itemList.length === 0) this._dropDownMenu.enabled = false;
+    else this._dropDownMenu.enabled = true;
 
-    this._dropDownMenu.model = { items: this._props.itemList.length > 0 ? this._props.itemList : [''] };
-    this._dropDownMenu.onselection = this.cbOnSelection.bind(this);
-    const foundSelected = this._props.itemList.indexOf(this._props.selected);
-    this._dropDownMenu.selected = foundSelected === -1 ? 0 : foundSelected;
     this._dropDownMenu.attachToElement(this.find('.tc-dropdown-container'));
 
     this.find('.fp-components-dropdown').style.setProperty('min-height', '40px');
     this.container.style.minWidth = '80px';
+    if (this._props.labelPos === 'left' || this._props.labelPos === 'right') {
+      this.container.classList.add('justify-stretch');
+    }
   }
 
   /**
@@ -68,12 +74,22 @@ export class Dropdown_A extends Component_A {
    * @param {string[]} ilist - list of paramenters
    * @protected
    */
-  _updateItemList(ilist) {
-    let itemList = this._props.addNoSelection && ilist[0] !== '' ? [''] : [];
-    itemList = itemList.concat(ilist);
-    let selected = this._props.selected === '' ? itemList[0] : this._props.selected;
 
-    this.setProps({ itemList, selected });
+  _updateItemList(ilist) {
+    const items =
+      this._props.itemList.length > 0
+        ? this._props.addNoSelection && this._props.itemList[0] !== ''
+          ? [''].concat(this._props.itemList)
+          : this._props.itemList
+        : [''];
+
+    this._props.itemList = items;
+    this._dropDownMenu.model = { items };
+
+    this._props.selected = !this._props.selected ? items[0] : this._props.selected;
+
+    const foundSelected = items.indexOf(this._props.selected);
+    this._dropDownMenu.selected = foundSelected === -1 ? 0 : foundSelected;
   }
 
   markup(self) {
@@ -88,12 +104,14 @@ export class Dropdown_A extends Component_A {
    * @memberof TComponents.Dropdown_A
    * @param {number}  index - Index of selected item
    * @param {string}  selection - Selected item
+   * @prop {Function} [onSelection] Function to be called when button is pressed
    * @private
    * @todo Currently only one function is possible. Change the method to accept multiple callbacks
    */
   cbOnSelection(index, selection) {
+    const previous = this._props.selected;
     this._props.selected = selection;
-    this.trigger('selection', selection);
+    this.trigger('selection', selection, previous, index);
   }
 
   /**
@@ -118,7 +136,7 @@ export class Dropdown_A extends Component_A {
   }
 
   set selected(selected) {
-    this.setProps({ selected });
+    this.setProps({ selected }, null, true);
   }
 
   /**
@@ -132,13 +150,7 @@ export class Dropdown_A extends Component_A {
   }
 
   set items(itemList) {
-    this._dropDownMenu.model = { items: itemList };
-    if (!this._props.itemList.includes(this._dropDownMenu.model.items[this._dropDownMenu.selected])) {
-      this._props.selected = this._dropDownMenu.model.items[0];
-      this._dropDownMenu.selected = 0;
-    } else {
-      this._props.selected = this._dropDownMenu.model.items[this._dropDownMenu.selected];
-    }
+    this.setProps({ itemList });
   }
 }
 

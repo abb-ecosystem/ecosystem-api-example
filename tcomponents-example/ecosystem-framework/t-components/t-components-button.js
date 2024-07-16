@@ -57,13 +57,32 @@ export class Button_A extends Component_A {
   async onInit() {}
 
   onRender() {
-    this._btn.text = this._props.text;
-    this._btn.icon = this._props.icon;
-    this._btn.onclick = this.cbOnClick.bind(this);
-    if (this._props.onClick) this.on('click', this._props.onClick);
+    try {
+      if (this._props.labelPos === 'left' || this._props.labelPos === 'right') {
+        this.container.classList.add('justify-stretch');
+      }
+      this._btn.text = Component_A.t(this._props.text);
 
-    const btnContainer = this.find('.tc-button');
-    if (btnContainer) this._btn.attachToElement(btnContainer);
+      this._btn.onclick = this.cbOnClick.bind(this);
+      if (this._props.onClick) this.on('click', this._props.onClick);
+
+      const btnContainer = this.find('.tc-button');
+      if (btnContainer) this._btn.attachToElement(btnContainer);
+
+      this._btn.icon = this._props.icon;
+      if (this._props.icon && this._props.icon.startsWith('blob')) {
+        // workaround to handle blobs
+        this.find('.fp-components-button-icon').style.backgroundImage = `url(${this._props.icon})`;
+      }
+
+      // check if icon is set and no text, then centers the icon
+      if (this._props.icon && !this._props.text) {
+        this.find('.fp-components-button-icon').style.margin = 'auto';
+        this.find('.fp-components-button-text').style.flex = '0 0 0';
+      }
+    } catch (e) {
+      console.error('Error setting icon', e);
+    }
   }
 
   markup() {
@@ -116,3 +135,24 @@ export class Button_A extends Component_A {
     this.trigger('click', value);
   }
 }
+
+Button_A.loadCssClassFromString(/*css*/ `
+.tc-button,
+.tc-button > .fp-components-button,
+.tc-button > .fp-components-button-disabled {
+  min-height: inherit;
+}
+
+.tc-button > .fp-components-button:not(.fp-components-button-highlight),
+.tc-button > .fp-components-button-disabled:not(.fp-components-button-highlight) {
+  background-color : var(--t-color-GRAY-10);
+}
+
+.tc-button > .fp-components-button:hover:not(:active) {
+  background-color: var(--t-color-GRAY-30);
+}
+
+.tc-button > .fp-components-button:active {
+  background-color: var(--t-color-GRAY-20);
+}
+`);

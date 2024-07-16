@@ -85,7 +85,7 @@ export class Base_A extends Eventing_A {
    * @returns {boolean} - true if the component has been updated, false otherwise
    */
   async setProps(newProps, onRender = null, sync = false) {
-    const { props, modified } = this._updateProps(newProps, this._props);
+    const { props, modified } = Base_A._updateProps(newProps, this._props, false, this.noCheck);
 
     /**
      * Internal element containing the component properties. A copy of it can be obtained
@@ -165,8 +165,8 @@ export class Base_A extends Eventing_A {
    * @private
    * @returns {object}
    */
-  _getAllProps(p) {
-    const { props } = this._updateProps(p, this._getAllDefaultProps(), true);
+  _getAllProps(p, restError = true) {
+    const { props } = Base_A._updateProps(p, this._getAllDefaultProps(), restError, this.noCheck);
     return props;
   }
 
@@ -206,13 +206,19 @@ export class Base_A extends Eventing_A {
    * @static
    * @private
    */
-  _updateProps(newProps = {}, prevProps = {}, restError = false) {
+  static _updateProps(newProps = {}, prevProps = {}, restError = false, noCheck = []) {
     let modified = false;
 
     let props = Object.keys(prevProps).reduce((acc, key) => {
       if (newProps.hasOwnProperty(key)) {
-        if (!Array.isArray(prevProps[key]) && !this.noCheck.includes(key) && typeof prevProps[key] === 'object' && prevProps[key] !== null) {
-          const nestedProps = this._updateProps(newProps[key], prevProps[key], restError);
+        if (
+          !Array.isArray(prevProps[key]) &&
+          !noCheck.includes(key) &&
+          typeof prevProps[key] === 'object' &&
+          prevProps[key] !== null &&
+          !(prevProps[key] instanceof HTMLElement)
+        ) {
+          const nestedProps = Base_A._updateProps(newProps[key], prevProps[key], restError, noCheck);
           modified = modified || nestedProps.modified;
           acc[key] = nestedProps.props;
         } else {
@@ -220,6 +226,7 @@ export class Base_A extends Eventing_A {
           modified = modified || newProps[key] !== prevProps[key];
         }
       } else {
+        // key not existing in new prop, so the value is the same as before
         acc[key] = prevProps[key];
       }
       return acc;
@@ -255,7 +262,8 @@ export class Base_A extends Eventing_A {
       return false;
     }
 
-    const isDepsDiff = this._initPropsDependencies && checkDepsDiff(this._initPropsDependencies, this._props, this._prevProps);
+    const isDepsDiff =
+      this._initPropsDependencies && checkDepsDiff(this._initPropsDependencies, this._props, this._prevProps);
 
     // Update previous props
     this._prevProps = Object.assign({}, this._props);

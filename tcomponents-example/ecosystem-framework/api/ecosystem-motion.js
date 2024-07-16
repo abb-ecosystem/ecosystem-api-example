@@ -130,21 +130,26 @@ export const factoryApiMotion = function (mot) {
      * Jogs the robot
      * @alias executeJogging
      * @memberof API.MOTION
-     * @param {executeJoggingProps} props
+     * @param {string} [tool]
+     * @param {string} [wobj]
+     * @param {COORDS} [coords]
+     * @param {JOGMODE} [jogMode]
+     * @param {JogData} [jogData]
+     * @param {RobTarget} [robTarget]
+     * @param {JointTarget} [jointTarget]
+     * @param {boolean} [doJoint]
      * @returns {undefined | Promise<{}>} - Promise rejected if failure
      */
-    this.executeJogging = async function ({
-      tool = '',
-      wobj = '',
+    this.executeJogging = async function (
+      tool = 'tool0',
+      wobj = 'wobj0',
       coords = this.COORDS.Current,
       jogMode = this.JOGMODE.GoToPos,
       jogData = [500, 500, 500, 500, 500, 500],
       robTarget = null,
       jointTarget = null,
       doJoint = false,
-    }) {
-      console.log('🚀 executeJogging:', tool, wobj, coords, jogMode, jogData, robTarget, jointTarget, doJoint);
-
+    ) {
       let state = null;
       try {
         jogStop = true;
@@ -154,10 +159,15 @@ export const factoryApiMotion = function (mot) {
         await prepareJogging(tool, wobj, coords, jogMode);
 
         if (doJoint && jointTarget !== null) await doJogging(jogData, jointTarget, false, true);
-        else await doJogging(jogData, robTarget, false, false);
+        else {
+          await doJogging(jogData, robTarget, false, false);
+        }
         await API.RWS.releaseMastership('motion');
       } catch (err) {
-        if (state === (await API.RWS.getMastershipState('motion')) && (state === API.RWS.MASTERSHIP.Remote || state === API.RWS.MASTERSHIP.Local))
+        if (
+          state === (await API.RWS.getMastershipState('motion')) &&
+          (state === API.RWS.MASTERSHIP.Remote || state === API.RWS.MASTERSHIP.Local)
+        )
           await API.RWS.releaseMastership('motion');
         console.log(`Motion Mastership: ${state}`);
         return API.rejectWithStatus('Execute jogging failed.', err);
@@ -175,7 +185,7 @@ export const factoryApiMotion = function (mot) {
      * @returns {undefined |Promise<{}>} - Undefined or reject Promise if fails.
      * @private
      */
-    const prepareJogging = async function (tool = '', wobj = '', coords = 'Base', jogMode = '') {
+    const prepareJogging = async function (tool = 'tool0', wobj = 'wobj0', coords = 'Base', jogMode = '') {
       try {
         await API.RWS.MOTIONSYSTEM.setMechunit({ tool, wobj, jogMode, coords });
 

@@ -57,6 +57,11 @@ namespace API.RAPID {
     System = 'system',
   }
 
+  export enum EXECUTIONSTATE {
+    Running = 'running',
+    Stopped = 'stopped',
+  }
+
   export enum symbolTypes {
     undefined = 0, //value not set
     constant = 1, //Rapid constant

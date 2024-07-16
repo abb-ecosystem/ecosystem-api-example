@@ -14,6 +14,12 @@ declare namespace API {
   function init(): Promise<any>;
 
   /**
+   *
+   * @param value
+   */
+  function disableSubscriptions(value?: boolean): void;
+
+  /**
    * Set vorbose-flag to print in Flexpendant debugging window any error catched within the API
    * @alias setVerbose
    * @param {boolean} [value] - if true, logs are exposed
@@ -83,13 +89,14 @@ declare namespace API {
 
   class Events {
     constructor();
-    on(eventName: string, callback: Function);
-    trigger(eventName: string, data?: any);
+    on(eventName: string, callback: Function): void;
+    trigger(eventName: string, data?: any): void;
   }
 
   namespace CONTROLLER {
     let isAuto: boolean;
     let isManual: boolean;
+
     function monitorOperationMode(callback?: Function): Promise<any>;
     function monitorControllerState(callback?: Function): Promise<any>;
     function setOpMode(mode: API.CONTROLLER.OPMODE): Promise<void>;
@@ -103,17 +110,17 @@ declare namespace API {
 
   namespace CONFIG {
     type Action = 'add' | 'replace' | 'add-with-reset';
-    function loadConfiguration(filepath: string, action?: Action);
+    function loadConfiguration(filepath: string, action?: Action): Promise<any>;
 
     function getSignalAttributes(name: string): Promise<object>;
     function createSignalInstance(name: string): Promise<any>;
     function updateSignalAttributes(attr: any): void;
-    function deleteSignal(name: string);
+    function deleteSignal(name: string): Promise<any>;
 
     function getCrossConnectionAttributes(name: string): Promise<object>;
     function createCrossConnectionInstance(name: string): Promise<any>;
     function updateCrossConnectionAttributes(attr: any): Promise<any>;
-    function deleteCrossConnection(name: string);
+    function deleteCrossConnection(name: string): Promise<any>;
 
     function fetchAllInstancesOfType(type: TYPE): Promise<object[]>;
     function fetchAllCrossConnections(): Promise<object[]>;
@@ -128,13 +135,13 @@ declare namespace API {
       map?: string;
       type?: 'DI' | 'DO' | 'AI' | 'AO' | 'GI' | 'GO';
     }
-    function find(attr): Promise<SIGNAL.Signal>;
+    function find(attr: SignalAttributesProp): Promise<SIGNAL.Signal>;
   }
 
   namespace SIGNAL {
     class Signal {
-      constructor(name, signal, attr);
-      public name;
+      constructor(name: string, signal: RWS.IO.Signal, attr);
+      public name: string;
       getValue(): Promise<boolean>;
       setValue(value: boolean): void;
       get type(): string;
@@ -152,13 +159,14 @@ declare namespace API {
 
     function getSignal(name: string): Promise<SIGNAL.Signal>;
     function createSignal(name: string, attr?: object): Promise<SIGNAL.Signal>;
+    function monitorSignal(name: string, callback: Function): Promise<SIGNAL.Signal>;
 
     interface filterSignalSearch {
       name?: string;
       device?: string;
       network?: string;
       category?: string;
-      type?: 'DI' | 'DO' | 'AI' | 'AO' | 'GI' | 'GO';
+      type?: 'DI' | 'DO' | 'AI' | 'AO' | 'GI' | 'GO' | string;
       invert?: boolean;
       blocked?: boolean;
     }
@@ -197,6 +205,8 @@ declare namespace API {
     function fileExists(directoryPath: string, fileName: string): Promise<boolean>;
 
     function deleteFile(directoryPath: string, fileName: string): Promise<any>;
+    function deleteDirectory(directoryPath: string): Promise<void>;
+    function deleteDirectoryContent(directoryPath: string): Promise<void>;
 
     function copy(source: string, destination: string, overwrite?: boolean): Promise<any>;
   }
@@ -285,7 +295,16 @@ declare namespace API {
       doJoint?: boolean;
     }
 
-    function executeJogging(props: executeJoggingProps): Promise<any>;
+    function executeJogging(
+      tool?: string,
+      wobj?: string,
+      coords?: COORDS,
+      jogMode?: JOGMODE,
+      jogData?: number[],
+      robTarget?: RobTarget,
+      jointTarget?: JointTarget,
+      doJoint?: boolean,
+    ): Promise<any>;
 
     function stopJogging(): Promise<any>;
     function getRobotPosition(): RobTarget;
@@ -327,15 +346,15 @@ declare namespace API {
       filter?: string;
     }
 
-    type RapidDataType = 'num' | 'dnum' | 'string' | 'bool' | 'robtarget' | 'tooldata' | 'wobjdata';
+    type RapidDataType = 'num' | 'dnum' | 'string' | 'bool' | 'robtarget' | 'jointtarget' | 'tooldata' | 'wobjdata';
 
     type VariableSymbolType = 'constant' | 'variable' | 'persistent';
     type RoutineSymbolType = 'procedure' | 'function' | 'trap';
 
     interface filterVariables {
       name?: string;
-      symbolType?: VariableSymbolType;
-      dataType?: RapidDataType;
+      symbolType?: VariableSymbolType | VariableSymbolType[];
+      dataType?: RapidDataType | RapidDataType[];
     }
     interface filterRoutines {
       name?: string;
@@ -346,17 +365,17 @@ declare namespace API {
     class Task {
       public name: string;
 
-      loadModule(path: string, replace?: boolean);
-      unloadModule(path: string);
-      executeProcedure(procedure: string, props: executeProcedureProps);
-      stopExecution(props: stopExecutionProps);
+      loadModule(path: string, replace?: boolean): Promise<any>;
+      unloadModule(path: string): Promise<any>;
+      executeProcedure(procedure: string, props: executeProcedureProps): Promise<any>;
+      stopExecution(props: stopExecutionProps): Promise<any>;
       searchVariables(module: string, isInUse?: boolean, filter?: filterVariables): string[];
       searchModules(isInUse?: boolean, filter?: string): string[];
       searchProcedures(module: string, isInUse?: boolean, filter?: string): string[];
       searchRoutines(module: string, isInUse?: boolean, filter?: filterRoutines): string[];
-      getValue(module: string, variable: string);
-      setValue(module: string, variable: string, value: any);
-      getVariable(module: string, variable: string);
+      getValue(module: string, variable: string): Promise<any>;
+      setValue(module: string, variable: string, value: any): Promise<void>;
+      getVariable(module: string, variable: string, subscribe: boolean): Variable;
     }
 
     interface VariableProps {
@@ -377,34 +396,49 @@ declare namespace API {
       setValue(v: any): Promise<any>;
 
       get type(): string;
-      get declaration(): VariableSymbolType;
+      get symbolType(): VariableSymbolType;
 
-      subscribe(raiseInitial?: boolean);
+      subscribe(raiseInitial?: boolean): Promise<any>;
       unsubscribe(): void;
 
-      onChanged(callback: Function);
+      onChanged(callback: Function): void;
     }
 
     class VariableString {
       getValue(): Promise<string>;
-      setValue(value: string);
+      setValue(value: string): Promise<void>;
     }
 
     class VariableBool {
       getValue(): Promise<string>;
-      setValue(value: string);
+      setValue(value: string): Promise<void>;
     }
 
     class VariableNum {
       getValue(): Promise<string>;
-      setValue(value: string);
+      setValue(value: string): Promise<void>;
     }
 
-    function getVariable(task: string, module: string, name: string): RAPID.Variable;
+    function getVariable(task: string, module: string, name: string, subscribe: boolean): RAPID.Variable;
+    function monitorVariableInstance(
+      task: string,
+      module: string,
+      name: string,
+      callback: Function,
+    ): Promise<RAPID.Variable>;
     function getTask(task?: string): RAPID.Task;
 
-    function loadModule(path: string, replace?: boolean, taskName?: string);
-    function unloadModule(path: string, taskName?: string);
+    function loadModule(path: string, replace?: boolean, taskName?: string): Promise<any>;
+    function unloadModule(path: string, taskName?: string): Promise<any>;
+    function getModuleText(moduleName: string, taskName?: string): Promise<string>;
+    function setModuleText(moduleName: string, text: string, taskName?: string): Promise<any>;
+  }
+
+  namespace NETWORK {
+    let connected: boolean;
+    function mountRWS(): Promise<any>;
+    function unmountRWS(): Promise<any>;
+    function onStatusChanged(callback: Function): void;
   }
 
   namespace RWS {
@@ -453,11 +487,16 @@ declare namespace API {
         totalPayload?: string;
       }
       function setMechunit(props: SetMechunitProps): Promise<any>;
-      function setRobotPositionTarget(r: MOTION.RobTarget);
-      function setRobotPositionJoint(j: MOTION.JointTarget);
+      function setRobotPositionTarget(r: MOTION.RobTarget): Promise<any>;
+      function setRobotPositionJoint(j: MOTION.JointTarget): Promise<any>;
       function jog(jogdata: MOTION.JogData, ccount: number): Promise<any>;
       function getChangeCount(): number;
-      function getRobTarget(tool?: string, wobj?: string, coords?: MOTION.COORDS, mechunit?: string): Promise<MOTION.RobTarget>;
+      function getRobTarget(
+        tool?: string,
+        wobj?: string,
+        coords?: MOTION.COORDS,
+        mechunit?: string,
+      ): Promise<MOTION.RobTarget>;
       function getJointTarget(mechunit?: string): Promise<MOTION.JointTarget>;
 
       interface JointsSolutionProps {
@@ -475,13 +514,15 @@ declare namespace API {
     }
 
     namespace RAPID {
-      function loadModule(path: string, replace: boolean, taskName: string);
-      function unloadModule(path: string, replace: boolean, taskName: string);
-      function movePPToCursor(moduleName: string, taskName: string, line: string, column: string);
+      function loadModule(path: string, replace: boolean, taskName: string): Promise<any>;
+      function unloadModule(path: string, replace: boolean, taskName: string): Promise<any>;
+      function getModuleText(moduleName: string, taskName?: string): Promise<string>;
+      function setModuleText(moduleName: string, text: string, taskName?: string): Promise<any>;
+      function movePPToCursor(moduleName: string, taskName: string, line: string, column: string): Promise<any>;
     }
 
     namespace CFG {
-      function deleteConfigInstance(name: string, type: string, domain: string);
+      function deleteConfigInstance(name: string, type: string, domain: string): Promise<any>;
     }
   }
 }

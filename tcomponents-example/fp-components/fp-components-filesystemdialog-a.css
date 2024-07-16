@@ -1,20 +1,21 @@
 
 /*
 
-(c) Copyright 2020-2023 ABB
+(c) Copyright 2020-2024 ABB
 
 Any unauthorized use, reproduction, distribution,
 or disclosure to third parties is strictly forbidden.
 ABB reserves all rights regarding Intellectual Property Rights
 
-OmniCore App SDK 1.4
+OmniCore App SDK 1.4.1
 
 */
 
 .fp-components-filesystemdialog-bg {
     display: none;
     position: fixed;
-    z-index: 2147480100;
+    z-index: 2147480040;
+    
     top: 0px;
     left: 0px;
     box-sizing: border-box;
@@ -99,10 +100,6 @@ OmniCore App SDK 1.4
     padding: 20px 10px 10px 10px;
     font-size: 16px;
     font-weight: bold;
-}
-
-.fp-components-filesystemdialog-root-folder-list {
-
 }
 
 .fp-components-filesystemdialog-root-folder-list-item {
@@ -264,15 +261,6 @@ tr:active {
     padding-right: 10px;
 }
 
-.fp-components-filesystemdialog-file-object {
-    
-}
-
-
-.fp-components-filesystemdialog-folder-object {
-    
-}
-
 .fp-components-filesystemdialog-bot {
     display: flex;
     flex-direction: row;
@@ -315,8 +303,4 @@ tr:active {
 
 .fp-components-filesystemdialog-bot-left {
     overflow-y: hidden;
-}
-
-.fp-components-filesystemdialog-bot-right {
-
 }

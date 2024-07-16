@@ -5,9 +5,10 @@ import { Button_A } from './t-components-button.js';
 /**
  * @typedef TComponents.ButtonRebootProps
  * @prop {boolean} confirm - Popup an confirmation message before restarting
- * @prop {function|null} [callback] - Function to be called when button is pressed
+ * @prop {function|null} [onClick] - Function to be called when button is pressed
  * @prop {string|null} [icon] - Path to image file
  * @prop {string} [label] - label text
+ * @prop {string} [text] Button text
  */
 
 /**
@@ -77,7 +78,7 @@ export class ButtonReboot_A extends Button_A {
                 Popup_A.error(e, 'TComponents.Reboot_A ');
               }
             }
-          }
+          },
         );
       } else {
         await API.CONTROLLER.restart();

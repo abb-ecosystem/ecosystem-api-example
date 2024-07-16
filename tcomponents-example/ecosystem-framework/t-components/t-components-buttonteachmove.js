@@ -4,7 +4,7 @@ import { ButtonTeach_A } from './t-components-buttonteach.js';
 
 /**
  * @typedef TComponents.ButtonTeachMoveProps
- * @prop {string} variable - Rapid variable to subpscribe to
+ * @prop {string} robTarget Rapid robTarget to subpscribe to
  * @prop {string} module - Module containig the rapid variable
  * @prop {string} [label] Label text
  * @prop {string} [labelPos] Label position (top, bottom, left, right)
@@ -25,7 +25,7 @@ import { ButtonTeach_A } from './t-components-buttonteach.js';
  * // index.js
  * const btnTeach = new ButtonTeachMove_A(
  *    document.querySelector('.btn-teach-move'), {
- *     variable: 'esTarget02',
+ *     robTarget: 'esTarget02',
  *     module: 'Ecosystem_BASE',
  *    }
  *  );
@@ -40,7 +40,6 @@ export class ButtonTeachMove_A extends Component_A {
      */
     this._props;
 
-    this.robTarget = null;
     this._isJogging = false;
   }
 
@@ -53,18 +52,18 @@ export class ButtonTeachMove_A extends Component_A {
   defaultProps() {
     return {
       module: '',
-      variable: '',
+      robTarget: '',
     };
   }
 
   mapComponents() {
     return {
       _btnMoveTo: new ButtonMoveTo_A(this.find('.tc-button-teachmove-move'), {
-        variable: this._props.variable,
+        robTarget: this._props.robTarget,
         module: this._props.module,
       }),
       _btnTeach: new ButtonTeach_A(this.find('.tc-button-teachmove-teach'), {
-        variable: this._props.variable,
+        robTarget: this._props.robTarget,
         module: this._props.module,
       }),
     };
@@ -79,12 +78,12 @@ export class ButtonTeachMove_A extends Component_A {
         `;
   }
 
-  get variable() {
-    return this._props.variable;
+  get robTarget() {
+    return this._props.robTarget;
   }
 
-  set variable(variable) {
-    this.setProps({ variable });
+  set robTarget(robTarget) {
+    this.setProps({ robTarget });
   }
 
   get module() {

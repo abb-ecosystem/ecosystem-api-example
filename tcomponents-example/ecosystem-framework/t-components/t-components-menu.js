@@ -33,6 +33,11 @@ export class Menu_A extends Component_A {
   constructor(parent, props) {
     super(parent, props);
 
+    Object.defineProperty(this, '_isView', {
+      value: true,
+      writable: false,
+    });
+
     this.viewId = new Map();
     this.requireMarkup = [];
 
@@ -40,6 +45,11 @@ export class Menu_A extends Component_A {
      * @type {TComponents.MenuProps}
      */
     this._props;
+    if (this._props.views.length > 0) {
+      this._props.views.forEach((view) => {
+        if (!view.hasOwnProperty('active')) view['active'] = false;
+      });
+    }
 
     this.initPropsDep('views');
   }
@@ -60,6 +70,7 @@ export class Menu_A extends Component_A {
     if (this._props.views.length > 0) {
       this._props.views.forEach((view) => {
         view['id'] = this._processContent(view.content);
+        if (!view.hasOwnProperty('active')) view['active'] = false;
         this.views.push(view);
       });
     }
@@ -69,23 +80,24 @@ export class Menu_A extends Component_A {
     const obj = {};
 
     this.views.forEach(({ content }) => {
-      if (content instanceof Component_A) {
+      if (Component_A.isTComponent(content)) {
         obj[content.compId] = content;
       }
     });
-
     return obj;
   }
 
   onRender() {
     this.viewId.clear();
     this.views.forEach(({ name, content, image, active, id }) => {
-      const dom = this._getDom(content, id);
+      const dom = this._getDom(content, id, name);
+
       id = {};
       this.viewId.set(id, name);
     });
 
     this.container.classList.add('tc-container');
+    this.container.dataset.view = 'true';
   }
 
   markup() {
@@ -110,24 +122,23 @@ export class Menu_A extends Component_A {
     return [...this.viewId.values()];
   }
 
-  _getDom(content, id) {
+  _getDom(content, id, name) {
     let dom;
-
-    if (content instanceof Component_A) {
+    if (Component_A.isTComponent(content)) {
       if (id) content.attachToElement(this.find(`#${id}`));
       dom = content.parent;
     } else {
       dom = content;
     }
+    dom.dataset.viewId = id ? id : name.replace(/\s/g, '_');
     return dom;
   }
 
   _processContent(content) {
     let id = null;
-    if (Component_A._isTComponent(content)) {
-      if (!content.parent) {
-        id = content.compId + '__container';
-      }
+
+    if (Component_A.isTComponent(content)) {
+      id = content.compId + '__container';
     } else if (typeof content === 'string') {
       const elementId = content;
       content = document.getElementById(`${elementId}`);
@@ -137,7 +148,7 @@ export class Menu_A extends Component_A {
         Try adding view as Element or Component_A instance to the Hamburger menu.`);
       }
     } else if (!Component_A._isHTMLElement(content)) {
-      throw new Error(`Unexpected type of view content: ${typeof content}`);
+      throw new Error(`Unexpected type of view content: type -- ${typeof content} --> ${content}}`);
     }
     return id;
   }

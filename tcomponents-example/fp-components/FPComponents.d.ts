@@ -1,11 +1,11 @@
 
-// (c) Copyright 2020-2023 ABB
+// (c) Copyright 2020-2024 ABB
 //
 // Any unauthorized use, reproduction, distribution,
 // or disclosure to third parties is strictly forbidden.
 // ABB reserves all rights regarding Intellectual Property Rights
 
-// OmniCore App SDK 1.4
+// OmniCore App SDK 1.4.1
 
 declare function fpComponentsLoadCSS(href: string): void;
 declare const FP_COMPONENTS_COMMON_VERSION: string;

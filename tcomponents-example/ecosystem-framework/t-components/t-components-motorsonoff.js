@@ -33,8 +33,8 @@ export class MotorsOnOff_A extends Component_A {
     };
 
     try {
-      var execution = await RWS.IO.getSignal('scDriveEnableFeedback');
-      await API.CONTROLLER.monitorOperationMode(this.cbOpModeStateChanged.bind(this));
+      var execution = await API.SIGNAL.getSignal('scDriveEnableFeedback');
+      await API.CONTROLLER.monitorOperationMode(this.cbOpModeChanged.bind(this));
 
       // check for initial state
       (await execution.getValue()) === 0 ? (this.imgInit = imgMotorsOff) : (this.imgInit = imgMotorsOn);
@@ -43,10 +43,8 @@ export class MotorsOnOff_A extends Component_A {
       else this._switch.active = true;
 
       // subscriber for motors on
-      execution.addCallbackOnChanged((newValue) => {
-        this.setIcon(newValue);
-      });
-      await execution.subscribe();
+      execution.onChanged(this.cbOnExecutionChanged.bind(this));
+      execution.subscribe();
     } catch (e) {
       this.error = true;
       Popup_A.error(e, `TComponents.MotorsOnOff_A`);
@@ -95,8 +93,12 @@ export class MotorsOnOff_A extends Component_A {
     }
   }
 
-  async cbOpModeStateChanged(state) {
-    this.enabled = state === API.CONTROLLER.OPMODE.Auto ? true : false;
+  async cbOpModeChanged(opMode) {
+    this.enabled = (opMode === API.CONTROLLER.OPMODE.Auto) === true ? true : (this.enabled = false);
+  }
+
+  cbOnExecutionChanged(newValue) {
+    this.setIcon(newValue);
   }
 }
 

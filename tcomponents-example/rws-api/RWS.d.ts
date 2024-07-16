@@ -1,11 +1,11 @@
 
-// (c) Copyright 2020-2023 ABB
+// (c) Copyright 2020-2024 ABB
 //
 // Any unauthorized use, reproduction, distribution,
 // or disclosure to third parties is strictly forbidden.
 // ABB reserves all rights regarding Intellectual Property Rights
 
-// OmniCore App SDK 1.4
+// OmniCore App SDK 1.4.1
 
 declare namespace RWS {
 
@@ -182,7 +182,7 @@ declare namespace RWS.Rapid {
     interface Monitor {
         getTitle(): string;
         getResourceString(): string;
-        addCallbackOnChanged(callback: (value: string|PointerState|UiInstrState)=>void): void;
+        addCallbackOnChanged(callback: (value: ExecutionStates|PointerState|UiInstrState)=>void): void;
         subscribe(raiseInitial?: boolean): Promise<void>;
         unsubscribe(): Promise<void>;
     }

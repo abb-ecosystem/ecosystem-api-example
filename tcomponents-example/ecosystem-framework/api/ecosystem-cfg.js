@@ -41,7 +41,7 @@ const factoryApiCfg = function (cfg) {
      */
     this.loadConfiguration = async function (filepath, action = RWS.CFG.LoadMode.add) {
       try {
-        const answer = await RWS.CFG.loadConfiguration(filepath, action);
+        return await RWS.CFG.loadConfiguration(filepath, action);
       } catch (e) {
         console.error(e);
         API.rejectWithStatus(`Failed to load ${filepath} `, e);
@@ -296,7 +296,7 @@ const factoryApiCfg = function (cfg) {
             (signal) =>
               (attr.hasOwnProperty('map') ? signal.attributes.DeviceMap === attr.map : true) &&
               (attr.hasOwnProperty('type') ? signal.attributes.SignalType === attr.type : true) &&
-              (attr.hasOwnProperty('name') ? signal.attributes.Name === attr.name : true)
+              (attr.hasOwnProperty('name') ? signal.attributes.Name === attr.name : true),
           )
         );
       };
@@ -361,7 +361,10 @@ const factoryApiCfg = function (cfg) {
       async setValue(value) {
         const v = value ? 1 : 0;
         try {
-          if (!this.signal) return API.rejectWithStatus(`Signal ${this.name} not yet availabe. If confiugred a system restart may be required.`);
+          if (!this.signal)
+            return API.rejectWithStatus(
+              `Signal ${this.name} not yet availabe. If confiugred a system restart may be required.`,
+            );
           return await this.signal.setValue(v);
         } catch (e) {
           return API.rejectWithStatus(`Failed to set value of signal ${this.name}`, e);
@@ -413,7 +416,12 @@ const factoryApiCfg = function (cfg) {
         try {
           if (!this.signal) return API.rejectWithStatus(`Signal ${this.name} not available for subscription`);
 
-          return await this.signal.subscribe(raiseInitial);
+          if (API._disableSubscribe) {
+            API.log('API.SIGNAL: Subscription disabled, signal: ', this.name);
+            return;
+          } else {
+            return await this.signal.subscribe(raiseInitial);
+          }
         } catch (e) {
           return API.rejectWithStatus(`Failed to subscribe to signal ${this.name}`, e);
         }
@@ -472,7 +480,9 @@ const factoryApiCfg = function (cfg) {
           // Signal instance NOT found, create a config instance
           if (!attr.Name || !attr.SignalType || !attr.Access)
             return API.rejectWithStatus(
-              `Mandatory attributes missing: ${!attr.Name ? 'Name ' : ''}${!attr.SignalType ? 'SignalType ' : ''}${!attr.Access ? 'Access ' : ''} `
+              `Mandatory attributes missing: ${!attr.Name ? 'Name ' : ''}${!attr.SignalType ? 'SignalType ' : ''}${
+                !attr.Access ? 'Access ' : ''
+              } `,
             );
           API.CONFIG.createSignalInstance(attr);
           let config = await RWS.CFG.getInstanceByName(API.CONFIG.DOMAIN.EIO, API.CONFIG.TYPE.SIGNAL, attr.Name);
@@ -485,6 +495,29 @@ const factoryApiCfg = function (cfg) {
       }
 
       return s;
+    };
+
+    /**
+     *
+     * @param {string} name
+     *
+     */
+    this.monitorSignal = async (name, callback) => {
+      try {
+        if (typeof name !== 'string') throw new Error('Signal parameter is not a string!');
+
+        const _signal = await this.getSignal(name);
+
+        const cbOnChanged = async (value) => {
+          callback(value, name);
+        };
+
+        _signal.onChanged(cbOnChanged);
+        _signal.subscribe();
+        return _signal;
+      } catch (e) {
+        return API.rejectWithStatus(`API.SIGNAL.monitorSignal: Failed to get signal ${name}`, e);
+      }
     };
 
     /**
@@ -541,7 +574,6 @@ const factoryApiCfg = function (cfg) {
      *     <br>&emsp;(string) category category string
      *     <br>&emsp;(string) category-pon
      *     <br>&emsp;(string) type type of signal, valid values: 'DI', 'DO', 'AI', 'AO', 'GI' or 'GO'
-     *     <br>&emsp;(boolean) invert inverted signals
      *     <br>&emsp;(boolean) blocked blocked signals
      *
      * Search system for signals matching the filter. The signal name does not have to be an exact match,
@@ -554,10 +586,40 @@ const factoryApiCfg = function (cfg) {
      *             name: 'TestDI',
      *       }
      * @returns {Promise<object[] | string[]> } - List of API.CONFIG.SIGNAL.Signal instances
+     * @todo:    <br>&emsp;(boolean) invert inverted signals -- NOT WORKING
      */
     this.search = async function (filter = {}, onlyName = false) {
       try {
-        var ss = await RWS.IO.searchSignals(filter);
+        let f = {};
+
+        // pass from filter to f only the keys that are not empty strings or booleans (either true or false)
+        Object.keys(filter).forEach((key) => {
+          const keys = ['name', 'device', 'network', 'category', 'type', 'blocked'];
+
+          if (keys.includes(key) && filter[key]) {
+            f[key] = filter[key];
+          }
+        });
+
+        function isValidType(type) {
+          const validTypes = ['DI', 'DO', 'AI', 'AO', 'GI', 'GO'];
+          if (validTypes.includes(type)) {
+            return true;
+          }
+          if (type.startsWith('[') && type.endsWith(']')) {
+            const array = type.slice(1, -1).split(',');
+            return array.every((item) => validTypes.includes(item));
+          }
+          return false;
+        }
+
+        if (f.type && !isValidType(f.type)) {
+          return API.rejectWithStatus(`Invalid type ${f.type}`);
+        }
+
+        var ss = await RWS.IO.searchSignals(f);
+        const names = ss.map((s) => s.getName());
+
         if (onlyName)
           return ss.map((s) => {
             return s.getName();

@@ -1,13 +1,13 @@
 
 /*
 
-(c) Copyright 2020-2023 ABB
+(c) Copyright 2020-2024 ABB
 
 Any unauthorized use, reproduction, distribution,
 or disclosure to third parties is strictly forbidden.
 ABB reserves all rights regarding Intellectual Property Rights
 
-// OmniCore App SDK 1.4
+// OmniCore App SDK 1.4.1
 
 */
 
@@ -143,6 +143,7 @@ ABB reserves all rights regarding Intellectual Property Rights
 
     --fp-color-STATUS-WARNING:      #FFA200;
     --fp-color-STATUS-WARNIN-BG:    #FEF9EF;
+    --fp-color-STATUS-WARNING-BG:   #FEF9EF;
 
     --fp-color-STATUS-ERROR:        #EF3934;
     --fp-color-STATUS-ERROR-BG:     #FBF0F0;

@@ -1,65 +1,55 @@
 
-// (c) Copyright 2020-2023 ABB
+// (c) Copyright 2020-2024 ABB
 //
 // Any unauthorized use, reproduction, distribution,
 // or disclosure to third parties is strictly forbidden.
-// ABB reserves all rights regarding Intellectual Property Rights
+// ABB reserves all rights regarding Intellectual Property Rights.
 
-// OmniCore App SDK 1.4
+// OmniCore App SDK 1.4.1
 
-'use strict';
+
+
+"use strict";
 
 var App = App || {};
+
 if (typeof App.constructed === "undefined") {
-    (function (o) {
-
-        // VERSION INFO
-        o.APP_LIB_VERSION = "1.4";        
-
-        /**
-         * Initializes the App object
-         */
-        o.init = () => {
-
-
-        }
-        window.addEventListener("load", o.init, false);
-
-        /**
-         * Notifies the app framework that the script is busy. This will enable a spinner and disable all input for app.
-         * 
-         * @param   {boolean}           state   The busy-state, state == true is busy, otherwise not busy
-         */
-        o.setBusyState = function (state) {
-            let busyFlag = 'false';
+    (function(o) {
+        o.APP_LIB_VERSION = "1.4.1";
+        const init = () => {};
+        window.addEventListener("load", init, false);
+        const isWebView = () => {
+            return "chrome" in window && "webview" in window.chrome && "postMessage" in window.chrome.webview || "external" in window && "notify" in window.external;
+        };
+        const postWebViewMessage = message => {
+            if ("chrome" in window && "webview" in window.chrome && "postMessage" in window.chrome.webview) {
+                window.chrome.webview.postMessage(message);
+            } else if ("external" in window && "notify" in window.external) {
+                window.external.notify(message);
+            } else {
+                throw new Error("Could not post WebView message, WebView not recognized.");
+            }
+        };
+        o.setBusyState = function(state) {
+            let busyFlag = "false";
             if (state == true) {
-                busyFlag = 'true';
+                busyFlag = "true";
             }
-
-            if (typeof (window.external) !== 'undefined' && ('notify' in window.external)) {
-                window.external.notify(`IsBusy ${busyFlag}`);
+            if (isWebView()) {
+                postWebViewMessage(`IsBusy ${busyFlag}`);
             }
-        }
-
-        var onGetAppTypeListeners = [];
-
-        /**
-         * 
-         */
-        o.getTpuType = function () {
- 
-            if (typeof (window.external) !== 'undefined' && ('notify' in window.external)) {
-
+        };
+        let onGetAppTypeListeners = [];
+        o.getTpuType = function() {
+            if (isWebView()) {
                 let listener = {
                     promise: null,
                     resolve: null,
                     reject: null
                 };
-
                 listener.promise = new Promise((resolve, reject) => {
                     listener.resolve = resolve;
                     listener.reject = reject;
-
                     setTimeout(() => {
                         var temp = [];
                         let length = onGetAppTypeListeners.length;
@@ -67,121 +57,89 @@ if (typeof App.constructed === "undefined") {
                             let item = onGetAppTypeListeners.shift();
                             if (item !== listener) {
                                 temp.push(item);
-                            } 
+                            }
                         }
                         onGetAppTypeListeners = temp;
-
-                        reject('Request timed out.');
-                    }, 3000);
+                        reject("Request timed out.");
+                    }, 3e3);
                 });
-
                 onGetAppTypeListeners.push(listener);
-                window.external.notify("GetTpuType");
-
+                postWebViewMessage("GetTpuType");
                 return listener.promise;
             } else {
-                let response = JSON.stringify({ 'isTpu': false, 'machineName': '' });
-
+                let response = JSON.stringify({
+                    isTpu: false,
+                    machineName: ""
+                });
                 return Promise.resolve(response);
             }
-        }
-
-        o.onGetTpuType = async (data) => {
+        };
+        o.onGetTpuType = async data => {
             let length = onGetAppTypeListeners.length;
             for (let iii = 0; iii < length; iii++) {
                 onGetAppTypeListeners.shift().resolve(data);
             }
-        }
-
-        /**
-         * The "interface" for WebApp interaction related events.
-         * 
-         * NOTE! Implement global functions 'appMessageReceived' and 'appNavigateTo' in your script to enable interaction events.
-         * The functions must return a Promise which if resolved will return true to the app framework, reject will return false.  
-         * 
-         */
-
-        o.Interaction = new function () {
-
-            this.closeApp = function () {
-                if (typeof (window.external) !== 'undefined' && ('notify' in window.external)) {
-                    window.external.notify('CloseApp');
+        };
+        o.Interaction = new function() {
+            this.closeApp = function() {
+                if (isWebView()) {
+                    postWebViewMessage("CloseApp");
                 }
-            }
-            
+            };
             let activeMessage = null;
-
-            this.onSendMessageResponse = async (data) => {
-
+            this.onSendMessageResponse = async data => {
                 if (activeMessage === null) {
-                    console.log('No active message.');
+                    console.log("No active message.");
                 }
-
                 activeMessage.resolve(data);
                 activeMessage = null;
-            }
-
-            this.sendMessage = function (message) {
-                const checkMessage = (msg) => {
-                    if (msg.hasOwnProperty('AppName') === false) {
+            };
+            this.sendMessage = function(message) {
+                const checkMessage = msg => {
+                    if (msg.hasOwnProperty("AppName") === false) {
                         console.error(`'AppName' not present in message.`);
                         return false;
                     }
-                    if (msg.hasOwnProperty('Message') === false) {
+                    if (msg.hasOwnProperty("Message") === false) {
                         console.error(`'Message' not present in message.`);
                         return false;
                     }
                     return true;
-                }
-
-                if (typeof (window.external) !== 'undefined' && ('notify' in window.external)) {
-
+                };
+                if (isWebView()) {
                     if (checkMessage(message) === false) {
-                        return Promise.reject('Message is not of supported type.');
+                        return Promise.reject("Message is not of supported type.");
                     }
-
                     let listener = {
                         promise: null,
                         resolve: null,
                         reject: null
                     };
-
                     listener.promise = new Promise((resolve, reject) => {
                         listener.resolve = resolve;
                         listener.reject = reject;
-
                         setTimeout(() => {
                             activeMessage = null;
-                            reject('Request timed out.');
-                        }, 3000);
+                            reject("Request timed out.");
+                        }, 3e3);
                     });
-
                     activeMessage = listener;
-
                     let messageString = JSON.stringify(message);
-                    window.external.notify(`SendMessage ${messageString}`);
-
+                    postWebViewMessage(`SendMessage ${messageString}`);
                     return listener.promise;
                 } else {
-                    return Promise.reject('Messages not supported.');
+                    return Promise.reject("Messages not supported.");
                 }
-            }
-
-            this.onMessageReceived = async (info) => {
-
-                let status = '';
-                if (typeof appMessageReceived === 'function') {
+            };
+            this.onMessageReceived = async info => {
+                let status = "";
+                if (typeof appMessageReceived === "function") {
                     try {
-                        await Promise.resolve(appMessageReceived(info))
-                            .then(x => {
-                                if (x == true) return Promise.resolve();
-
-                                return Promise.reject();
-                            })
-                            .then(() => status = '')
-                            .catch(() => status = "'appMessageReceived' failed.");
-                    }
-                    catch (error) {
+                        await Promise.resolve(appMessageReceived(info)).then(x => {
+                            if (x == true) return Promise.resolve();
+                            return Promise.reject();
+                        }).then(() => status = "").catch(() => status = "'appMessageReceived' failed.");
+                    } catch (error) {
                         console.error(`onMessageReceived failed to execute, function 'appMessageReceived' may be faulty. >>> ${error}`);
                         status = "'appMessageReceived' failed to execute.";
                     }
@@ -189,25 +147,18 @@ if (typeof App.constructed === "undefined") {
                     status = "'appMessageReceived' not found.";
                     console.error(status);
                 }
-
-                if (typeof (window.external) !== 'undefined' && ('notify' in window.external)) {
-                    window.external.notify(`SendMessageResponse ${status}`);
+                if (isWebView()) {
+                    postWebViewMessage(`SendMessageResponse ${status}`);
                 }
-            }
-
-
+            };
             let activeRequest = null;
-
-            this.onNavigateToResponse = (data) => {
-
+            this.onNavigateToResponse = data => {
                 if (activeRequest === null) {
-                    console.log('No active request.');
-                    return Promise.reject('No active request.');
+                    console.log("No active request.");
+                    return Promise.reject("No active request.");
                 }
-
                 try {
                     let status = JSON.parse(data);
-
                     if (status.Success === true) {
                         activeRequest.resolve();
                     } else {
@@ -221,142 +172,90 @@ if (typeof App.constructed === "undefined") {
                     activeRequest = null;
                     console.error(`Exception: ${exception.message}`);
                 }
-            }
-
-            this.sendNavigateToRequest = (info) => {
-
+            };
+            this.sendNavigateToRequest = info => {
                 if (activeRequest !== null) {
-                    console.warn('Request already active.');
-                    return Promise.reject('Request already active.');
+                    console.warn("Request already active.");
+                    return Promise.reject("Request already active.");
                 }
-
-                if (typeof (window.external) !== 'undefined' && ('notify' in window.external)) {
-
+                if (isWebView()) {
                     let listener = {
                         promise: null,
                         resolve: null,
                         reject: null
                     };
-
                     listener.promise = new Promise((resolve, reject) => {
                         listener.resolve = resolve;
                         listener.reject = reject;
                     });
                     activeRequest = listener;
-
                     let infoText = JSON.stringify(info);
-                    window.external.notify(`NavigateTo ${infoText}`);
-
+                    postWebViewMessage(`NavigateTo ${infoText}`);
                     return listener.promise;
                 } else {
-                    return Promise.reject('No external window.');
+                    return Promise.reject("No external window.");
                 }
-            }
-
-            this.onNavigateTo = async (info) => {
-
-                let navigateToStatus = '';
-                if (typeof appNavigateTo === 'function') {
+            };
+            this.onNavigateTo = async info => {
+                let navigateToStatus = "";
+                if (typeof appNavigateTo === "function") {
                     try {
-                        await Promise.resolve(appNavigateTo(info))
-                            .then(x => {
-                                if (x == true) return Promise.resolve();
-
-                                return Promise.reject();
-                            })
-                            .then(() => navigateToStatus = '')
-                            .catch(() => navigateToStatus = "'appNavigateTo' failed.");
-                    }
-                    catch (error) {
+                        await Promise.resolve(appNavigateTo(info)).then(x => {
+                            if (x == true) return Promise.resolve();
+                            return Promise.reject();
+                        }).then(() => navigateToStatus = "").catch(() => navigateToStatus = "'appNavigateTo' failed.");
+                    } catch (error) {
                         console.error("onNavigateTo failed to execute, function 'appNavigateTo' may be faulty.");
                     }
                 } else {
                     navigateToStatus = "'appNavigateTo' not found.";
                     console.error(navigateToStatus);
                 }
-
-                if (typeof (window.external) !== 'undefined' && ('notify' in window.external)) {
-                    window.external.notify(`NavigateToResponse ${navigateToStatus}`);
+                if (isWebView()) {
+                    postWebViewMessage(`NavigateToResponse ${navigateToStatus}`);
                 }
-            }
-
-        }
-
-        /**
-         * The "interface" for activation related events.
-         * 
-         * NOTE! Implement global functions 'appActivate' and 'appDeactivate' in your script to enable activation events.
-         * The functions must return a Promise which if resolved will return true to the app framework, reject will return false.  
-         * 
-         */
-        o.Activation = new function () {
-
-            /**
-             * Is called from external application to notify that the app is being activated
-             * NOTE: The function is called from external application and should not be called explicitly
-             * 
-             */
+            };
+        }();
+        o.Activation = new function() {
             this.onActivate = async () => {
-
-                let activateStatus = 'false';
-                if (typeof appActivate === 'function') {
+                let activateStatus = "false";
+                if (typeof appActivate === "function") {
                     try {
-                        await Promise.resolve(appActivate())
-                            .then(x => {
-                                if (x == true) return Promise.resolve();
-
-                                return Promise.reject();
-                            })
-                            .then(() => activateStatus = 'true')
-                            .catch(() => activateStatus = 'false');
-                    }
-                    catch (error) {
+                        await Promise.resolve(appActivate()).then(x => {
+                            if (x == true) return Promise.resolve();
+                            return Promise.reject();
+                        }).then(() => activateStatus = "true").catch(() => activateStatus = "false");
+                    } catch (error) {
                         console.error("onActivate failed to execute, function 'appActivate' may be faulty.");
                     }
                 } else {
-                    activateStatus = 'true';
+                    activateStatus = "true";
                 }
-
-                if (typeof (window.external) !== 'undefined' && ('notify' in window.external)) {
-                    window.external.notify(`Activated ${activateStatus}`);
+                if (isWebView()) {
+                    postWebViewMessage(`Activated ${activateStatus}`);
                 }
-            }
-
-            /**
-             * Is called from external application to notify that the app is being deactivated
-             * NOTE: The function is called from external application and should not be called explicitly
-             * 
-             */
+            };
             this.onDeactivate = async () => {
-
-                let deactivateStatus = 'false';
-                if (typeof appDeactivate === 'function') {
+                let deactivateStatus = "false";
+                if (typeof appDeactivate === "function") {
                     try {
-                        await Promise.resolve(appDeactivate())
-                            .then(x => {
-                                if (x == true) return Promise.resolve();
-
-                                return Promise.reject();
-                            })
-                            .then(() => deactivateStatus = 'true')
-                            .catch(() => deactivateStatus = 'false');
-                    }
-                    catch (error) {
+                        await Promise.resolve(appDeactivate()).then(x => {
+                            if (x == true) return Promise.resolve();
+                            return Promise.reject();
+                        }).then(() => deactivateStatus = "true").catch(() => deactivateStatus = "false");
+                    } catch (error) {
                         console.error("onDeactivate failed to execute, function 'appDeactivate' may be faulty.");
                     }
                 } else {
-                    deactivateStatus = 'true';
+                    deactivateStatus = "true";
                 }
-
-                if (typeof (window.external) !== 'undefined' && ('notify' in window.external)) {
-                    window.external.notify(`Deactivated ${deactivateStatus}`);
+                if (isWebView()) {
+                    postWebViewMessage(`Deactivated ${deactivateStatus}`);
                 }
-            }
-        }
-
+            };
+        }();
         o.constructed = true;
     })(App);
-    
     window["_onGetTpuType"] = App.onGetTpuType;
     window["_onNavigateTo"] = App.Interaction.onNavigateTo;
     window["_onNavigateToResponse"] = App.Interaction.onNavigateToResponse;

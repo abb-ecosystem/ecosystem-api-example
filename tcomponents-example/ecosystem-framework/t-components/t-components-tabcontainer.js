@@ -11,6 +11,7 @@ import { Component_A } from './t-components-component.js';
  * @prop {Function} [onPlus] Set this attribute to a callback function that should be called when the user clicks on the plus ("add-tab") button. Clicking the button has no effect other than this callback function being called.
  * Typically, this callback function will dynamically build a new view and then add it as a new tab using the addTab method.
  * Setting this attribute to a function will cause the plus button to appear in the tab bar.
+ * @prop {boolean} userTabClosing Set this attribute to true to allow the user to close tabs using a button on each active tab.
  * @prop {Function} [onUserClose] Set this attribute to a callback function that should be called when the user clicks on a tab's "close" button. The parameter tabId is the tab identifier object for the tab being closed.
  * If this attribute is not set, the tab will be closed immediately. If it is set to a function, that function will be called, and if the function returns true, the tab will be removed directly.
  * If the function returns false, the tab will not be removed, and it is up to the developer to later close the tab using the removeTab method. This is useful for implementing user interaction when
@@ -37,25 +38,30 @@ export class TabContainer_A extends Menu_A {
   }
 
   async onInit() {
+    this.tabContainer = new FPComponents.Tabcontainer_A();
+
     await super.onInit();
     if (this._props.onPlus) this.on('plus', this._props.onPlus);
-    if (this._props.onUserClose) this.on('userclose', this._props.onPlus);
+    if (this._props.onUserClose) this.on('userclose', this._props.onUserClose);
   }
 
   defaultProps() {
     return {
       onPlus: null,
+      userTabClosing: false,
       onUserClose: null,
       plusEnabled: false,
       hiddenTabs: false,
+      transparent: false,
     };
   }
 
   onRender() {
-    this.tabContainer = new FPComponents.Tabcontainer_A();
     this.tabContainer.onchange = this.cbOnChange.bind(this);
-    this.tabContainer.onplus = this.cbOnPlus.bind(this);
-    this.tabContainer.onuserclose = this.cbOnUserClose.bind(this);
+    if (this._props.onPlus) this.tabContainer.onplus = this.cbOnPlus.bind(this);
+    if (this._props.onUserClose) this.tabContainer.onuserclose = this.cbOnUserClose.bind(this);
+    if (this._props.title) this.tabContainer.setTabTitle = this._props.title;
+    this.tabContainer.userTabClosing = this._props.userTabClosing;
 
     this._onRenderView();
 
@@ -67,6 +73,12 @@ export class TabContainer_A extends Menu_A {
 
     this.container.removeEventListener('click', this._handleTabClick);
     this.addEventListener(this.container, 'click', this._handleTabClick, true);
+
+    this.container.dataset.view = 'true';
+
+    if (this._props.transparent) {
+      this.find('.fp-components-tabcontainer').classList.add('bg-transparent');
+    }
   }
 
   _handleTabClick(e) {
@@ -87,15 +99,22 @@ export class TabContainer_A extends Menu_A {
 
   _onRenderView() {
     this.viewId.clear();
-    this.views.forEach(({ name, content, id }) => {
-      const dom = this._getDom(content, id);
-      id = this.tabContainer.addTab(name, dom);
+    this.views.forEach(({ name, content, id, active }) => {
+      const dom = this._getDom(content, id, name);
+      id = this.tabContainer.addTab(Component_A.t(name), dom, active);
       this.viewId.set(id, name);
     });
   }
 
   getProps() {
-    return this._props;
+    const tempView = this._props.views;
+    const ret = super.getProps();
+    ret.views = ret.views.map((view, index) => {
+      view.content = tempView[index].content;
+      return view;
+    });
+
+    return ret;
   }
 
   /**
@@ -109,59 +128,86 @@ export class TabContainer_A extends Menu_A {
   }
 
   removeTab(name) {
-    this.tabContainer.removeTab([...this.viewId.entries()].filter(([_, value]) => value === name)[0][0]);
+    const entries = [...this.viewId.entries()].filter(([_, value]) => value === name);
+    if (entries.length > 0) {
+      const id = entries[0][0];
+      this.tabContainer.removeTab(id);
+      this.viewId.delete(id);
+      this.views = this.views.filter((view) => view.name !== name);
+    }
   }
 
   cbOnPlus() {
     this.trigger('plus');
   }
 
-  cbOnUserClose() {
-    this.trigger('userclose');
+  cbOnUserClose(id) {
+    const name = this.viewId.get(id);
+
+    if (!this.props.onUserClose) return true;
+
+    // decouple async function from original
+    (async () => {
+      // Wait for onUserClose to complete
+      const result = await this.props.onUserClose(name);
+      // If onUserClose returns true, delete the view and rerender
+      if (result) {
+        this.removeTab(name);
+      }
+    })();
+    // Return false to prevent the tab from being removed immediately
+    return false;
   }
 
-  get getTabTitle() {
-    return this.tabContainer.getTabTitle;
+  get title() {
+    return this.getProps().getTabTitle;
   }
 
-  set setTabTitle(title) {
-    this.tabContainer.setTabTitle = title;
+  set title(title) {
+    this.setProps({ title });
   }
 
   get plusEnabled() {
-    return this.tabContainer.plusEnabled;
+    return this.getProps().plusEnabled;
   }
 
   set plusEnabled(value) {
-    this._props.plusEnabled = value;
-    this.tabContainer.plusEnabled = value;
+    this.setProps({ plusEnabled: value });
   }
 
   get userTabClosing() {
-    return this.tabContainer.userTabClosing;
+    return this.getProps().userTabClosing;
   }
 
   set userTabClosing(value) {
-    this.tabContainer.userTabClosing = value;
+    this.setProps({ userTabClosing: value });
   }
 
   get hiddenTabs() {
-    return this.tabContainer.hiddenTabs;
+    return this.getProps().hiddenTabs;
   }
 
   set hiddenTabs(value) {
-    this._props.hiddenTabs = value;
-    this.tabContainer.hiddenTabs = value;
+    this.setProps({ hiddenTabs: value });
   }
 
   get activeTab() {
+    if (!this.tabContainer) throw new Error('TabContainer not initialized yet. Please render the component first');
     return this.viewId.get(this.tabContainer.activeTab);
   }
 
   set activeTab(name) {
-    const tab = [...this.viewId.entries()].filter(([_, value]) => value === name);
+    if (!this.tabContainer) throw new Error('TabContainer not initialized yet. Please render the component first');
 
-    this.tabContainer.activeTab = tab[0][0];
+    const entries = [...this.viewId.entries()].filter(([_, value]) => value === name);
+    if (entries.length > 0) {
+      this.all('.fp-components-tabcontainer-activetab').forEach((el) => {
+        el.classList.remove('fp-components-tabcontainer-activetab');
+      });
+
+      const id = entries[0][0];
+      this.tabContainer.activeTab = id;
+    }
   }
 }
 
@@ -174,4 +220,6 @@ TabContainer_A.loadCssClassFromString(/*css*/ `
 .tabContainer-base-style {
   background-color: transparent !important;
 }
+
+
   `);

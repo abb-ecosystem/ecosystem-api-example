@@ -44,6 +44,12 @@ export const factoryApiRapid = function (r) {
     };
     this.MODULETYPE = MODULETYPE;
 
+    const EXECUTIONSTATE = {
+      Running: 'running',
+      Stopped: 'stopped',
+    };
+    this.EXECUTIONSTATE = EXECUTIONSTATE;
+
     /**
      * @memberof API
      * @param {RWS.Rapid.MonitorResources} res
@@ -54,6 +60,11 @@ export const factoryApiRapid = function (r) {
      */
     const subscribeRes = async function (res, func, task = 'T_ROB1') {
       try {
+        if (API._disableSubscribe) {
+          API.log('API.RAPID: Subscription disabled, monitor rapid');
+          return;
+        }
+
         const monitor = await RWS.Rapid.getMonitor(res, task);
         monitor.addCallbackOnChanged(func);
         await monitor.subscribe();
@@ -134,7 +145,7 @@ export const factoryApiRapid = function (r) {
         }
         return elements;
       } catch (e) {
-        return API.rejectWithStatus(`Failed to search variable ${name} -  module: ${module}, isInUse: ${isInUse}`, e);
+        return API.rejectWithStatus(`Failed to search symbol ${name} -  module: ${module}`, e);
       }
     };
 
@@ -150,14 +161,17 @@ export const factoryApiRapid = function (r) {
       if (typeof filter !== 'string') {
         throw new Error('The filter string should be a valid string.');
       }
-      const allTasks = await RWS.Rapid.getTasks();
-      const taskNames = allTasks.map((t) => t.getName());
+      try {
+        const allTasks = await RWS.Rapid.getTasks();
+        const taskNames = allTasks.map((t) => t.getName());
+        const flags = caseSensitive ? '' : 'i';
+        const regex = new RegExp(filter, flags);
+        const filteredTaskNames = taskNames.filter((element) => regex.test(element));
 
-      const flags = caseSensitive ? '' : 'i';
-      const regex = new RegExp(filter, flags);
-
-      const filteredTaskNames = taskNames.filter((element) => regex.test(element));
-      return taskNames.filter((element) => regex.test(element));
+        return taskNames.filter((element) => regex.test(element));
+      } catch (error) {
+        return API.rejectWithStatus('Failed to get tasks', error);
+      }
     };
 
     /**
@@ -181,6 +195,7 @@ export const factoryApiRapid = function (r) {
             API.log(this.executionState);
           };
           subscribeRes(RWS.Rapid.MonitorResources.execution, cbExecState.bind(this));
+          callback(this.executionState);
         } catch (e) {
           return API.rejectWithStatus('Failed to subscribe execution state', e);
         }
@@ -245,8 +260,8 @@ export const factoryApiRapid = function (r) {
        * let url = `${this.path}/${this.name}${this.extension}`;
        * await task.loadModule(url, true);
        */
-      loadModule(path, replace = false) {
-        loadModule(path, replace, this.name);
+      async loadModule(path, replace = false) {
+        return await loadModule(path, replace, this.name);
       }
 
       /**
@@ -255,8 +270,8 @@ export const factoryApiRapid = function (r) {
        * @memberof API.RAPID.Task
        * @param {string} module Module's name
        */
-      unloadModule(module) {
-        unloadModule(module, this.name);
+      async unloadModule(module) {
+        return await unloadModule(module, this.name);
       }
 
       /**
@@ -278,7 +293,10 @@ export const factoryApiRapid = function (r) {
        * const task = await API.RAPID.getTask('T_ROB1');
        * await task.executeProcedure('myProcedure', { userLevel: true, resetPP: false});
        */
-      async executeProcedure(procedure, { userLevel = false, resetPP = false, cycleMode = RWS.Rapid.CycleModes.once } = {}) {
+      async executeProcedure(
+        procedure,
+        { userLevel = false, resetPP = false, cycleMode = RWS.Rapid.CycleModes.once } = {},
+      ) {
         let pp;
         let progress;
 
@@ -370,7 +388,11 @@ export const factoryApiRapid = function (r) {
               ret = API.rejectWithStatus('Program Pointer Reset', {
                 message: 'Unable to reset the program pointer for task T_ROB1.',
                 description: `The program will not start.`,
-                cause: ['• No program is loaded.', '• The main routine is missing.', '• There are errors in the program.'],
+                cause: [
+                  '• No program is loaded.',
+                  '• The main routine is missing.',
+                  '• There are errors in the program.',
+                ],
               });
             case 'step6':
             // await RWS.Rapid.resetPP();
@@ -455,7 +477,9 @@ export const factoryApiRapid = function (r) {
                   arr.splice(1); // eject early
                   return RWS.Rapid.SymbolTypes[entry];
                 }
-                return entry === 'constant' || entry === 'variable' || entry === 'persistent' ? all + RWS.Rapid.SymbolTypes[entry] : all;
+                return entry === 'constant' || entry === 'variable' || entry === 'persistent'
+                  ? all + RWS.Rapid.SymbolTypes[entry]
+                  : all;
               }, 0)
             : RWS.Rapid.SymbolTypes[filter.symbolType];
         } else {
@@ -540,7 +564,9 @@ export const factoryApiRapid = function (r) {
                   arr.splice(1); // eject early
                   return RWS.Rapid.SymbolTypes[entry];
                 }
-                return entry === 'procedure' || entry === 'function' || entry === 'trap' ? all + RWS.Rapid.SymbolTypes[entry] : all;
+                return entry === 'procedure' || entry === 'function' || entry === 'trap'
+                  ? all + RWS.Rapid.SymbolTypes[entry]
+                  : all;
               }, 0)
             : RWS.Rapid.SymbolTypes[filter.symbolType];
         } else {
@@ -567,9 +593,13 @@ export const factoryApiRapid = function (r) {
       async getValue(module, variable) {
         try {
           var data = await this._task.getData(module, variable);
+          // const properties = await data.getProperties();
           return await data.getValue();
         } catch (e) {
-          return API.rejectWithStatus(`Variable ${variable} not found at ${this._task.getName()} : ${module} module.`, e);
+          return API.rejectWithStatus(
+            `Variable ${variable} not found at ${this._task.getName()} : ${module} module.`,
+            e,
+          );
         }
       }
 
@@ -598,11 +628,12 @@ export const factoryApiRapid = function (r) {
        * @memberof API.RAPID.Task
        * @param {string} module - module containing the variable
        * @param {string} variable - variable name
+       * @param {boolean} subscribe
        * @returns {Promise<object>} API.RAPID.Variable object
        * @see {@link https://developercenter.robotstudio.com/omnicore-sdk|Omnicore-SDK}
        */
-      async getVariable(module, variable) {
-        return await getVariableInstance(this.name, module, variable);
+      async getVariable(module, variable, subscribe = true) {
+        return await getVariableInstance(this.name, module, variable, subscribe);
       }
 
       /**
@@ -702,7 +733,7 @@ export const factoryApiRapid = function (r) {
        * 'variable'
        * 'persistent'
        */
-      get declaration() {
+      get symbolType() {
         return this.props.symbolType;
       }
 
@@ -890,29 +921,6 @@ export const factoryApiRapid = function (r) {
       return variable;
     };
 
-    this.subscribeVariable = async function (task, module, name) {
-      const refName = task + ':' + module + ':' + name;
-      let entry = this.subscriptions.get(refName);
-
-      if (entry) {
-        entry.count++;
-        return entry.variable;
-      } else {
-        let newVariable = await createVariable(task, module, name);
-
-        // double check case parallel async subscriptions just happened
-        let entry = this.subscriptions.get(refName);
-        if (!entry) {
-          this.subscriptions.set(refName, { variable: newVariable, count: 1 });
-
-          newVariable.subscribe();
-          return newVariable;
-        } else {
-          return entry.variable;
-        }
-      }
-    };
-
     this.unsubscribeVariable = function (task, module, name) {
       const refName = task + ':' + module + ':' + name;
       let entry = this.subscriptions.get(refName);
@@ -929,30 +937,83 @@ export const factoryApiRapid = function (r) {
      * @param {string} task  - RAPID Task in which the variable is contained
      * @param {string} module -RAPID module where the variable is contained
      * @param {string} name - name of RAPID variable
+     * @param {boolean} subscribe - subscribe to variable, default is true
      * @returns RWS.RAPID Data object
      * @private
      */
-    const getVariableInstance = async (task, module, name) => {
+    const getVariableInstance = async (task, module, name, subscribe = true) => {
       if (task && module && name) {
         try {
-          const v = await this.subscribeVariable(task, module, name);
-          return v;
+          const refName = task + ':' + module + ':' + name;
+          let entry = this.subscriptions.get(refName);
+
+          if (entry) {
+            entry.count++;
+            return entry.variable;
+          } else {
+            let newVariable = await createVariable(task, module, name);
+
+            // double check case parallel async subscriptions just happened
+            let entry = this.subscriptions.get(refName);
+            if (!entry) {
+              if (API._disableSubscribe) {
+                API.log('API.RAPID: Subscription disabled, variable: ', refName);
+              } else {
+                if (subscribe) {
+                  this.subscriptions.set(refName, { variable: newVariable, count: 1 });
+                  if (newVariable.symbolType !== 'constant') newVariable.subscribe();
+                }
+              }
+              return newVariable;
+            } else {
+              return entry.variable;
+            }
+          }
         } catch (e) {
-          return API.rejectWithStatus(`Failed to subscribe to variable ${name} at ${task}->${module} module.`, e);
+          return API.rejectWithStatus(`Failed to subscribe to variable at ${task}/${module}/${name}.`, e);
         }
       }
     };
 
     /**
-     * Subscribe to a existing RAPID variable.
+     * Get and Subscribe to a existing RAPID variable.
      * @alias getVariable
      * @memberof API.RAPID
      * @param {string} task  - RAPID Task in which the variable is contained
      * @param {string} module -RAPID module where the variable is contained
      * @param {string} name - name of RAPID variable
+     * @param {boolean} subscribe - subscribe to variable, default is true
      * @returns {API.RAPID.Variable}
      */
     this.getVariable = getVariableInstance;
+
+    /**
+     * Monitor a variable for changes
+     * @param {string} task
+     * @param {string} module
+     * @param {string} name
+     * @param {Function} callback
+     * @returns {API.RAPID.Variable}
+     */
+    this.monitorVariableInstance = async (task, module, name, callback) => {
+      try {
+        if (typeof callback !== 'function') throw new Error('callback is not a valid function');
+        if (typeof task !== 'string' || typeof module !== 'string' || typeof name !== 'string')
+          throw new Error('task, module or name is not a valid string');
+        if (!task || !module || !name) throw new Error('task, module or name is not defined');
+
+        const cbOnChanged = async (value) => {
+          callback(value, `${task}/${module}/${name}`);
+        };
+
+        const _varElement = await getVariableInstance(task, module, name);
+        _varElement.onChanged(cbOnChanged);
+
+        return _varElement;
+      } catch (e) {
+        return API.rejectWithStatus(`Failed to monitor variable ${task}/${module}/${name}.`, e);
+      }
+    };
 
     /**
      * Gets an instance of a API.RAPID.Task class
@@ -982,6 +1043,38 @@ export const factoryApiRapid = function (r) {
       await API.RWS.RAPID.loadModule.apply(null, arguments);
     };
     this.loadModule = loadModule;
+
+    /**
+     * Get RAPID Module Text
+     * @param {*} moduleName
+     * @param {*} taskName
+     * @returns {Promise<string>} containing the module text
+     */
+    this.getModuleText = async function (moduleName, taskName = 'T_ROB1') {
+      try {
+        const res = await API.RWS.RAPID.getModuleText(moduleName, taskName);
+
+        const moduleText = res['module-text'];
+        if (moduleText) return moduleText;
+
+        const filePath = res['file-path'];
+        const fileContent = await API.FILESYSTEM.getFile(filePath);
+        await API.FILESYSTEM.deleteFile(filePath);
+        return fileContent;
+      } catch (e) {
+        API.rejectWithStatus(`Failed to get ${taskName}:${moduleName} text.`, e);
+      }
+    };
+
+    this.setModuleText = async function (moduleName, text, taskName = 'T_ROB1') {
+      try {
+        await API.RWS.requestMastership('edit');
+        await API.RWS.RAPID.setModuleText(moduleName, text, taskName);
+        await API.RWS.releaseMastership('edit');
+      } catch (e) {
+        API.rejectWithStatus(`Failed to set ${taskName}:${moduleName} text.`, e);
+      }
+    };
 
     /**
      * Unload a RAPI module

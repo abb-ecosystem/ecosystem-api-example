@@ -4,9 +4,10 @@ import { Button_A } from './t-components-button.js';
 /**
  * @typedef TComponents.ButtonCloseProps
  * @prop {boolean} confirm - Popup a confirmation message before closing
- * @prop {function|null} [callback] - Function to be called when button is pressed
+ * @prop {function|null} [onClick] - Function to be called when button is pressed
  * @prop {string|null} [icon] - Path to image file
  * @prop {string} [label] - label text
+ * @prop {string} [text] Button text
  */
 
 /**

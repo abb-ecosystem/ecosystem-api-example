@@ -1,3 +1,4 @@
+import API from '../api/index.js';
 import { Component_A } from './t-components-component.js';
 import { Popup_A } from './t-components-popup.js';
 import { Button_A } from './t-components-button.js';
@@ -32,6 +33,7 @@ export class RapidStartStop_A extends Component_A {
      * @type {TComponents.RapidStartStopProps}
      */
     this._props;
+    this._src = imgStop;
   }
 
   /**
@@ -49,20 +51,27 @@ export class RapidStartStop_A extends Component_A {
   async onInit() {
     // subscribe to executionState
     try {
-      API.RAPID.monitorExecutionState((eventData) => {
+      await API.RAPID.monitorExecutionState((eventData) => {
+        const img = this.find('.tc-rapid-feedback');
         if (eventData == 'stopped') {
-          if (this._props.indicator) this.find('.tc-rapid-feedback').src = imgStop;
-          this.child.btnStart.enabled = true;
-          this.child.btnStop.enabled = false;
+          this._src = imgStop;
+          if (this._props.indicator && img) img.src = imgStop;
+          if (this.child && this.child.btnStart && this.child.btnStop) {
+            this.child.btnStart.enabled = true;
+            this.child.btnStop.enabled = false;
+          }
         } else if (eventData == 'running') {
-          if (this._props.indicator) this.find('.tc-rapid-feedback').src = imgStart;
-          this.child.btnStart.enabled = false;
-          this.child.btnStop.enabled = true;
+          this._src = imgStart;
+          if (this._props.indicator && img) img.src = imgStart;
+          if (this.child && this.child.btnStart && this.child.btnStop) {
+            this.child.btnStart.enabled = false;
+            this.child.btnStop.enabled = true;
+          }
         }
       });
     } catch (e) {
       this.error = true;
-      Popup_A.danger('Subscribe to failed. >>>', [e.message, e.description]);
+      Popup_A.danger('Subscribe to execution state failed. >>>', [e.message, e.description]);
     }
   }
 
@@ -81,13 +90,27 @@ export class RapidStartStop_A extends Component_A {
     };
   }
 
-  onRender() {}
+  onRender() {
+    const img = this.find('.tc-rapid-feedback');
+    if (this._props.indicator && img) img.src = this._src;
+    if (this._src === imgStart) {
+      this.child.btnStart.enabled = false;
+      this.child.btnStop.enabled = true;
+    } else {
+      this.child.btnStart.enabled = true;
+      this.child.btnStop.enabled = false;
+    }
+  }
 
   markup() {
     return /*html*/ `
 
           <div class="tc-container-row tc-item">
-          ${this._props.indicator ? `<img src="${imgStop}" style="width:36px ;height:36px;" class="tc-rapid-feedback tc-item"> </img>` : ''}
+          ${
+            this._props.indicator
+              ? `<img src="${imgStop}" style="width:36px ;height:36px;" class="tc-rapid-feedback tc-item"> </img>`
+              : ''
+          }
             <div class="tc-btn-start tc-item"></div>
             <div class="tc-btn-stop tc-item"></div>
           </div>

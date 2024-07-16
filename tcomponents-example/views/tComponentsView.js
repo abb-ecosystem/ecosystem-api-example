@@ -108,17 +108,17 @@ export default class TComponentsView extends TComponents.Component_A {
         text: 'ButtonAlign_A',
       }),
       teach: new TComponents.ButtonTeach_A(this.find('.btns-move'), {
-        variable: 'esTarget02',
+        robTarget: 'esTarget02',
         module: 'Ecosystem_BASE',
         text: 'ButtonTeach_A',
       }),
       move: new TComponents.ButtonMoveTo_A(this.find('.btns-move'), {
-        variable: 'esTarget02',
+        robTarget: 'esTarget02',
         module: 'Ecosystem_BASE',
         text: 'ButtonMoveTo_A',
       }),
       teachMove: new TComponents.ButtonTeachMove_A(this.find('.btns-move'), {
-        variable: 'esTarget02',
+        robTarget: 'esTarget02',
         module: 'Ecosystem_BASE',
         label: 'ButtonTeachMove_A',
         labelPos: 'right',
@@ -228,9 +228,9 @@ export default class TComponentsView extends TComponents.Component_A {
     // console.log('😎😎😎 - TComponentsView finished rendering...');
   }
 
-  markup({ _name }) {
+  markup() {
     return /*html*/ `
-        <h1 class="row comp-text">${_name}</h1>
+        <h1 class="row comp-text">${this._name}</h1>
         <div class="tc-accordion-item">
           <p class="tc-accordion-info-text">Variables</p>  
           <div class="tc-image-arrow-down tc-icon"></div>        

@@ -2,7 +2,9 @@ import { Component_A } from './t-components-component.js';
 
 /**
  * @typedef TComponents.SwitchProps
+ * @prop {string} [variant] Type of switch: 'checkbox', 'radio' or 'switch' (default = 'switch')
  * @prop {Function} [onChange] Function to be called when button is pressed
+ *
  */
 
 /**
@@ -46,18 +48,59 @@ export class Switch_A extends Component_A {
    * @returns {TComponents.SwitchProps}
    */
   defaultProps() {
-    return { onChange: null };
+    return { onChange: null, variant: 'switch' };
+  }
+
+  onInit() {
+    if (this._props.onChange) this.onChange(this._props.onChange);
+
+    if (this._props.variant === 'checkbox' && !(this._switch instanceof FPComponents.Checkbox_A)) {
+      this._switch = this._switchComponent(this._switch, FPComponents.Checkbox_A);
+    } else if (this._props.variant === 'radio' && !(this._switch instanceof FPComponents.Radio_A)) {
+      this._switch = this._switchComponent(this._switch, FPComponents.Radio_A);
+    } else if (this._props.variant === 'switch' && !(this._switch instanceof FPComponents.Switch_A)) {
+      this._switch = this._switchComponent(this._switch, FPComponents.Switch_A);
+    }
+    // in case the fp-component changed, lets update its enabled status
+    this.enabled = this.enabled;
+
+    switch (this._props.variant) {
+      case 'checkbox':
+      case 'radio':
+        this._switch.onclick = this.cbOnChange.bind(this);
+        break;
+      case 'switch':
+        this._switch.onchange = this.cbOnChange.bind(this);
+        break;
+      default:
+        break;
+    }
+  }
+
+  _switchComponent(oldComponent, newComponentConstructor) {
+    const active = oldComponent.active || oldComponent.checked;
+    const scale = oldComponent.scale;
+    oldComponent.onchange = null;
+    oldComponent.onclick = null;
+    const newComponent = new newComponentConstructor();
+    newComponent.active = active;
+    newComponent.scale = scale;
+
+    return newComponent;
   }
 
   onRender() {
     // this._switch.desc = this._props.label;
-    this._switch.onchange = this.cbOnChange.bind(this);
-    if (this._props.onChange) this.onChange(this._props.onChange);
+
     this._switch.attachToElement(this.find('.tc-switch'));
   }
 
   markup() {
     return /*html*/ `<div class="tc-switch"></div>`;
+  }
+
+  get propsEnums() {
+    return { variant: ['checkbox', 'radio', 'switch'] };
   }
 
   /**
@@ -68,14 +111,15 @@ export class Switch_A extends Component_A {
    * @private
    */
   get active() {
-    return this._switch.active;
+    const status = this._props.variant === 'switch' ? this._switch.active : this._switch.checked;
+    return status;
   }
 
   /**
    * @private
    */
   set active(value) {
-    this._switch.active = value;
+    this._props.variant === 'switch' ? (this._switch.active = value) : (this._switch.checked = value);
   }
 
   /**

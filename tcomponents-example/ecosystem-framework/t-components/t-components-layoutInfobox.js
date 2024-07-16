@@ -39,6 +39,7 @@ export class LayoutInfobox_A extends Component_A {
         height: 'auto',
         classNames: ['flex-col', 'justify-stretch'],
       },
+      transparent: false,
     };
   }
   mapComponents() {
@@ -52,6 +53,9 @@ export class LayoutInfobox_A extends Component_A {
 
   onRender() {
     this.child.content.cssBox(false);
+    if (this._props.transparent) {
+      this.find('.layout-infobox').classList.add('bg-transparent');
+    }
     this.container.classList.add('layout-container');
     this.child.content.container.style.minHeight = '60px';
   }
@@ -59,7 +63,11 @@ export class LayoutInfobox_A extends Component_A {
   markup() {
     return /*html*/ `
       <div class="layout-infobox ${this._props.useBorder ? 'tc-container-box' : ''}">
-        ${this._props.title ? /*html*/ `<div class="layout-title"><p>${this._props.title}</p></div>` : ''}
+        ${
+          this._props.title
+            ? /*html*/ `<div class="flex-row justify-center layout-title "><p>${Component_A.t(this._props.title)}</p></div>`
+            : ''
+        }
         <div class="layout-infobox-content flex-col justify-stretch"></div>
       </div>
     `;
@@ -110,7 +118,6 @@ LayoutInfobox_A.loadCssClassFromString(/*css*/ `
   font-weight: bold;
   font-size: 18px;
   text-align: center;
-  width: 100%;
 }
 
 .layout-infobox > :not(.layout-title)  {

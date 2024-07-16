@@ -10,7 +10,10 @@ declare namespace TComponents {
     off(eventName: string, callback: (...values: any[]) => void): boolean;
     once(eventName: string, callback: (...values: any[]) => void): void;
     trigger(eventName: string, ...data: any): void;
+    count(eventName: string): number;
     cleanUpEvents(): void;
+    hasEvent(eventName: string): boolean;
+    anyEvent(): boolean;
   }
 
   class Base_A extends Eventing_A {
@@ -22,7 +25,7 @@ declare namespace TComponents {
     props: any;
     defaultProps(props: object): object;
     getProps(): any;
-    setProps(props: object, onRender?: Function, sync?: boolean): Promise<void>;
+    setProps(props: object, onRender?: Function | null, sync?: boolean): Promise<boolean>;
 
     static _equalProps(newProps: object, prevProps: object): boolean;
   }
@@ -34,13 +37,18 @@ declare namespace TComponents {
   }
   class Component_A extends Base_A {
     constructor(parent: TComponentParent, props?: ComponentProps);
-
+    static _isTComponent: boolean;
+    static _isView: boolean;
+    static isTComponent(obj: any): boolean;
+    static isView(obj: any): boolean;
     static _isHTMLElement(o: any): boolean;
-    static _isTComponent(o: any): boolean;
     static loadCssClassFromString(css: string): void;
     static mIf(condition: boolean, markup: string, elseMarkup?: string): string;
     static mFor(array: any[], markup: Function): string;
+    static setLanguageAdapter(adapter: Function): void;
+    static t(key: string): string;
 
+    protected error: boolean;
     protected _getAllDefaultProps(): any;
 
     props: ComponentProps;
@@ -59,6 +67,8 @@ declare namespace TComponents {
 
     protected child: any;
 
+    protected initialized: boolean;
+
     forceUpdate(): void;
 
     init(): object;
@@ -71,19 +81,25 @@ declare namespace TComponents {
 
     get enabled(): boolean;
 
+    get hidden(): boolean;
+    set hidden(value: boolean);
+
     onInit(): void;
     mapComponents(): object;
     onRender(): void;
+    onDestroy(): void;
     markup(self: Component_A): string;
 
-    addEventListener(element: EventTarget, eventType: string, handler: EventListener): void;
+    addEventListener(
+      element: EventTarget,
+      eventType: string,
+      handler: (ev: any) => void,
+      options?: boolean | object,
+    ): void;
     removeAllEventListeners(): void;
     destroy(): void;
 
     attachToElement(element: HTMLElement): void;
-
-    // set(newProps: object): void;
-    // setupProps(newProps: object, initial: object): void;
 
     find(selector: string): HTMLElement;
     all(selector: string): HTMLElement[];
@@ -119,6 +135,9 @@ declare namespace TComponents {
     onClick(func: Function): void;
 
     protected cbOnClick(value: any): void;
+
+    get highlight(): boolean;
+    set highlight(value: boolean);
   }
 
   interface DigitalProps extends ComponentProps {
@@ -141,7 +160,34 @@ declare namespace TComponents {
     protected cbOnClick(value: any): void;
   }
 
+  interface CheckboxProps extends ComponentProps {
+    onChange?: (...values: any[]) => void;
+  }
+
+  class Checkbox_A extends Component_A {
+    constructor(parent: TComponentParent, props?: CheckboxProps);
+
+    props: CheckboxProps;
+
+    protected _switch: FPComponents.Checkbox_A;
+
+    onInit(): void;
+
+    onRender(): void;
+
+    get checked();
+    set checked(value: boolean);
+
+    get scale();
+    set scale(value: Number);
+
+    onChange(func: Function): void;
+
+    protected cbOnChange(value: any): void;
+  }
+
   interface SwitchProps extends ComponentProps {
+    useCheckbox?: boolean;
     onChange?: (...values: any[]) => void;
   }
 
@@ -201,7 +247,7 @@ declare namespace TComponents {
     tool?: string;
     wobj?: string;
     coords?: string;
-    selector?: boolean;
+    useCoordSelector?: boolean;
   }
 
   class ButtonAlign_A extends Button_A {
@@ -212,7 +258,7 @@ declare namespace TComponents {
   }
 
   interface ButtonMoveToProps extends ButtonProps {
-    variable: string;
+    robTarget: string;
     module: string;
     tool?: string;
     wobj?: string;
@@ -266,7 +312,7 @@ declare namespace TComponents {
   }
 
   interface ButtonTeachProps extends ButtonProps {
-    variable: string;
+    robTarget: string;
     module: string;
   }
 
@@ -277,7 +323,7 @@ declare namespace TComponents {
   }
 
   interface ButtonTeachMoveProps extends ComponentProps {
-    variable: string;
+    robTarget: string;
     module: string;
   }
 
@@ -289,6 +335,7 @@ declare namespace TComponents {
     itemList?: string[] | Number[];
     selected?: string | Number;
     addNoSelection?: boolean;
+    onSelection?: Function;
   }
 
   class Dropdown_A extends Component_A {
@@ -301,14 +348,15 @@ declare namespace TComponents {
     onSelection(func: Function): void;
     get selected(): string;
     set selected(arg: string);
-    get items(): string[];
-    set items(arg: string[]);
+    get items(): (string | boolean | Number)[];
+    set items(arg: (string | boolean | Number)[]);
 
     _updateItemList(itemsList: string[]): void;
   }
 
   interface ModalWindowProps {
     content?: Component_A | HTMLElement;
+    style?: string;
   }
 
   class ModalWindow_A extends Component_A {
@@ -344,9 +392,6 @@ declare namespace TComponents {
   class Popup_A {
     static get OK(): string;
     static get CANCEL(): string;
-
-    static show: boolean;
-    static enabled: boolean;
 
     static show: boolean;
     static enabled: boolean;
@@ -395,6 +440,20 @@ declare namespace TComponents {
     get signal(): void;
   }
 
+  interface IndicatorVariableProps extends DigitalProps {
+    task?: string;
+    module?: string;
+    variable?: string;
+    onChange?: Function;
+    readOnly?: boolean;
+  }
+
+  class IndicatorVariable_A extends Digital_A {
+    constructor(parent: TComponentParent, props?: SignalIndicatorProps);
+    props: IndicatorVariableProps;
+    get variable(): void;
+  }
+
   interface SwitchSignalProps extends ComponentProps {
     signal: string | object;
     callback?: Function;
@@ -416,6 +475,16 @@ declare namespace TComponents {
     constructor(parent: TComponentParent, props?: SignalViewProps);
   }
 
+  interface ButtonBoolProps extends ButtonProps {
+    boolVariable: string;
+    module: string;
+    task?: string;
+  }
+
+  class ButtonBool_A extends Button_A {
+    constructor(parent: TComponentParent, props: ButtonBoolProps);
+  }
+
   interface ButtonVariableProps extends ButtonProps {
     variable: string;
     module: string;
@@ -427,6 +496,7 @@ declare namespace TComponents {
   }
 
   interface VarIncrDecrProps extends ComponentProps {
+    task?: string;
     module?: string;
     variable?: string;
     readOnly?: boolean;
@@ -459,6 +529,7 @@ declare namespace TComponents {
   interface InputVariableProps extends InputProps {
     variable?: string;
     module?: string;
+    task?: string;
   }
 
   class InputVariable_A extends Component_A {
@@ -475,9 +546,10 @@ declare namespace TComponents {
     cbUpdateInputField(value: any): void;
   }
 
-  interface SwitchVariableProps extends Switch_A {
+  interface SwitchVariableProps extends SwitchProps {
     variable?: string;
     module?: string;
+    task?: string;
   }
 
   class SwitchVariable_A extends Switch_A {
@@ -495,8 +567,8 @@ declare namespace TComponents {
 
   interface filterRapid {
     name?: string;
-    symbolType?: 'constant' | 'variable' | 'persistent';
-    dataType?: string;
+    symbolType?: API.RAPID.VariableSymbolType;
+    dataType?: API.RAPID.RapidDataType;
   }
 
   interface ItemMap {
@@ -515,49 +587,78 @@ declare namespace TComponents {
     _updateItemMap(imap: object): void;
   }
 
-  interface SelectorVariablesProps extends DropdownProps {
+  interface SelectorVariablesProps extends ComponentProps {
     module?: string;
     isInUse?: boolean;
-    filter?: filterRapid;
+    filter?: API.RAPID.filterVariables;
+    addNoSelection?: boolean;
+    selected?: string;
+    onSelection?: Function;
   }
 
   class SelectorVariables_A extends Dropdown_A {
     constructor(parent: TComponentParent, props?: SelectorVariablesProps);
 
-    updateSearch(module: string, filter?: object): Promise<void>;
+    onSelection(func: Function): void;
+    updateSearch(module: string, task?: string, filter?: object): Promise<void>;
+    get selected(): string;
+    set selected(arg: string);
+    get items(): string[];
+    set items(arg: string[]);
   }
 
-  interface SelectorProceduresProps extends DropdownProps {
+  interface SelectorProceduresProps extends ComponentProps {
     module?: string;
     isInUse?: boolean;
     filter?: string;
+    addNoSelection?: boolean;
+    selected?: string;
+    onSelection?: Function;
   }
 
   class SelectorProcedures_A extends Dropdown_A {
     constructor(parent: TComponentParent, props?: SelectorProceduresProps);
 
-    updateSearch(module: string, filter?: string): Promise<void>;
+    onSelection(func: Function): void;
+    updateSearch(module: string, task?: string, filter?: string): Promise<void>;
+    get selected(): string;
+    set selected(arg: string);
+    get items(): string[];
+    set items(arg: string[]);
   }
 
   class SelectorTasks_A extends Dropdown_A {
     constructor(parent: TComponentParent, props?: DropdownProps);
+    onSelection(func: Function): void;
   }
 
   interface SelectorModulesProps extends DropdownProps {
     isInUse?: boolean;
     filter?: string;
+    addNoSelection?: boolean;
+    selected?: string;
+    onSelection?: Function;
   }
 
   class SelectorModules_A extends Dropdown_A {
     constructor(parent: TComponentParent, props?: SelectorModulesProps);
-
-    updateSearch(filter?: string): Promise<void>;
+    onSelection(func: Function): void;
+    updateSearch(task?: string, filter?: string): Promise<void>;
+    get selected(): string;
+    set selected(arg: string);
+    get items(): string[];
+    set items(arg: string[]);
   }
 
   class SelectorEthernetIPDevices_A extends Dropdown_A {
     constructor(parent: TComponentParent, props?: DropdownProps);
 
+    onSelection(func: Function): void;
     updateSearch(): Promise<void>;
+    get selected(): string;
+    set selected(arg: string);
+    get items(): string[];
+    set items(arg: string[]);
   }
 
   interface filterRapid {
@@ -571,13 +672,18 @@ declare namespace TComponents {
   }
 
   interface SelectorSignalsProps extends DropdownProps {
-    filter?: filterRapid;
+    filter?: API.SIGNAL.filterSignalSearch;
+    onSelection?: Function;
   }
 
   class SelectorSignals_A extends Dropdown_A {
     constructor(parent: TComponentParent, props?: SelectorSignalsProps);
-
+    onSelection(func: Function): void;
     updateSearch(filter: object): Promise<void>;
+    get selected(): string;
+    set selected(arg: string);
+    get items(): string[];
+    set items(arg: string[]);
   }
 
   interface TemplateViewProps extends ComponentProps {
@@ -651,6 +757,13 @@ declare namespace TComponents {
     set userTabClosing(value: boolean);
     get activeTab(): string;
     set activeTab(name: string);
+  }
+
+  interface StepContainerProps extends ComponentProps {
+    views?: View[];
+  }
+  class StepContainer_A extends Component_A {
+    constructor(parent: TComponentParent, props?: StepContainerProps);
   }
 
   interface ContainerProps extends ComponentProps {

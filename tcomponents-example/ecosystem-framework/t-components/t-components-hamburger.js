@@ -38,32 +38,36 @@ export class Hamburger_A extends Menu_A {
   }
 
   onInit() {
+    this.hamburgerMenu = new FPComponents.Hamburgermenu_A();
     this._props.views.forEach((view) => {
       if (!view.hasOwnProperty('image')) view['image'] = '';
     });
     super.onInit();
   }
   defaultProps() {
-    return { alwaysVisible: true };
+    return { alwaysVisible: true, transparent: false };
   }
 
   onRender() {
-    this.hamburgerMenu = new FPComponents.Hamburgermenu_A();
     this.hamburgerMenu.attachToElement(this.container);
-    this.hamburgerMenu.title = this._props.title;
+    this.hamburgerMenu.title = Hamburger_A.t(this._props.title);
     this.hamburgerMenu.alwaysVisible = this._props.alwaysVisible;
     this.hamburgerMenu.onchange = this.cbOnChange.bind(this);
 
     this.container.dataset.view = 'true';
     this.views.forEach(({ name, content, image, active, id }) => {
-      const dom = this._getDom(content, id);
-      this.viewId.set(this.hamburgerMenu.addView(name, dom, image ? image : undefined, active), name);
+      const dom = this._getDom(content, id, name);
+      this.viewId.set(this.hamburgerMenu.addView(Hamburger_A.t(name), dom, image ? image : undefined, active), name);
     });
     this.find('.fp-components-hamburgermenu-a-menu__container').style.setProperty('z-index', '3');
     this.find('.fp-components-hamburgermenu-a-button-container').style.setProperty('z-index', '3');
     this.find('.fp-components-hamburgermenu-a-container').style.alignItems = 'normal';
     this.find('.fp-components-hamburgermenu-a-container').classList.add('hamburger__container');
-    this.find('.fp-components-hamburgermenu-a-container__content').classList.add('hamburger__container', 'flex-col', 'justify-stretch');
+    this.find('.fp-components-hamburgermenu-a-container__content').classList.add(
+      'hamburger__container',
+      'flex-col',
+      'justify-stretch',
+    );
 
     // this.find('.fp-components-hamburgermenu-a-container__content').style.setProperty(
     //   'overflow',
@@ -74,6 +78,11 @@ export class Hamburger_A extends Menu_A {
     // baseEl.classList.remove('fp-components-base');
     this.container.classList.add('tc-container');
     this.container.classList.add('hamburger-base-style');
+    this.container.dataset.view = 'true';
+
+    if (this._props.transparent) {
+      this.find('.fp-components-base').classList.add('bg-transparent');
+    }
   }
 
   /**
@@ -88,11 +97,20 @@ export class Hamburger_A extends Menu_A {
   }
 
   get activeView() {
+    if (!this.hamburgerMenu) throw new Error('Hamburger menu not initialized. Please render the component first.');
     return this.viewId.get(this.hamburgerMenu.activeView);
   }
 
   set activeView(name) {
-    this.hamburgerMenu.activeView = [...this.viewId.entries()].filter(([_, value]) => value === name)[0][0];
+    if (!this.hamburgerMenu) throw new Error('Hamburger menu not initialized. Please render the component first.');
+
+    const entries = [...this.viewId.entries()].filter(([_, value]) => value === name);
+    if (entries.length > 0) {
+      this.all('.fp-components-hamburgermenu-a-menu__button--active').forEach((el) => {
+        el.classList.remove('fp-components-hamburgermenu-a-menu__button--active');
+      });
+      this.hamburgerMenu.activeView = entries[0][0];
+    }
   }
 }
 

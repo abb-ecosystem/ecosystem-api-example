@@ -4,14 +4,16 @@ import { Button_A } from './t-components-button.js';
 
 /**
  * @typedef TComponents.ButtonMoveToProps
- * @prop {string} variable Rapid variable to subpscribe to
- * @prop {string} module Module containig the rapid variable
+ * @prop {string} robTarget Rapid robTarget to subpscribe to
+ * @prop {string} module Module containig the rapid robTarget
  * @prop {string} [tool] Active tool - default='', which means current tool,
  * @prop {string} [wobj] Active working object - defaut='', which means current working object,
  * @prop {string} [coords] Active coordinate system {@link API.MOTION.COORDS} , defaut=API.MOTION.COORDS.Current,
- * @prop {Function} [callback] Function to be called when button is pressed
+ * @prop {number} [speed] Speed of the movement in %, default=100
+ * @prop {Function} [onClick] Function to be called when button is pressed
  * @prop {string} [label] Label text
  * @prop {string|null} [icon] Path to image file
+ * @prop {string} [text] Button text
  */
 
 /**
@@ -28,7 +30,7 @@ import { Button_A } from './t-components-button.js';
  *
  * // index.js
  * const btnMove = new ButtonMoveTo_A(document.querySelector('.btn-move'), {
- *    variable: 'esTarget02',
+ *    robTarget: 'esTarget02',
  *    module: 'Ecosystem_BASE',
  *    text: 'move to',
  *  });
@@ -44,11 +46,11 @@ export class ButtonMoveTo_A extends Button_A {
      */
     this._props;
 
-    this.initPropsDep(['module', 'variable']);
+    this.initPropsDep(['module', 'robTarget']);
 
-    this._value = null;
+    this._variable = null;
     this._isJogging = false;
-    if (this._props.text === this._getAllDefaultProps().text) this._props.text = 'Move to';
+    if (this._props.text === this._getAllDefaultProps().text) this._props.text = 'Move';
   }
 
   /**
@@ -60,35 +62,40 @@ export class ButtonMoveTo_A extends Button_A {
   defaultProps() {
     return {
       module: '',
-      variable: '',
+      robTarget: '',
       tool: '',
       wobj: '',
       coords: API.MOTION.COORDS.Current,
+      speed: 100,
     };
   }
 
   async onInit() {
-    if (!this._props.module || !this._props.variable) {
+    if (!this._props.module || !this._props.robTarget) {
       this.error = true;
       return;
     }
     try {
       this.task = await API.RAPID.getTask();
 
-      this._value = await this.task.getValue(this._props.module, this._props.variable);
+      this._variable = await this.task.getVariable(this._props.module, this._props.robTarget);
+
+      if (!this._variable || this._variable.type !== 'robtarget')
+        throw new Error(`Variable ${this._props.robTarget} is not a robtarget`);
     } catch (e) {
       this.error = true;
 
-      Popup_A.warning(`Move to button`, [`Error when gettin variable ${this._props.variable}`, e.message]);
+      Popup_A.warning(`Move to button`, [`Error when getting variable ${this._props.robTarget}`, e.message]);
     }
   }
 
   onRender() {
     super.onRender();
-    const elemBtnMove = this.container;
-    this.addEventListener(elemBtnMove, 'pointerdown', this.move.bind(this));
-    this.addEventListener(elemBtnMove, 'pointerup', this.stop.bind(this));
-    this.addEventListener(elemBtnMove, 'pointerleave', this.stop.bind(this));
+
+    const btn = this.find('.tc-button');
+    this.addEventListener(btn, 'pointerdown', this.move.bind(this));
+    this.addEventListener(btn, 'pointerup', this.stop.bind(this));
+    this.addEventListener(btn, 'pointerleave', this.stop.bind(this));
   }
 
   /**
@@ -99,22 +106,28 @@ export class ButtonMoveTo_A extends Button_A {
    */
   async move() {
     if (this._btn.enabled) {
-      const jogData = [500, 500, 500, 500, 500, 500];
-      this._value = await this.task.getValue(this._props.module, this._props.variable);
-      if (!this._value) return;
       try {
+        const speed = this._props.speed > 100 ? 100 : this._props.speed < 2 ? 2 : this._props.speed;
+        const jogData = [
+          (1000 * speed) / 100,
+          (1000 * speed) / 100,
+          (1000 * speed) / 100,
+          (1000 * speed) / 100,
+          (1000 * speed) / 100,
+          (1000 * speed) / 100,
+        ];
+        const value = await this._variable.getValue();
+        if (!value) return;
+
+        const tool = this._props.tool ? this._props.tool : 'tool0';
+        const wobj = this._props.wobj ? this._props.wobj : 'wobj0';
+        const coords = this._props.coords ? this._props.coords : API.MOTION.COORDS.Current;
+        const jogMode = API.MOTION.JOGMODE.GoToPos;
+        const robTarget = value;
+
         this._isJogging = true;
 
-        let props = {
-          jogMode: API.MOTION.JOGMODE.GoToPos,
-          jogData: jogData,
-          robTarget: this._value,
-        };
-        if (this._props.tool) props = Object.assign({ props }, { tool: this._props.tool });
-        if (this._props.wobj) props = Object.assign({ props }, { wobj: this._props.wobj });
-        if (this._props.coords) props = Object.assign({ props }, { coords: this._props.coords });
-
-        await API.MOTION.executeJogging(props);
+        await API.MOTION.executeJogging(tool, wobj, coords, jogMode, jogData, robTarget);
       } catch (e) {
         this._isJogging = false;
         Popup_A.error(e, 'TComponents.ButtonMoveTo_A');

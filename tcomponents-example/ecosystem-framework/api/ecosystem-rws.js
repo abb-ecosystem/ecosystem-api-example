@@ -288,16 +288,19 @@ const factoryApiRws = function (rws) {
        * @returns {Promise<any>}
        */
       this.setRobotPositionTarget = function (r) {
-        if (r.trans === undefined || r.rot === undefined || r.robconf === undefined) return Promise.reject("Parameter 'r' is not a robtarget.");
+        if (r.trans === undefined || r.rot === undefined || r.robconf === undefined)
+          return Promise.reject("Parameter 'r' is not a robtarget.");
 
         let url = `/rw/motionsystem/position-target`;
-        let body = `pos-x=${r.trans.x}&pos-y=${r.trans.y}&pos-z=${r.trans.z}&orient-q1=${r.rot.q1}&orient-q2=${r.rot.q2}&orient-q3=${
-          r.rot.q3
-        }&orient-q4=${r.rot.q4}&config-j1=${r.robconf.cf1}&config-j4=${r.robconf.cf4}&config-j6=${r.robconf.cf6}&config-jx=${
-          r.robconf.cfx
-        }&extjoint-1=${r.extax ? r.extax.eax_a : 9e9}&extjoint-2=${r.extax ? r.extax.eax_b : 9e9}&extjoint-3=${
-          r.extax ? r.extax.eax_c : 9e9
-        }&extjoint-4=${r.extax ? r.extax.eax_d : 9e9}&extjoint-5=${r.extax ? r.extax.eax_e : 9e9}&extjoint-6=${r.extax ? r.extax.eax_f : 9e9}`;
+        let body = `pos-x=${r.trans.x}&pos-y=${r.trans.y}&pos-z=${r.trans.z}&orient-q1=${r.rot.q1}&orient-q2=${
+          r.rot.q2
+        }&orient-q3=${r.rot.q3}&orient-q4=${r.rot.q4}&config-j1=${r.robconf.cf1}&config-j4=${r.robconf.cf4}&config-j6=${
+          r.robconf.cf6
+        }&config-jx=${r.robconf.cfx}&extjoint-1=${r.extax ? r.extax.eax_a : 9e9}&extjoint-2=${
+          r.extax ? r.extax.eax_b : 9e9
+        }&extjoint-3=${r.extax ? r.extax.eax_c : 9e9}&extjoint-4=${r.extax ? r.extax.eax_d : 9e9}&extjoint-5=${
+          r.extax ? r.extax.eax_e : 9e9
+        }&extjoint-6=${r.extax ? r.extax.eax_f : 9e9}`;
 
         return rwsPost(url, body, 'Failed to set robot position.');
       };
@@ -313,11 +316,11 @@ const factoryApiRws = function (rws) {
         if (j.robax === undefined) return Promise.reject("Parameter 'j' is not a jointtarget.");
 
         let url = `/rw/motionsystem/position-joint`;
-        let body = `robjoint=${j.robax.rax_1},${j.robax.rax_2},${j.robax.rax_3},${j.robax.rax_4},${j.robax.rax_5},${j.robax.rax_6}&extjoint=${
-          j.extax ? j.extax.eax_a : 9e9
-        },${j.extax ? j.extax.eax_b : 9e9},${j.extax ? j.extax.eax_c : 9e9},${j.extax ? j.extax.eax_d : 9e9},${j.extax ? j.extax.eax_e : 9e9},${
-          j.extax ? j.extax.eax_f : 9e9
-        }`;
+        let body = `robjoint=${j.robax.rax_1},${j.robax.rax_2},${j.robax.rax_3},${j.robax.rax_4},${j.robax.rax_5},${
+          j.robax.rax_6
+        }&extjoint=${j.extax ? j.extax.eax_a : 9e9},${j.extax ? j.extax.eax_b : 9e9},${j.extax ? j.extax.eax_c : 9e9},${
+          j.extax ? j.extax.eax_d : 9e9
+        },${j.extax ? j.extax.eax_e : 9e9},${j.extax ? j.extax.eax_f : 9e9}`;
 
         return rwsPost(url, body, 'Failed to set joint position.');
       };
@@ -367,8 +370,6 @@ const factoryApiRws = function (rws) {
 
         let obj = parseJSON(res.responseText);
 
-        console.log('😛 getRobTarget:', obj);
-
         let rt = { trans: {}, rot: {}, robconf: {}, extax: {} };
         rt.trans.x = parseFloat(obj['state'][0]['x']);
         rt.trans.y = parseFloat(obj['state'][0]['y']);
@@ -394,7 +395,6 @@ const factoryApiRws = function (rws) {
       const parseJointTarget = function (jointTarget, toDegrees = false) {
         let jt = { robax: {}, extax: {} };
         let factor = 180 / Math.PI;
-        console.log('😯', jointTarget, toDegrees, factor);
         jt.robax.rax_1 = toDegrees ? parseFloat(jointTarget['rax_1']) * factor : parseFloat(jointTarget['rax_1']);
         jt.robax.rax_2 = toDegrees ? parseFloat(jointTarget['rax_2']) * factor : parseFloat(jointTarget['rax_2']);
         jt.robax.rax_3 = toDegrees ? parseFloat(jointTarget['rax_3']) * factor : parseFloat(jointTarget['rax_3']);
@@ -468,24 +468,28 @@ const factoryApiRws = function (rws) {
          *   }
          */
         const r = robTarget;
-        const t = toolData ? toolData : { robhold: true, tframe: { trans: { x: 0, y: 0, z: 0 }, rot: { q1: 1, q2: 0, q3: 0, q4: 0 } } };
+        const t = toolData
+          ? toolData
+          : { robhold: true, tframe: { trans: { x: 0, y: 0, z: 0 }, rot: { q1: 1, q2: 0, q3: 0, q4: 0 } } };
         const toMeters = 0.001;
 
         if (r.trans === undefined || r.rot === undefined || r.robconf === undefined)
           return Promise.reject("Parameter 'robTarget' is not a robtarget.");
 
         let url = `/rw/motionsystem/mechunits/${mechUnit}/all-joints-solution`;
-        let body = `curr_position=[${r.trans.x * toMeters},${r.trans.y * toMeters},${r.trans.z * toMeters}]&curr_ext_joints=[${
-          r.extax ? r.extax.eax_a : 9e9
-        },${r.extax ? r.extax.eax_b : 9e9},${r.extax ? r.extax.eax_c : 9e9},${r.extax ? r.extax.eax_d : 9e9},${r.extax ? r.extax.eax_e : 9e9},${
+        let body = `curr_position=[${r.trans.x * toMeters},${r.trans.y * toMeters},${
+          r.trans.z * toMeters
+        }]&curr_ext_joints=[${r.extax ? r.extax.eax_a : 9e9},${r.extax ? r.extax.eax_b : 9e9},${
+          r.extax ? r.extax.eax_c : 9e9
+        },${r.extax ? r.extax.eax_d : 9e9},${r.extax ? r.extax.eax_e : 9e9},${
           r.extax ? r.extax.eax_f : 9e9
-        }]&tool_frame_position=[${t.tframe.trans.x * toMeters},${t.tframe.trans.y * toMeters},${t.tframe.trans.z * toMeters}]&curr_orientation=[${
-          r.rot.q1
-        },${r.rot.q2},${r.rot.q3},${r.rot.q4}]&tool_frame_orientation=[${t.tframe.rot.q1},${t.tframe.rot.q2},${t.tframe.rot.q3},${
-          t.tframe.rot.q4
-        }]&robot_fixed_object=${t.robhold ? 'TRUE' : 'FALSE'}&robot_configuration=[${r.robconf.cf1},${r.robconf.cf4},${r.robconf.cf6},${
-          r.robconf.cfx
-        }]`;
+        }]&tool_frame_position=[${t.tframe.trans.x * toMeters},${t.tframe.trans.y * toMeters},${
+          t.tframe.trans.z * toMeters
+        }]&curr_orientation=[${r.rot.q1},${r.rot.q2},${r.rot.q3},${r.rot.q4}]&tool_frame_orientation=[${
+          t.tframe.rot.q1
+        },${t.tframe.rot.q2},${t.tframe.rot.q3},${t.tframe.rot.q4}]&robot_fixed_object=${
+          t.robhold ? 'TRUE' : 'FALSE'
+        }&robot_configuration=[${r.robconf.cf1},${r.robconf.cf4},${r.robconf.cf6},${r.robconf.cfx}]`;
 
         let res = await rwsPost(url, body, 'Failed to get Joints from Cartesian');
 
@@ -569,10 +573,11 @@ const factoryApiRws = function (rws) {
          */
         const r = robTarget;
         const j = jointTarget;
-        const t = toolData ? toolData : { robhold: true, tframe: { trans: { x: 0, y: 0, z: 0 }, rot: { q1: 1, q2: 0, q3: 0, q4: 0 } } };
+        const t = toolData
+          ? toolData
+          : { robhold: true, tframe: { trans: { x: 0, y: 0, z: 0 }, rot: { q1: 1, q2: 0, q3: 0, q4: 0 } } };
 
         const toRadians = Math.PI / 180;
-        console.log('😯', toRadians);
 
         const toMeters = 0.001;
 
@@ -580,21 +585,25 @@ const factoryApiRws = function (rws) {
           return Promise.reject("Parameter 'robTarget' is not a robtarget.");
 
         let url = `/rw/motionsystem/mechunits/${mechUnit}/joints-from-cartesian`;
-        let body = `curr_position=[${r.trans.x * toMeters},${r.trans.y * toMeters},${r.trans.z * toMeters}]&curr_ext_joints=[${
-          r.extax ? r.extax.eax_a : 9e9
-        },${r.extax ? r.extax.eax_b : 9e9},${r.extax ? r.extax.eax_c : 9e9},${r.extax ? r.extax.eax_d : 9e9},${r.extax ? r.extax.eax_e : 9e9},${
+        let body = `curr_position=[${r.trans.x * toMeters},${r.trans.y * toMeters},${
+          r.trans.z * toMeters
+        }]&curr_ext_joints=[${r.extax ? r.extax.eax_a : 9e9},${r.extax ? r.extax.eax_b : 9e9},${
+          r.extax ? r.extax.eax_c : 9e9
+        },${r.extax ? r.extax.eax_d : 9e9},${r.extax ? r.extax.eax_e : 9e9},${
           r.extax ? r.extax.eax_f : 9e9
-        }]&tool_frame_position=[${t.tframe.trans.x},${t.tframe.trans.y},${t.tframe.trans.z}]&curr_orientation=[${r.rot.q1},${r.rot.q2},${r.rot.q3},${
-          r.rot.q4
-        }]&tool_frame_orientation=[${t.tframe.rot.q1},${t.tframe.rot.q2},${t.tframe.rot.q3},${t.tframe.rot.q4}]&old_rob_joints=[${
-          j.robax.rax_1 * toRadians
-        },${j.robax.rax_2 * toRadians},${j.robax.rax_3 * toRadians},${j.robax.rax_4 * toRadians},${j.robax.rax_5 * toRadians},${
-          j.robax.rax_6 * toRadians
-        }]&old_ext_joints=[${j.extax ? j.extax.eax_a : 9e9},${j.extax ? j.extax.eax_b : 9e9},${j.extax ? j.extax.eax_c : 9e9},${
-          j.extax ? j.extax.eax_d : 9e9
-        },${j.extax ? j.extax.eax_e : 9e9},${j.extax ? j.extax.eax_f : 9e9}]&robot_fixed_object=${
-          t.robhold ? 'TRUE' : 'FALSE'
-        }&robot_configuration=[${r.robconf.cf1},${r.robconf.cf4},${r.robconf.cf6},${r.robconf.cfx}]&elog_at_error=TRUE`;
+        }]&tool_frame_position=[${t.tframe.trans.x},${t.tframe.trans.y},${t.tframe.trans.z}]&curr_orientation=[${
+          r.rot.q1
+        },${r.rot.q2},${r.rot.q3},${r.rot.q4}]&tool_frame_orientation=[${t.tframe.rot.q1},${t.tframe.rot.q2},${
+          t.tframe.rot.q3
+        },${t.tframe.rot.q4}]&old_rob_joints=[${j.robax.rax_1 * toRadians},${j.robax.rax_2 * toRadians},${
+          j.robax.rax_3 * toRadians
+        },${j.robax.rax_4 * toRadians},${j.robax.rax_5 * toRadians},${j.robax.rax_6 * toRadians}]&old_ext_joints=[${
+          j.extax ? j.extax.eax_a : 9e9
+        },${j.extax ? j.extax.eax_b : 9e9},${j.extax ? j.extax.eax_c : 9e9},${j.extax ? j.extax.eax_d : 9e9},${
+          j.extax ? j.extax.eax_e : 9e9
+        },${j.extax ? j.extax.eax_f : 9e9}]&robot_fixed_object=${t.robhold ? 'TRUE' : 'FALSE'}&robot_configuration=[${
+          r.robconf.cf1
+        },${r.robconf.cf4},${r.robconf.cf6},${r.robconf.cfx}]&elog_at_error=TRUE`;
 
         let res = await rwsPost(url, body, 'Failed to get Joints from Cartesian');
 
@@ -634,7 +643,10 @@ const factoryApiRws = function (rws) {
        */
       this.loadModule = async function (path, replace = false, taskName = 'T_ROB1') {
         const f = async function () {
-          return await RWS.Network.post(`/rw/rapid/tasks/${taskName}/loadmod?mastership=implicit`, 'modulepath=' + path + '&replace=' + replace);
+          return await RWS.Network.post(
+            `/rw/rapid/tasks/${taskName}/loadmod?mastership=implicit`,
+            'modulepath=' + path + '&replace=' + replace,
+          );
         };
         return await requestMastershipAround(f);
       };
@@ -655,6 +667,61 @@ const factoryApiRws = function (rws) {
       };
 
       /**
+       * Get a RAPID module text
+       * @param {*} moduleName
+       * @param {*} taskName
+       * @returns {Promise<any>} object containing the following structure
+       * {
+       *  change-count,
+       *  module-length,
+       *  module-text?,
+       *  file-path?,
+       *  _title,
+       *  _type,
+       * }
+       */
+      this.getModuleText = async function (moduleName, taskName = 'T_ROB1') {
+        let res = await RWS.Network.get(`/rw/rapid/tasks/${taskName}/modules/${moduleName}/text`);
+        var fixedResponse = res.responseText.replace(/""(.*?)""/g, '"$1"');
+        let obj = parseJSON(fixedResponse);
+
+        if (typeof obj === 'undefined') return Promise.reject('Could not parse JSON.');
+        if (!obj.state[0]) return Promise.reject('Failed to get module text.');
+
+        return obj.state[0];
+      };
+
+      /**
+       * Set the content of a RAPID module
+       * @param {*} moduleName
+       * @param {*} text
+       * @param {*} taskName
+       * @returns
+       */
+      this.setModuleText = async function (moduleName, text, taskName = 'T_ROB1') {
+        const url = `/rw/rapid/tasks/${taskName}/modules/${moduleName}/text`;
+        const body = `text=${encodeURIComponent(text)}`;
+        return await rwsPost(url, body, `Failed to set content of ${taskName}:${moduleName}.`);
+      };
+
+      this.setModuleTextInRange = async function (
+        moduleName,
+        text,
+        startRow,
+        startCol,
+        endRow,
+        endCol,
+        taskName = 'T_ROB1',
+        replaceMode = 'Replace',
+      ) {
+        const url = `/rw/rapid/tasks/${taskName}/modules/${moduleName}/text/range`;
+        const body = `replace-mode=${replaceMode}&query-mode=Force&startrow=${startRow}&startcol=${startCol}&endrow=${endRow}&endcol=${endCol}&text=${encodeURIComponent(
+          text,
+        )}`;
+        return rwsPost(url, body, `Failed to set content of ${taskName}:${moduleName}.`);
+      };
+
+      /**
        * Move the program pointer to an specific cursor position
        * @alias movePPToCursor
        * @memberof API.RWS.RAPID
@@ -670,7 +737,9 @@ const factoryApiRws = function (rws) {
         if (typeof column !== 'string') return Promise.reject("Parameter 'column' is not a string.");
 
         let url = `/rw/rapid/tasks/${encodeURIComponent(taskName)}/pcp/cursor?mastership=implicit`;
-        let body = `module=${encodeURIComponent(moduleName)}&line=${encodeURIComponent(line)}&column=${encodeURIComponent(column)}`;
+        let body = `module=${encodeURIComponent(moduleName)}&line=${encodeURIComponent(
+          line,
+        )}&column=${encodeURIComponent(column)}`;
         return rwsPost(url, body, 'Failed to set PP to cursor.');
       };
     })();

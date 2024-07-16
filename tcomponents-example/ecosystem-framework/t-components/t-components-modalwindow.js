@@ -57,6 +57,7 @@ export class ModalWindow_A extends Component_A {
   defaultProps() {
     return {
       content: null,
+      style: '',
     };
   }
 
@@ -66,7 +67,7 @@ export class ModalWindow_A extends Component_A {
 
   onRender() {
     if (this._props.content) {
-      if (this._props.content instanceof Component_A) {
+      if (Component_A.isTComponent(this._props.content)) {
         this._props.content.attachToElement(this.find('.tc-modal-window-content'));
       } else if (Component_A._isHTMLElement(this._props.content)) {
         const contentElement = this.find('.tc-modal-window-content');
@@ -92,13 +93,14 @@ export class ModalWindow_A extends Component_A {
    * @returns {string}
    */
   markup() {
+    const style = this._props.style ? `style="${this._props.style};"` : '';
     return /*html*/ `
           <div class="tc-overlay tc-hidden">
-            <div class="tc-modal-window tc-hidden">
+            <div class="tc-modal-window tc-hidden" ${style}>
               <button class="tc-close-modal">&times;</button>
-              <div class="tc-modal-window-content"></div>
+              <div class="tc-modal-window-content" ${style}></div>
             </div>
-          </div>    
+          </div>
           `;
   }
 
@@ -162,8 +164,6 @@ export class ModalWindow_A extends Component_A {
    * @see TComponents.ModalWindow_A.triggerElements
    */
   openWindow(e) {
-    console.log('openWindow called...');
-
     // Calling any registered handler
     // for (let i = 0; i < this.handler.length; i++) {
     //   try {
@@ -174,7 +174,7 @@ export class ModalWindow_A extends Component_A {
     // }
 
     // Passing dataset information if stored in the element
-    if (e.target instanceof HTMLElement) {
+    if (e && e.target instanceof HTMLElement) {
       const el = e.target.closest('.tc-modal-window-trigger');
       if (el instanceof HTMLElement && el.dataset) {
         this._props.content.render(Object.assign({}, el.dataset));
@@ -194,7 +194,9 @@ export class ModalWindow_A extends Component_A {
     this._overlay.classList.toggle('tc-hidden');
     this._window.classList.toggle('tc-hidden');
 
-    document.body.style.overflow === 'hidden' ? (document.body.style.overflow = 'auto') : (document.body.style.overflow = 'hidden');
+    document.body.style.overflow === 'hidden'
+      ? (document.body.style.overflow = 'auto')
+      : (document.body.style.overflow = 'hidden');
 
     this.isOpen ? this.trigger('open') : this.trigger('close');
   }

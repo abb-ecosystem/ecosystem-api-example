@@ -7,7 +7,6 @@ import { Digital_A } from './t-components-digital.js';
  * @prop {string | API.SIGNAL.Signal} [signal] Signal to connect. It can be either the name of the signal or an {@link API.SIGNAL.Signal} object
  * @prop {Function} [onChange] Callback called when the signal changes its state
  * @prop {boolean} [readOnly] If true (default), clicks on indicator does not change the state of the signal
- * @prop {Function} [callback] Function to be called when indicator is pressed
  * @prop {string} [label] Label text
  */
 
@@ -65,7 +64,8 @@ export class SignalIndicator_A extends Digital_A {
     }
 
     try {
-      this._signal = typeof this._props.signal === 'string' ? await API.SIGNAL.getSignal(this._props.signal) : this._props.signal;
+      this._signal =
+        typeof this._props.signal === 'string' ? await API.SIGNAL.getSignal(this._props.signal) : this._props.signal;
 
       this._signal.onChanged(this.cbUpdateIndicator.bind(this));
       this._props.onChange && this.onChange(this._props.onChange);
@@ -91,13 +91,14 @@ export class SignalIndicator_A extends Digital_A {
    */
   async cbOnClick() {
     if (this._props.readOnly) return;
-
     const value = this.active;
     try {
+      if(!this._signal) throw new Error('Signal not initialized');
+
       value ? await this._signal.setValue(false) : await this._signal.setValue(true);
     } catch (e) {
       console.error(e);
-      Popup_A.error(e);
+      Popup_A.error(e, 'SignalIndicator_A');
     }
     this.trigger('click', value);
   }

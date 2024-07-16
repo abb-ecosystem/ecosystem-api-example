@@ -15,7 +15,7 @@ import { Component_A } from './t-components-component.js';
  * @class TComponents.Input_A
  * @extends TComponents.Component_A
  * @param {HTMLElement} parent - DOM element in which this component is to be inserted
- * @param {TComponents.InputProps} [props] - label text
+ * @param {TComponents.InputProps} [props] - input field properties (InputProps)
  * @example
  * // index.html
  * ...
@@ -54,6 +54,8 @@ export class Input_A extends Component_A {
       readOnly: false,
       description: '',
       useBorder: true,
+      transparent: false,
+      bold: false,
       text: '',
     };
   }
@@ -61,19 +63,33 @@ export class Input_A extends Component_A {
   async onInit() {}
 
   onRender() {
+    if (this._props.labelPos === 'left' || this._props.labelPos === 'right') {
+      this.container.classList.add('justify-stretch');
+    }
     this._inputField.label = this._props.description;
     this._props.readOnly || (this._inputField.onchange = this.cbOnChange.bind(this));
     if (this._props.onChange) this.onChange(this._props.onChange);
     this._inputField.attachToElement(this.find('.tc-input'));
 
     if (this._props.readOnly) {
-      const el = this.container.querySelector('.fp-components-input');
+      const el = this.find('.fp-components-input');
       el.onclick = null;
     }
     if (!this._props.useBorder) {
-      const el = this.container.querySelector('.fp-components-input');
+      const el = this.find('.fp-components-input');
       el.style.borderStyle = 'none';
     }
+
+    if (this._props.transparent) {
+      const el = this.find('.fp-components-input');
+      el.style.backgroundColor = 'transparent';
+    }
+
+    if (this._props.bold) {
+      const el = this.find('.tc-input');
+      el.style.fontWeight = 'bold';
+    }
+
     this.container.style.minWidth = '80px';
   }
 
@@ -200,3 +216,11 @@ export class Input_A extends Component_A {
     this.trigger('change', value);
   }
 }
+
+Input_A.loadCssClassFromString(/*css*/ `
+
+.tc-input {
+  min-width: 6rem;
+}
+
+`);

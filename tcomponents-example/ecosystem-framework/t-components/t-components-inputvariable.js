@@ -4,9 +4,10 @@ import { Popup_A } from './t-components-popup.js';
 
 /**
  * @typedef TComponents.InputVariableProps
+ * @prop {string} [task] RAPID Task in which the variable is contained (default = "T_ROB1" )
  * @prop {string} [variable] Rapid variable to subpscribe to
  * @prop {string} [module] Module containig the rapid variable
- * @prop {Function} [callback] Function to be called when button is pressed
+ * @prop {Function} [onChange] Function to be called when button is pressed
  * @prop {string} [label] Label text
  * @prop {boolean} [readOnly] Set to true to use the input field only to display but no to edit values
  * @prop {string} [description] Label to be displayed under the input field when open the keyboard editor
@@ -42,7 +43,7 @@ export class InputVariable_A extends Input_A {
      */
     this._props;
 
-    this.initPropsDep(['module', 'variable']);
+    this.initPropsDep(['task', 'module', 'variable']);
   }
 
   /**
@@ -53,21 +54,20 @@ export class InputVariable_A extends Input_A {
    */
   defaultProps() {
     return {
+      task: 'T_ROB1',
       module: '',
       variable: '',
     };
   }
 
   async onInit() {
-    // await super.onInit();
-
     if (!this._props.module || !this._props.variable) {
       this.error = true;
       return;
     }
 
     try {
-      if (!this.task) this.task = await API.RAPID.getTask();
+      this.task = await API.RAPID.getTask(this._props.task);
       this.varElement = await this.task.getVariable(this._props.module, this._props.variable);
       this.varElement.onChanged(this.cbUpdateInputField.bind(this));
 
@@ -150,7 +150,7 @@ export class InputVariable_A extends Input_A {
    */
   async cbUpdateInputField(value) {
     this.text = this.isArray ? JSON.stringify(value) : value;
-    this.trigger('change' + this.compId, value);
+    this.trigger('change', value);
   }
 }
 

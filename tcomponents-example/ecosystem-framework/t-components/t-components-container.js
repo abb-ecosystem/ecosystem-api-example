@@ -44,7 +44,9 @@ export class Container_A extends Component_A {
   async onInit() {
     this._children.clear();
 
-    const childrenArray = Array.isArray(this._props.children) ? this._props.children : [this._props.children ? this._props.children : []];
+    const childrenArray = Array.isArray(this._props.children)
+      ? this._props.children
+      : [this._props.children ? this._props.children : []];
 
     childrenArray.forEach((child, idx) => {
       if (typeof child === 'string') {
@@ -61,7 +63,7 @@ export class Container_A extends Component_A {
           child.id = this._childId(idx);
         }
         this._children.set(child, child.id);
-      } else if (Component_A._isTComponent(child)) {
+      } else if (Component_A.isTComponent(child)) {
         this._children.set(child, child.compId);
       } else if (Component_A._isHTMLElement(child)) {
         if (!child.id) {
@@ -83,7 +85,7 @@ export class Container_A extends Component_A {
     this.container.dataset.tcContainer = 'true';
 
     this._children.forEach((id, child) => {
-      if (Component_A._isTComponent(child)) {
+      if (Component_A.isTComponent(child)) {
         child.attachToElement(this.container);
       } else {
         if (child.parentNode) {

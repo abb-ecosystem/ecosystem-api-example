@@ -4,11 +4,12 @@ import { Button_A } from './t-components-button.js';
 
 /**
  * @typedef TComponents.ButtonTeachProps
- * @prop {string} variable - Rapid variable to subpscribe to
+ * @prop {string} robTarget - Rapid variable to subpscribe to
  * @prop {string} module - Module containig the rapid variable
- * @prop {Function} [callback] Function to be called when button is pressed
+ * @prop {Function} [onClick] Function to be called when button is pressed
  * @prop {string} [label] Label text
  * @prop {string|null} [icon] - Path to image file
+ * @prop {string} [text] Button text
  */
 
 /**
@@ -25,7 +26,7 @@ import { Button_A } from './t-components-button.js';
  *
  * // index.js
  * const btnTeach = new ButtonTeach_A(document.querySelector('.btn-teach'), {
- *    variable: 'esTarget02',
+ *    robTarget: 'esTarget02',
  *    module: 'Ecosystem_BASE',
  *    text: 'teach',
  *  });
@@ -40,9 +41,9 @@ export class ButtonTeach_A extends Button_A {
      */
     this._props;
 
-    this.initPropsDep(['module', 'variable']);
+    this.initPropsDep(['module', 'robTarget']);
 
-    this._value = null;
+    this._variable = null;
 
     if (this._props.text === this._getAllDefaultProps().text) this._props.text = 'Teach';
   }
@@ -56,24 +57,26 @@ export class ButtonTeach_A extends Button_A {
   defaultProps() {
     return {
       module: '',
-      variable: '',
+      robTarget: '',
     };
   }
 
   async onInit() {
-    if (!this._props.module || !this._props.variable) {
+    if (!this._props.module || !this._props.robTarget) {
       this.error = true;
       return;
     }
 
     try {
       this.task = await API.RAPID.getTask();
-      this._value = await this.task.getValue(this._props.module, this._props.variable);
+      this._variable = await this.task.getVariable(this._props.module, this._props.robTarget, false);
+      if (!this._variable || this._variable.type !== 'robtarget')
+        throw new Error(`Variable ${this._props.robTarget} is not a robtarget`);
 
       this.onClick(this.teach.bind(this));
     } catch (e) {
       this._btn.enabled = false;
-      Popup_A.warning(`Teach button`, [`Error when gettin variable ${this._props.variable}`, e.message]);
+      Popup_A.warning(`Teach button`, [`Error when getting variable ${this._props.robTarget}`, e.message]);
     }
   }
 
@@ -88,11 +91,11 @@ export class ButtonTeach_A extends Button_A {
    * @async
    */
   async teach() {
-    this._value = await API.MOTION.getRobotPosition();
     try {
-      await this.task.setValue(this._props.module, this._props.variable, this._value);
+      if (!this._variable) throw new Error('Variable not initialized');
+      await this._variable.setValue(await API.MOTION.getRobotPosition());
     } catch (e) {
-      Popup_A.error(e, `ButtonTeach: robtarget: ${this._props.variable}`);
+      Popup_A.error(e, `ButtonTeach -- robtarget: ${this._props.robTarget}`);
     }
   }
 }

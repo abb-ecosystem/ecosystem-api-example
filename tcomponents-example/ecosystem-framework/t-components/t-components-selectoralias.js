@@ -55,16 +55,18 @@ export class SelectorAlias_A extends Dropdown_A {
 
   async onInit() {
     this._validateItemMap(this._props.itemMap);
-    const aliasList = this._props.itemMap.reduce((acc, item) => {
+    this._props.itemList = this._props.itemMap.reduce((acc, item) => {
       acc.push(item.alias);
       return acc;
     }, []);
 
-    this._updateItemList(aliasList);
+    await super.onInit();
   }
 
   cbOnSelection(index, selection) {
-    this.trigger('selection', this._props.itemMap.find((item) => item.alias === selection).item, selection);
+    const s = this._props.itemMap.find((item) => item.alias === selection);
+    if (!s) return;
+    this.trigger('selection', s.item, selection, index);
   }
 
   /**
@@ -75,10 +77,9 @@ export class SelectorAlias_A extends Dropdown_A {
    */
   get selected() {
     const s = super.selected;
-    const sel = this._props.itemMap.find((item) => item.alias === s).item;
-    console.log('SelectorAlias_A: selected', sel);
-
-    return this._props.itemMap.find((item) => item.alias === s).item;
+    const entry = this._props.itemMap.find((item) => item.alias === s);
+    const sel = entry ? entry.item : '';
+    return sel;
   }
 
   set selected(value) {
@@ -98,10 +99,7 @@ export class SelectorAlias_A extends Dropdown_A {
   }
 
   set items(itemMap) {
-    this._validateItemMap(itemMap);
-
-    this._props.itemMap = itemMap;
-    this._updateItemList(this._props.itemMap.forEach((item) => item.alias));
+    this.setProps({ itemMap }, null, true);
   }
 
   _validateItemMap(itemMap) {
