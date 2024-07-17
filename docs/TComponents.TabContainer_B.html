@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Class: SelectorModules_A</title>
+    <title>Class: TabContainer_B</title>
     
     
     <script src="scripts/prettify/prettify.js"></script>
@@ -2551,7 +2551,7 @@
     </ul>
 </div>
     <div class="main">
-        <h1 class="page-title" data-filename="TComponents.SelectorModules_A.html">Class: SelectorModules_A</h1>
+        <h1 class="page-title" data-filename="TComponents.TabContainer_B.html">Class: TabContainer_B</h1>
         
 
 
@@ -2562,7 +2562,7 @@
     <h2>
         <span class="ancestors"><a href="TComponents.html">TComponents</a>.</span>
     
-    SelectorModules_A
+    TabContainer_B
     </h2>
     
 </header>  
@@ -2575,14 +2575,14 @@
         
 <dt>
     <div class="nameContainer">
-        <h4 class="name" id="SelectorModules_A">
+        <h4 class="name" id="TabContainer_B">
             
-            new TComponents.SelectorModules_A<span class="signature">(parent, props)</span>
+            new TComponents.TabContainer_B<span class="signature">(parent, <span class="optional">props</span>)</span>
         </h4>
     
         
         <div class="tag-source">
-            t-components/t-components-selectormodules.js, line 20
+            t-components/t-components-tabcontainer-b.js, line 24
         </div>
         
     </div>
@@ -2593,7 +2593,9 @@
     
     
     <div class="description">
-        <p>Selector displaying modules available at the controller</p>
+        <p>The Tab container component implements a view-switching area with a visual tab bar at the top.
+It can be populated with any content and can be configured for most use cases. Any number of tabs are supported.
+Optionally, the component can be used as a generic view-switcher without any visible tab bar.</p>
     </div>
     
 
@@ -2640,6 +2642,11 @@
             
             <td class="description last">
                 
+                    
+                    
+                        
+                    
+                
                 <p>HTMLElement that is going to be the parent of the component</p></td>
         </tr>
 	
@@ -2653,7 +2660,7 @@
             <td class="type">
             
                 
-<span class="param-type"><a href="TComponents.html#.SelectorModulesProps">TComponents.SelectorModulesProps</a></span>
+<span class="param-type"><a href="TComponents.html#.TabContainerProps">TComponents.TabContainerProps</a></span>
 
 
             
@@ -2662,6 +2669,13 @@
             
             
             <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
                 
                 </td>
         </tr>
@@ -2708,18 +2722,6 @@
     
     
     
-        <h5>Example</h5>
-        
-
-    
-    <pre class="prettyprint"><code>const modSelector = new SelectorModules_A(
-   document.querySelector('.module-dropdown'),
-   { isInUse: false, label: 'Select a module:' }
- );
-await modSelector.render();</code></pre>
-    
-
-    
 </dd>
 
     
@@ -2729,7 +2731,7 @@ await modSelector.render();</code></pre>
         <h3 class="subsection-title">Extends</h3>
         
         <ul>
-            <li><a href="TComponents.Dropdown_A.html">TComponents.Dropdown_A</a></li>
+            <li><a href="TComponents.Menu_A.html">TComponents.Menu_A</a></li>
         </ul>
     
     
@@ -2793,256 +2795,6 @@ await modSelector.render();</code></pre>
     
     
     
-        <h3 class="subsection-title">Methods</h3>
-        
-        <dl>
-            
-<dt>
-    <div class="nameContainer">
-        <h4 class="name" id="updateSearch">
-            
-            <span class="type-signature ">async</span>updateSearch<span class="signature">(<span class="optional">filter</span>)</span>
-        </h4>
-    
-        
-        <div class="tag-source">
-            t-components/t-components-selectormodules.js, line 91
-        </div>
-        
-    </div>
-
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Updates the content of selector based available modules</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        
-
-<table class="params">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-		
-		<th>Type</th>
-		
-		
-		
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-	
-	<tbody>
-	
-	
-        <tr>
-            
-                <td class="name"><code>filter</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                    
-                        <span class="optional">optional</span>
-                    
-                    
-                        
-                    
-                
-                <p>only modules containing the filter patern (not casesensitive)</p></td>
-        </tr>
-	
-	
-	</tbody>
-</table>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <div class="nameContainer">
-        <h4 class="name" id="onSelection">
-            
-            onSelection<span class="signature">(func)</span>
-        </h4>
-    
-        
-        <div class="tag-source">
-            t-components/t-components-selectormodules.js, line 102
-        </div>
-        
-    </div>
-
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Adds a callback function to be called when an item is selected</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        
-
-<table class="params">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-		
-		<th>Type</th>
-		
-		
-		
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-	
-	<tbody>
-	
-	
-        <tr>
-            
-                <td class="name"><code>func</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">function</span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                </td>
-        </tr>
-	
-	
-	</tbody>
-</table>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    <dt class="tag-todo">TODO</dt>
-    <dd class="tag-todo">
-        <ul>
-            <li>Currently only one function is possible. Change the method to accept multiple callbacks</li>
-        </ul>
-    </dd>
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    
-    
-</dd>
-
-        </dl>
-    
     
     
     
@@ -3058,7 +2810,7 @@ await modSelector.render();</code></pre>
         
 
         <footer>
-            Documentation generated by <a target="_blank" href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.2</a> on Wed Jul 17 2024 08:56:32 GMT+0200 (Mitteleuropäische Sommerzeit)
+            Documentation generated by <a target="_blank" href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.2</a> on Wed Jul 17 2024 08:56:33 GMT+0200 (Mitteleuropäische Sommerzeit)
         </footer>
     </div>
 </div>
